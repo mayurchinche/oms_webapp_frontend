@@ -19,7 +19,7 @@ const AddMaterialModal = ({ isModalOpen, closeModal, refreshMaterials }) => {
       material_name: materialName,
       description: description
     };
-    axios.post(' https://ordermanagementservice-backend.onrender.com/api/materials', newMaterial, {
+    axios.post('https://ordermanagementservice-backend.onrender.com/api/materials', newMaterial, {
       headers: {
         Authorization: `Bearer ${token}`,
         role: role,
