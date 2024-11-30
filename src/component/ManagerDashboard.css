@@ -1,0 +1,93 @@
+/* Ensure the dashboard container takes the full height of the viewport */
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  /* Sidebar styling */
+  .sidebar {
+    width: 20%;
+    background-color: #f4f4f4;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  /* Manager details styling */
+  .manager-details {
+    margin-bottom: 20px;
+  }
+  
+  /* Sidebar buttons styling */
+  .sidebar-buttons button {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .sidebar-buttons button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Main content styling */
+  .main-content {
+    width: 80%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Header styling */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .header-section {
+    flex: 1;
+    text-align: center;
+  }
+  
+  /* Content area styling */
+  .content-area {
+    flex: 1;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+  }
+  
+  /* Table container styling */
+  .table-container {
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Custom table styling */
+  .custom-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .custom-table th, .custom-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .custom-table th {
+    background-color: #007bff;
+    color: white;
+  }
+  .main-content.sidebar-open{
+    margin-left: 30%;
+  }
