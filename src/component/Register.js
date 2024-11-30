@@ -16,8 +16,6 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [rePassword, setRePassword] = useState('');
   const [role, setRole] = useState('employee');
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false);
   const [otpTimer, setOtpTimer] = useState(60);
   const [idToken, setIdToken] = useState('');
   const navigate = useNavigate();
