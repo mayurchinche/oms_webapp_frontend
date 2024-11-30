@@ -1,32 +1,37 @@
-// src/component/Register.js
+// src/component/ForgotPassword.js
 import React, { useState } from 'react';
 import { auth } from '../firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './Register.css';
+import './ForgotPassword.css';
 
-const Register = () => {
+const ForgotPassword = () => {
   const [step, setStep] = useState(1);
   const [mobileNumber, setMobileNumber] = useState('');
   const [countryCode, setCountryCode] = useState('+91');
   const [otp, setOtp] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [password, setPassword] = useState('');
-  const [rePassword, setRePassword] = useState('');
-  const [role, setRole] = useState('employee');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
   const [otpTimer, setOtpTimer] = useState(60);
-  const [idToken, setIdToken] = useState('');
   const navigate = useNavigate();
 
   const handleSendOtp = () => {
     console.log('Sending OTP to:', `${countryCode}${mobileNumber}`);
-    window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {}, auth);
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
+        'size': 'invisible',
+        'callback': (response) => {
+          console.log('reCAPTCHA solved:', response);
+        }
+      }, auth);
+    }
     const appVerifier = window.recaptchaVerifier;
     signInWithPhoneNumber(auth, `${countryCode}${mobileNumber}`, appVerifier)
       .then((confirmationResult) => {
         window.confirmationResult = confirmationResult;
+        setOtpSent(true);
         setStep(2);
         startOtpTimer();
         console.log('OTP sent successfully');
@@ -40,11 +45,9 @@ const Register = () => {
     console.log('Verifying OTP:', otp);
     window.confirmationResult.confirm(otp)
       .then((result) => {
-        result.user.getIdToken().then((token) => {
-          setIdToken(token);
-          setStep(3);
-          console.log('OTP verified successfully, ID token:', token);
-        });
+        setOtpVerified(true);
+        setStep(3);
+        console.log('OTP verified successfully');
       })
       .catch((error) => {
         console.error('Error verifying OTP:', error);
@@ -63,30 +66,26 @@ const Register = () => {
     }, 1000);
   };
 
-  const handleRegister = () => {
-    const userData = {
-      contact_number: `${countryCode}${mobileNumber}`,
-      id_token: idToken,
-      password: password,
-      role: role,
-      user_name: `${firstName} ${lastName}`
-    };
+  const handleResetPassword = () => {
+    if (newPassword !== confirmPassword) {
+      console.error('Passwords do not match');
+      return;
+    }
 
-    console.log('Registering user with data:', userData);
-
-    axios.post('/auth/register', userData)
-      .then((response) => {
-        console.log('Registration successful:', response.data);
+    const user = auth.currentUser;
+    user.updatePassword(newPassword)
+      .then(() => {
+        console.log('Password reset successful');
         navigate('/login');
       })
       .catch((error) => {
-        console.error('Error registering user:', error);
+        console.error('Error resetting password:', error);
       });
   };
 
   return (
-    <div className="register-container">
-      <h2>Register</h2>
+    <div className="forgot-password-container">
+      <h2>Forgot Password</h2>
       {step === 1 && (
         <div>
           <label>
@@ -130,64 +129,33 @@ const Register = () => {
       {step === 3 && (
         <div>
           <label>
-            First Name:
-            <input
-              type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="Enter first name"
-              required
-            />
-          </label>
-          <label>
-            Last Name:
-            <input
-              type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Enter last name"
-              required
-            />
-          </label>
-          <label>
-            Password:
+            New Password:
             <input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Enter new password"
               required
             />
           </label>
           <label>
-            Re-enter Password:
+            Confirm Password:
             <input
               type="password"
-              value={rePassword}
-              onChange={(e) => setRePassword(e.target.value)}
-              placeholder="Re-enter password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm new password"
               required
             />
           </label>
-          {password && rePassword && (
-            <p>{password === rePassword ? 'Passwords match' : 'Passwords do not match'}</p>
+          {newPassword && confirmPassword && (
+            <p>{newPassword === confirmPassword ? 'Passwords match' : 'Passwords do not match'}</p>
           )}
-          <label>
-            Role:
-            <select value={role} onChange={(e) => setRole(e.target.value)}>
-              <option value="employee">Employee</option>
-              <option value="manager">Manager</option>
-              <option value="po_team">PO Team</option>
-            </select>
-          </label>
-          <button onClick={handleRegister}>Register</button>
+          <button onClick={handleResetPassword}>Reset Password</button>
         </div>
       )}
-      <p>
-        Already registered? <a href="/login">Go to Login</a>
-      </p>
     </div>
   );
 };
 
-export default Register;
+export default ForgotPassword;
