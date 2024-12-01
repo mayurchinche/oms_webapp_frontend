@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import firebase from "../firebase.config";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // Import Link
 import './Register.css';
 
 const Register = () => {
@@ -18,7 +18,7 @@ const Register = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpMessage, setOtpMessage] = useState('');
   const [isPasswordMatch, setIsPasswordMatch] = useState(true);
-  const [selectedRole, setSelectedRole] = useState('employee');  // Default role is 'employee'
+  const [selectedRole, setSelectedRole] = useState('employee'); // Default role is 'employee'
   const recaptchRef = useRef(null);
   const navigate = useNavigate();
 
@@ -43,16 +43,15 @@ const Register = () => {
     if (recaptchRef.current) {
       recaptchRef.current.innerHTML = '<div id="recaptcha-container"></div>';
     }
-    
 
     const verifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-      size: 'invisible',  // Invisible reCAPTCHA
-    callback: (response) => {
-      console.log("reCAPTCHA verified:", response);
-    },
-    'expired-callback': () => {
-      console.log("reCAPTCHA expired.");
-    }
+      size: 'invisible',
+      callback: (response) => {
+        console.log("reCAPTCHA verified:", response);
+      },
+      'expired-callback': () => {
+        console.log("reCAPTCHA expired.");
+      }
     });
     document.getElementById('recaptcha-container').style.display = 'none';
 
@@ -79,7 +78,7 @@ const Register = () => {
       id_token: idToken,
       user_name: `${name} ${lastName}`,
       password: password,
-      role: selectedRole,  // Send the selected role here
+      role: selectedRole, // Send the selected role here
     };
 
     try {
@@ -114,6 +113,10 @@ const Register = () => {
             />
             <button onClick={handleSendOtp}>Send OTP</button>
             {otpMessage && <p className="message">{otpMessage}</p>}
+            {/* Reference Text */}
+            <p className="reference-text">
+              Already registered? <Link to="/login">Click here to login</Link>
+            </p>
             {otpSent && (
               <>
                 <input
@@ -141,7 +144,6 @@ const Register = () => {
               value={lastName}
               onChange={e => setLastName(e.target.value)}
             />
-            {/* Role Dropdown */}
             <select value={selectedRole} onChange={e => setSelectedRole(e.target.value)}>
               <option value="employee">Employee</option>
               <option value="manager">Manager</option>

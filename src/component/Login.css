@@ -18,18 +18,19 @@ body {
 
 .login-card {
   background-color: #fff;
-  padding: 50px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-width: 500px;
-  width: 100%;
+  padding: 60px; /* Increased padding for a larger card */
+  border-radius: 16px; /* Slightly larger border-radius for modern UI */
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1); /* Enhanced shadow for better focus */
+  max-width: 550px; /* Increased width */
+  width: 100%; /* Maintains responsiveness */
+  min-height: 500px; /* Larger height to ensure content fits well */
   text-align: center;
 }
 
 .login-title {
-  font-size: 32px;
-  color: #333;  
-  margin-bottom: 30px;
+  font-size: 36px; /* Larger title for emphasis */
+  color: #333;
+  margin-bottom: 40px;
 }
 
 .login-form {
@@ -37,64 +38,51 @@ body {
 }
 
 .form-group {
-  margin-bottom: 25px;
+  margin-bottom: 30px; /* Increased spacing between form fields */
   text-align: left;
 }
 
 .form-group label {
   display: block;
-  font-size: 18px;
+  font-size: 20px; /* Larger font for better readability */
   color: #333;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .form-group input {
   width: 100%;
-  padding: 14px;
-  font-size: 16px;
+  padding: 18px; /* Increased padding for better visibility */
+  font-size: 18px; /* Adjusted font size for placeholder visibility */
   border: 1px solid #ccc;
-  border-radius: 6px;
+  border-radius: 8px; /* Keeps the modern rounded look */
+  box-sizing: border-box;
+  line-height: 1.5; /* Ensures text doesn't get cropped */
 }
+
 
 .log-in-btn-primary {
   width: 100%;
-  padding: 16px;
-  font-size: 18px;
+  padding: 18px; /* Increased button size */
+  font-size: 20px; /* Larger font for button text */
   color: #fff;
-  background-color: #007bff; /* Blue Button */
+  background-color: #007bff;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
   transition: background-color 0.3s ease;
-}
-.btn-primary {
-  width: 100%;
-  padding: 16px;
-  font-size: 18px;
-  color: #fff;
-  background-color: #007bff; /* Blue Button */
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
-
-.btn-primary:hover {
-  background-color: #0056b3; /* Darker blue for hover */
 }
 
 .log-in-btn-primary:hover {
-  background-color: #0056b3; /* Darker blue for hover */
+  background-color: #0056b3;
 }
 
 .link-green {
   color: green;
-  margin-top: 12px;
+  margin-top: 15px;
   display: inline-block;
   text-decoration: none;
-  font-size: 16px;
+  font-size: 18px; /* Larger text for links */
 }
 
 .link-green a {

@@ -17,7 +17,7 @@ const ForgotPassword = () => {
   const navigate = useNavigate();
 
   const handleSendOtp = () => {
-    console.log('Sending OTP to:', `${countryCode}${mobileNumber}`);
+    
     if (!window.recaptchaVerifier) {
       window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
         'size': 'invisible',

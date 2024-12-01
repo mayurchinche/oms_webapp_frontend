@@ -23,11 +23,12 @@ body {
 
 .register-card {
   background-color: #fff;
-  padding: 20px;
-  border-radius: 10px;
+  padding: 40px;
+  border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
+  max-width: 450px;
   width: 100%;
+  text-align: center;
 }
 
 h1 {
@@ -39,21 +40,22 @@ h1 {
 select,
 input {
   width: 100%;
-  padding: 12px;
-  margin-bottom: 10px;
+  padding: 18px;
+  margin-bottom: 15px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 8px;
+  font-size: 16px;
 }
 
 button {
   width: 100%;
-  padding: 12px;
+  padding: 15px;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-top: 10px;
+  font-size: 16px;
 }
 
 button:hover {
@@ -64,43 +66,50 @@ button:hover {
   text-align: center;
   color: red;
   margin-top: 10px;
+  font-size: 14px;
 }
 
 .verified-text {
   color: green;
   text-align: center;
   margin: 10px 0;
+  font-size: 14px;
 }
 
-/* Responsive Styles */
+.reference-text {
+  margin-top: 10px;
+  color: green;
+  font-size: 14px;
+}
+
+.reference-text a {
+  color: green;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
   .register-card {
-    padding: 15px;
-  }
-  h1 {
-    font-size: 1.5rem;
+    padding: 30px;
   }
   select,
   input {
-    padding: 10px;
+    padding: 14px;
   }
   button {
-    padding: 10px;
+    padding: 12px;
   }
 }
 
 @media (max-width: 480px) {
   .register-card {
-    padding: 10px;
-  }
-  h1 {
-    font-size: 1.2rem;
+    padding: 20px;
   }
   select,
   input {
-    padding: 8px;
+    padding: 10px;
   }
   button {
-    padding: 8px;
+    padding: 10px;
   }
 }

@@ -7,11 +7,22 @@ import './Login.css';
 const Login = () => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
+  const [countryCode] = useState('91'); // Set the country code to '91' (India) by default
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    // Validate the mobile number
+    if (!/^\d{10}$/.test(mobileNumber)) {
+      alert('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
+    // Combine the country code with the mobile number
+    const fullMobileNumber = `+${countryCode}${mobileNumber}`;
+
     try {
       const response = await fetch(
         'https://ordermanagementservice-backend.onrender.com/auth/login',
@@ -21,7 +32,7 @@ const Login = () => {
             'Content-Type': 'application/json',
             accept: 'application/json',
           },
-          body: JSON.stringify({ contact_number: mobileNumber, password }),
+          body: JSON.stringify({ contact_number: fullMobileNumber, password }),
         }
       );
 
@@ -31,9 +42,9 @@ const Login = () => {
       if (data && data.token) {
         sessionStorage.setItem('token', data.token);
         sessionStorage.setItem('role', data.role);
-        sessionStorage.setItem('mobileNumber', mobileNumber);
+        sessionStorage.setItem('mobileNumber', fullMobileNumber);
         sessionStorage.setItem('user_name', data.user_name);
-        dispatch(setAuth(data.role, data.token, mobileNumber, data.user_name));
+        dispatch(setAuth(data.role, data.token, fullMobileNumber, data.user_name));
         navigate(
           data.role === 'employee'
             ? '/employee-dashboard'
@@ -61,7 +72,8 @@ const Login = () => {
               type="text"
               value={mobileNumber}
               onChange={(e) => setMobileNumber(e.target.value)}
-              placeholder="Enter your mobile number"
+              placeholder="Enter your 10-digit mobile number"
+              maxLength="10"
               required
             />
           </div>
