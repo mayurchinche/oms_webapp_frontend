@@ -7,13 +7,14 @@ import PODashboard from './component/PODashboard';
 import ForgotPassword from './component/ForgotPassword';
 import Register from './component/Register';
 
+
+
 function App() {
   return (
     <Router>
     <Routes>
-      
       <Route path="/login" element={<Login />} />
-      <Route path="/" element={<Register />} />
+      <Route path="/Register" element={<Register />} />
       <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
       <Route path="/manager-dashboard" element={<ManagerDashboard />} />
       <Route path="/po-dashboard" element={<PODashboard />} />
