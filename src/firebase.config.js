@@ -17,6 +17,23 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  
+  // Debug logs
+  console.log("Firebase initialized with config:", firebaseConfig);
+  firebase.auth().onAuthStateChanged((user) => {
+    console.log("Auth state changed. User:", user);
+  });
+  
+  // Enable Firebase logging
+  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  firebase.auth().useDeviceLanguage();
+  // Conditionally use emulator for local development
+//     if (window.location.hostname === "localhost") {
+//         firebase.auth().useEmulator("http://127.0.0.1:3000");
+//   }
+  
 
 export default firebase;

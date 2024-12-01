@@ -73,14 +73,15 @@
   }
   
   .btn-primary {
-    background-color: #28a745;
-    color: #ffffff;
+    background-color: #007bff; /* Blue Button */
+    color: white;
+    margin-left: 10px;
   }
-  
+
   .btn-secondary:hover {
     background-color: #5a6268;
   }
   
   .btn-primary:hover {
-    background-color: #218838;
+    background-color: #0056b3; /* Darker blue for hover */
   }

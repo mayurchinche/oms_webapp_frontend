@@ -1,4 +1,3 @@
-// src/component/ForgotPassword.js
 import React, { useState } from 'react';
 import { auth } from '../firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
@@ -88,39 +87,33 @@ const ForgotPassword = () => {
       <h2>Forgot Password</h2>
       {step === 1 && (
         <div>
-          <label>
-            Country Code:
-            <select value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
-              <option value="+91">India (+91)</option>
-              {/* Add more country codes as needed */}
-            </select>
-          </label>
-          <label>
-            Mobile Number:
-            <input
-              type="text"
-              value={mobileNumber}
-              onChange={(e) => setMobileNumber(e.target.value)}
-              placeholder="Enter mobile number"
-              required
-            />
-          </label>
+          <label>Country Code:</label>
+          <select value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
+            <option value="+91">India (+91)</option>
+            {/* Add more country codes as needed */}
+          </select>
+          <label>Mobile Number:</label>
+          <input
+            type="text"
+            value={mobileNumber}
+            onChange={(e) => setMobileNumber(e.target.value)}
+            placeholder="Enter mobile number"
+            required
+          />
           <button onClick={handleSendOtp}>Send OTP</button>
           <div id="recaptcha-container"></div>
         </div>
       )}
       {step === 2 && (
         <div>
-          <label>
-            OTP:
-            <input
-              type="text"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              placeholder="Enter OTP"
-              required
-            />
-          </label>
+          <label>OTP:</label>
+          <input
+            type="text"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+            placeholder="Enter OTP"
+            required
+          />
           <p>OTP expires in {otpTimer} seconds</p>
           <button onClick={handleVerifyOtp}>Verify OTP</button>
           <button onClick={handleSendOtp}>Send Again</button>
@@ -128,26 +121,22 @@ const ForgotPassword = () => {
       )}
       {step === 3 && (
         <div>
-          <label>
-            New Password:
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Enter new password"
-              required
-            />
-          </label>
-          <label>
-            Confirm Password:
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm new password"
-              required
-            />
-          </label>
+          <label>New Password:</label>
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Enter new password"
+            required
+          />
+          <label>Confirm Password:</label>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm new password"
+            required
+          />
           {newPassword && confirmPassword && (
             <p>{newPassword === confirmPassword ? 'Passwords match' : 'Passwords do not match'}</p>
           )}
