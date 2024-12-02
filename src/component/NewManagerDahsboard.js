@@ -4,7 +4,7 @@ import './NewManagerDahsboard.css'; // Ensure the correct spelling of the file n
 import Sidebar from './Sidebar'; // Adjust the path as per your project structure
 
 const NewManagerDashboard = () => {
-  const role = 'manager'; // or 'employee' based on the logged-in user's role
+  const role = 'po_team'; // or 'employee' based on the logged-in user's role
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -19,9 +19,7 @@ const NewManagerDashboard = () => {
       <Sidebar role={role} onCollapseToggle={handleSidebarToggle} />
 
       {/* Main Content */}
-      <div
-        className={`main-content ${isSidebarCollapsed ? 'main-content-collapsed' : ''}`}
-      >
+      <div className={`main-content ${isSidebarCollapsed ? 'main-content-collapsed' : ''}`}>
         <h1>Welcome to the New Manager Dashboard</h1>
         <p>
           This is the main content area. It dynamically adjusts when the sidebar is toggled.

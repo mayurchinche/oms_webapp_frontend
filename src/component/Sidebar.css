@@ -1,47 +1,94 @@
-/* Sidebar user info section */
-.sidebar-user-info {
-    text-align: center;
-    margin-bottom: 20px;
+/* Sidebar Container */
+.sidebar-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    width: 250px;
+    background-color: #f4f4f4;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: width 0.3s ease;
   }
   
-  /* User icon styling */
+  /* When the sidebar is collapsed */
+  .sidebar-collapsed {
+    width: 80px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Align items to the center when collapsed */
+  }
+  
+  /* User Info Section */
+  .sidebar-user-info {
+    text-align: center;
+    margin-bottom: 10px; /* Reduced the space between user info and buttons */
+    padding: 15px;
+    background-color: #e9f1fd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    height: auto;
+    transition: height 0.3s ease;
+  }
+  
   .sidebar-user-icon {
-    font-size: 48px; /* Medium-sized icon */
+    width: 60px;
+    height: 60px;
     color: #007bff;
+    border-radius: 50%;
     margin-bottom: 10px;
+    transition: width 0.3s ease, height 0.3s ease;
   }
   
-  /* Username styling */
-  .sidebar-username {
-    color: #007bff; /* Blue color */
-    font-size: 18px;
-    font-weight: bold;
-    margin: 5px 0;
+  .sidebar-user-icon-collapsed {
+    width: 40px;
+    height: 40px;
+    color: #007bff;
   }
   
-  /* Contact number styling */
+  .sidebar-username,
   .sidebar-contact-number {
-    color: #333; /* Darker color for contact number */
+    color: #007bff;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  .sidebar-contact-number {
     font-size: 14px;
     font-weight: normal;
-    margin: 5px 0;
   }
   
-  /* Divider styling */
-  .sidebar-divider {
-    border: none;
-    border-top: 1px solid #ddd;
-    margin: 15px 0;
+  /* Divider between user info and button sections */
+  .sidebar-separator {
+    height: 1px;
+    background: linear-gradient(to right, #ddd, #bbb, #ddd);
+    margin: 10px 0; /* Reduced the space between separator and buttons */
   }
   
-  /* Sidebar menu styling */
+  /* Menu Items */
   .sidebar-menu {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Add spacing between menu items */
+    gap: 15px;
+    flex-grow: 1; /* Ensure the menu items grow to fill the space */
+  }
+  
+  .sidebar-item-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0;
+  }
+  
+  .sidebar-group-title {
+    font-size: 14px;
+    color: #555;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 10px;
   }
   
   .sidebar-item {
@@ -50,14 +97,24 @@
     font-size: 16px;
     color: #333;
     cursor: pointer;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    gap: 10px;
   }
   
-  .sidebar-item span {
-    margin-left: 10px;
+  /* Hide the text when the sidebar is collapsed */
+  .sidebar-collapsed .sidebar-item span {
+    display: none;
   }
   
-  /* Sidebar toggle button */
-  .sidebar-toggle-btn {
+  .sidebar-item:hover {
+    background-color: #e6f2ff;
+    color: #007bff;
+  }
+  
+  /* Sidebar Toggle Button */
+  /* .sidebar-toggle-btn {
     position: absolute;
     bottom: 20px;
     left: 50%;
@@ -72,52 +129,40 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
+  } */
+  
+  /* .sidebar-toggle-btn:hover {
+    background-color: #0056b3;
+  } */
+  
+  /* Separator Style */
+  .sidebar-separator {
+    height: 1px;
+    background: linear-gradient(to right, #ddd, #bbb, #ddd);
+    margin: 10px 0; /* Reduced the space between separator and buttons */
+  }
+  
+  /* Sidebar Toggle Button */
+/* Sidebar Toggle Button */
+.sidebar-toggle-btn {
+    position: absolute;
+    top: 50%;  /* Center vertically */
+    right: 0;  /* Place at the right edge */
+    transform: translateY(-50%);  /* Adjust to perfectly center vertically */
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 20px 0 0 20px;  /* Create a half-circle by rounding only the left and right sides */
+    width: 60px;  /* Increase width for a larger button */
+    height: 40px;  /* Maintain the height to fit the half-circle shape */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
   }
   
   .sidebar-toggle-btn:hover {
     background-color: #0056b3;
   }
   
-  .sidebar-toggle-btn svg {
-    font-size: 24px;
-  }
   
-  /* Sidebar collapse and expanded states */
-  .sidebar-container {
-    display: flex;
-    flex-direction: column;
-    width: 250px;
-    background-color: #f4f4f4;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    transition: width 0.3s ease;
-  }
-  
-  .sidebar-collapsed {
-    width: 80px;
-    padding: 10px;
-  }
-  
-  .sidebar-collapsed .sidebar-item span {
-    display: none;
-  }
-  
-  /* User info collapsed state */
-  .sidebar-collapsed .sidebar-user-info {
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  
-  .sidebar-collapsed .sidebar-user-icon {
-    font-size: 36px;
-  }
-  
-  .sidebar-collapsed .sidebar-username,
-  .sidebar-collapsed .sidebar-contact-number {
-    display: none;
-  }
-    

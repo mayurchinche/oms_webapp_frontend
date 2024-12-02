@@ -1,18 +1,17 @@
-/* Container for the entire dashboard */
+Container for the entire dashboard
 .dashboard-container {
   display: flex;
 }
 
-/* Main content area */
-.main-content {
-  flex-grow: 1; /* Take up remaining space */
-  margin-left: 250px; /* Default expanded sidebar width */
-  padding: 20px;
-  transition: margin-left 0.3s ease; /* Smooth transition */
-}
 
-/*
-Adjust for collapsed sidebar this will help in dynamic adjustment of data.
+.main-content {
+  flex-grow: 1; 
+  margin-left: 250px;
+  padding: 20px;
+  transition: margin-left 0.3s ease; 
+} 
+
+/*Adjust for collapsed sidebar this will help in dynamic adjustment of data. 
 .main-content-collapsed {
   margin-left: 80px; 
 }

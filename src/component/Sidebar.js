@@ -12,10 +12,10 @@ import {
   FaPaperPlane,
   FaShippingFast,
   FaBox,
-  FaUserCircle, // Icon for user symbol
+  FaUserCircle,
 } from 'react-icons/fa';
 
-// Define a mapping for button names to their corresponding icons
+// Mapping button names to their corresponding icons
 const iconMapping = {
   'View Orders': <FaClipboardList />,
   'Add Order': <FaBoxOpen />,
@@ -30,7 +30,7 @@ const iconMapping = {
   'Manage Suppliers': <FaUserTie />,
 };
 
-// Menu items based on the role
+// Function to fetch menu items based on user role
 const getMenuItems = (role) => {
   switch (role) {
     case 'manager':
@@ -61,38 +61,75 @@ const getMenuItems = (role) => {
 const Sidebar = ({ onCollapseToggle, role }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // Function to toggle sidebar state
   const toggleSidebar = () => {
-    const newCollapseState = !isCollapsed;
-    setIsCollapsed(newCollapseState);
-    onCollapseToggle(newCollapseState);
+    setIsCollapsed(!isCollapsed);
+    onCollapseToggle(!isCollapsed);
   };
 
-  // Get menu items for the current role
   const menuItems = getMenuItems(role);
+
+  const handleLogout = () => {
+    // Your logout logic here
+    alert('Logged out');
+  };
 
   return (
     <div className={`sidebar-container ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
       {/* User Info Section */}
       <div className="sidebar-user-info">
         <FaUserCircle className="sidebar-user-icon" />
-        <p className="sidebar-username">Username</p>
-        <p className="sidebar-contact-number">+1 (123) 456-7890</p>
+        {!isCollapsed && (
+          <>
+            <p className="sidebar-username">John Doe</p>
+            <p className="sidebar-contact-number">+1 (123) 456-7890</p>
+          </>
+        )}
       </div>
+      <div className="sidebar-separator"></div>
 
-      {/* Divider */}
-      <hr className="sidebar-divider" />
-
-      {/* Sidebar menu items */}
+      {/* Sidebar Menu */}
       <div className="sidebar-menu">
-        {menuItems.map((item, index) => (
-          <div className="sidebar-item" key={index}>
-            {iconMapping[item]} <span>{item}</span>
-          </div>
-        ))}
+        {/* Order Management Group */}
+        <div className="sidebar-item-group">
+          <p className="sidebar-group-title">Order</p>
+          {menuItems.slice(0, 2).map((item, index) => (
+            <div className="sidebar-item" key={index}>
+              {iconMapping[item]} <span>{item}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="sidebar-divider" />
+
+        {/* Delivery Actions Group */}
+        <div className="sidebar-item-group">
+          <p className="sidebar-group-title">Delivery Actions</p>
+          {menuItems.slice(2, 4).map((item, index) => (
+            <div className="sidebar-item" key={index}>
+              {iconMapping[item]} <span>{item}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="sidebar-divider" />
+
+        {/* Review Actions Group */}
+        <div className="sidebar-item-group">
+          <p className="sidebar-group-title">Review Actions</p>
+          {menuItems.slice(4).map((item, index) => (
+            <div className="sidebar-item" key={index}>
+              {iconMapping[item]} <span>{item}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Logout Button */}
+        <button className="sidebar-logout-btn" onClick={handleLogout}>
+          Logout <FaSignOutAlt />
+        </button>
       </div>
 
-      {/* Arrow button to toggle sidebar */}
+      {/* Sidebar Toggle Button */}
       <div className="sidebar-toggle-btn" onClick={toggleSidebar}>
         {isCollapsed ? '>' : '<'}
       </div>
