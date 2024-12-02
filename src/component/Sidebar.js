@@ -34,27 +34,30 @@ const iconMapping = {
 const getMenuItems = (role) => {
   switch (role) {
     case 'manager':
-      return [
-        'View Orders',
-        'Add Order',
-        'Manage Materials',
-        'Pending Reviews',
-        'Reversal Pending Reviews',
-        'Analysis',
-      ];
+      return {
+        order: ['View Orders', 'Add Order'],
+        management: ['Manage Materials'], // Manager has actions only in 'MANAGEMENT' group
+        reviewAction: ['Pending Reviews','Reversal Pending Reviews'], // No actions for 'manager' in review actions
+        deliveryActions: [], // No actions for 'manager' in delivery actions
+        analysis: ['Analysis']
+      };
     case 'po_team':
-      return [
-        'View Orders',
-        'Add Order',
-        'Raise PO',
-        'Mark Delivery',
-        'Raise DC',
-        'Mark Reversal Delivery',
-        'Manage Suppliers',
-      ];
+      return {
+        order: [],
+        management: ['Manage Suppliers'],
+        reviewAction: [],
+        deliveryActions: ['Raise PO', 'Mark Delivery', 'Raise DC', 'Mark Reversal Delivery'],
+        analysis: []
+      };
     case 'employee':
     default:
-      return ['View Orders', 'Add Order'];
+      return {
+        order: ['View Orders', 'Add Order'],
+        management: [], // No management actions for 'employee'
+        reviewAction: [], // No review actions for 'employee'
+        deliveryActions: [], // No delivery actions for 'employee'
+        analysis: []
+      };
   }
 };
 
@@ -89,39 +92,72 @@ const Sidebar = ({ onCollapseToggle, role }) => {
 
       {/* Sidebar Menu */}
       <div className="sidebar-menu">
-        {/* Order Management Group */}
-        <div className="sidebar-item-group">
-          <p className="sidebar-group-title">Order</p>
-          {menuItems.slice(0, 2).map((item, index) => (
+        {/* ORDER Group */}
+        {menuItems.order.length > 0 && (
+          <div className="sidebar-item-group">
+          <p className="sidebar-group-title">ORDER</p>
+          {menuItems.order.map((item, index) => (
             <div className="sidebar-item" key={index}>
               {iconMapping[item]} <span>{item}</span>
             </div>
           ))}
         </div>
+        )}
+        <div className="sidebar-divider" />
+
+        {/* MANAGEMENT Group - Only show for 'manager' and 'po_team' */}
+        {menuItems.management.length > 0 && (
+          <div className="sidebar-item-group">
+            <p className="sidebar-group-title">MANAGEMENT</p>
+            {menuItems.management.map((item, index) => (
+              <div className="sidebar-item" key={index}>
+                {iconMapping[item]} <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="sidebar-divider" />
 
-        {/* Delivery Actions Group */}
-        <div className="sidebar-item-group">
-          <p className="sidebar-group-title">Delivery Actions</p>
-          {menuItems.slice(2, 4).map((item, index) => (
-            <div className="sidebar-item" key={index}>
-              {iconMapping[item]} <span>{item}</span>
-            </div>
-          ))}
-        </div>
+        {/* REVIEW ACTION Group - Only show for 'manager' */}
+        {menuItems.reviewAction.length > 0 && (
+          <div className="sidebar-item-group">
+            <p className="sidebar-group-title">REVIEW ACTION</p>
+            {menuItems.reviewAction.map((item, index) => (
+              <div className="sidebar-item" key={index}>
+                {iconMapping[item]} <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="sidebar-divider" />
 
-        {/* Review Actions Group */}
-        <div className="sidebar-item-group">
-          <p className="sidebar-group-title">Review Actions</p>
-          {menuItems.slice(4).map((item, index) => (
-            <div className="sidebar-item" key={index}>
-              {iconMapping[item]} <span>{item}</span>
-            </div>
-          ))}
-        </div>
+        {/* DELIVERY ACTIONS Group - Only show for 'po_team' */}
+        {menuItems.deliveryActions.length > 0 && (
+          <div className="sidebar-item-group">
+            <p className="sidebar-group-title">DELIVERY ACTIONS</p>
+            {menuItems.deliveryActions.map((item, index) => (
+              <div className="sidebar-item" key={index}>
+                {iconMapping[item]} <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="sidebar-divider" />
+
+        {/* ANALYSIS Group */}
+        {menuItems.analysis.length > 0 && (
+          <div className="sidebar-item-group">
+            <p className="sidebar-group-title">ANALYSIS</p>
+            {menuItems.analysis.map((item, index) => (
+              <div className="sidebar-item" key={index}>
+                {iconMapping[item]} <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Logout Button */}
         <button className="sidebar-logout-btn" onClick={handleLogout}>

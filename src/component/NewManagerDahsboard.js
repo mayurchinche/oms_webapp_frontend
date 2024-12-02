@@ -4,7 +4,7 @@ import './NewManagerDahsboard.css'; // Ensure the correct spelling of the file n
 import Sidebar from './Sidebar'; // Adjust the path as per your project structure
 
 const NewManagerDashboard = () => {
-  const role = 'po_team'; // or 'employee' based on the logged-in user's role
+  const role = 'employee'; // or 'employee' based on the logged-in user's role
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 

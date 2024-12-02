@@ -11,19 +11,19 @@
     padding: 20px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     transition: width 0.3s ease;
-  }
-  
-  /* When the sidebar is collapsed */
-  .sidebar-collapsed {
+}
+
+/* When the sidebar is collapsed */
+.sidebar-collapsed {
     width: 80px;
     padding: 10px;
     display: flex;
     flex-direction: column;
     align-items: center; /* Align items to the center when collapsed */
-  }
-  
-  /* User Info Section */
-  .sidebar-user-info {
+}
+
+/* User Info Section */
+.sidebar-user-info {
     text-align: center;
     margin-bottom: 10px; /* Reduced the space between user info and buttons */
     padding: 15px;
@@ -32,66 +32,67 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     height: auto;
     transition: height 0.3s ease;
-  }
-  
-  .sidebar-user-icon {
+}
+
+.sidebar-user-icon {
     width: 60px;
     height: 60px;
     color: #007bff;
     border-radius: 50%;
     margin-bottom: 10px;
     transition: width 0.3s ease, height 0.3s ease;
-  }
-  
-  .sidebar-user-icon-collapsed {
+}
+
+.sidebar-user-icon-collapsed {
     width: 40px;
     height: 40px;
     color: #007bff;
-  }
-  
-  .sidebar-username,
-  .sidebar-contact-number {
+}
+
+.sidebar-username,
+.sidebar-contact-number {
     color: #007bff;
     font-size: 16px;
     font-weight: bold;
-  }
-  
-  .sidebar-contact-number {
+}
+
+.sidebar-contact-number {
     font-size: 14px;
     font-weight: normal;
-  }
-  
-  /* Divider between user info and button sections */
-  .sidebar-separator {
+}
+
+/* Divider between user info and button sections */
+.sidebar-separator {
     height: 1px;
     background: linear-gradient(to right, #ddd, #bbb, #ddd);
     margin: 10px 0; /* Reduced the space between separator and buttons */
-  }
-  
-  /* Menu Items */
-  .sidebar-menu {
+}
+
+/* Menu Items */
+.sidebar-menu {
     display: flex;
     flex-direction: column;
     gap: 15px;
     flex-grow: 1; /* Ensure the menu items grow to fill the space */
-  }
-  
-  .sidebar-item-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 10px 0;
-  }
-  
-  .sidebar-group-title {
-    font-size: 14px;
-    color: #555;
-    text-transform: uppercase;
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-  
-  .sidebar-item {
+}
+
+/* Hide Group Title and Button Text when collapsed */
+.sidebar-collapsed .sidebar-item-group {
+    padding-left: 15px;  /* Adds space on the left of group titles and items when collapsed */
+}
+
+.sidebar-collapsed .sidebar-item {
+    padding-left: 20px;  /* Adds padding from left for items when collapsed */
+}
+
+/* Hide the grouping name and button text when collapsed */
+.sidebar-collapsed .sidebar-group-title,
+.sidebar-collapsed .sidebar-item span {
+    display: none; /* Hides the grouping name and button text when collapsed */
+}
+
+/* Sidebar Item */
+.sidebar-item {
     display: flex;
     align-items: center;
     font-size: 16px;
@@ -100,49 +101,14 @@
     padding: 10px;
     border-radius: 5px;
     transition: background-color 0.2s ease, color 0.2s ease;
-    gap: 10px;
-  }
-  
-  /* Hide the text when the sidebar is collapsed */
-  .sidebar-collapsed .sidebar-item span {
-    display: none;
-  }
-  
-  .sidebar-item:hover {
+    gap: 10px; /* Adds white space between icon and text */
+}
+
+.sidebar-item:hover {
     background-color: #e6f2ff;
     color: #007bff;
-  }
-  
-  /* Sidebar Toggle Button */
-  /* .sidebar-toggle-btn {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-  } */
-  
-  /* .sidebar-toggle-btn:hover {
-    background-color: #0056b3;
-  } */
-  
-  /* Separator Style */
-  .sidebar-separator {
-    height: 1px;
-    background: linear-gradient(to right, #ddd, #bbb, #ddd);
-    margin: 10px 0; /* Reduced the space between separator and buttons */
-  }
-  
-  /* Sidebar Toggle Button */
+}
+
 /* Sidebar Toggle Button */
 .sidebar-toggle-btn {
     position: absolute;
@@ -159,10 +125,20 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-  }
-  
-  .sidebar-toggle-btn:hover {
+}
+
+.sidebar-toggle-btn:hover {
     background-color: #0056b3;
-  }
-  
-  
+}
+
+/* Sidebar Logout Button */
+.sidebar-logout-btn {
+    margin-top: auto; /* Push to the bottom */
+}
+
+/* Separator Style */
+.sidebar-separator {
+    height: 1px;
+    background: linear-gradient(to right, #ddd, #bbb, #ddd); /* Stylish gradient */
+    margin: 10px 0; /* Reduced the space between separator and buttons */
+}
