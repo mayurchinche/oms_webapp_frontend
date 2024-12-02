@@ -83,125 +83,137 @@ const EmployeeDashboard = () => {
 
   const logOut = () => navigate('/login');
 
-  return (
-    <div className="container-fluid dashboard">
-      <div className="row">
-        {sidebarVisible && (
-          <div className="col-md-2 sidebar bg-dark text-white vh-100 p-3">
-            <div className="user-info text-center">
-              <img
-                src="https://th.bing.com/th?id=OIP.Q9rsZpd4tcVdZAmeChgtXAHaHa&w=250&h=250&c=8&rs=1&qlt=90&o=6&dpr=1.5&pid=3.1&rm=2"
-                alt="User Logo"
-                className="user-logo img-fluid rounded-circle mb-3"
-              />
-              <h5>Welcome, {userName}</h5>
-              <p>{mobileNumber}</p>
-              <hr />
-            </div>
-            <nav className="nav flex-column">
-              <button className="btn btn-primary mb-2" onClick={openModal}>
-                Add Order
-              </button>
-              <button className="btn btn-primary mb-2">Remove Order</button>
-              <button className="btn btn-primary mb-2" onClick={handleForwardOrderClick}>
-                View Orders
-              </button>
-            </nav>
-            <button className="btn btn-danger mt-auto" onClick={logOut}>
-              Logout
-            </button>
-          </div>
-        )}
-        <div className={`col ${sidebarVisible ? 'col-md-10' : 'col-12'} main-content`}>
-          <div className="header bg-dark text-white p-3 d-flex justify-content-between">
-            <button className="btn btn-light d-md-none" onClick={toggleSidebar}>
-              {sidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
-            </button>
-            <div
-              className={`header-section ${activeSection === 'forward' ? 'active' : ''}`}
-              onClick={handleForwardOrderClick}
-            >
-              Forward Orders
-            </div>
-            <div
-              className={`header-section ${activeSection === 'reversal' ? 'active' : ''}`}
-              onClick={handleReversalOrderClick}
-            >
-              Reversal Orders
-            </div>
-          </div>
-          <div className="content-area p-3">
-            {loading ? (
-              <div className="loading-overlay">
-                <div className="loading-modal">
-                  <div className="loading-content">
-                    <div className="spinner-border text-primary" role="status" />
-                    <p>Loading data, please wait...</p>
-                  </div>
+
+    return (
+      <div className="page-container">
+        <div className="container-fluid dashboard">
+          <div className="row">
+            {/* Sidebar */}
+            {sidebarVisible && (
+              <div className="col-md-2 sidebar bg-dark text-white vh-100 p-3">
+                <div className="user-info text-center">
+                  <img
+                    src="https://th.bing.com/th?id=OIP.Q9rsZpd4tcVdZAmeChgtXAHaHa&w=250&h=250&c=8&rs=1&qlt=90&o=6&dpr=1.5&pid=3.1&rm=2"
+                    alt="User Logo"
+                    className="user-logo img-fluid rounded-circle mb-3"
+                  />
+                  <h5>Welcome, {userName}</h5>
+                  <p>{mobileNumber}</p>
+                  <hr />
                 </div>
-              </div>
-            ) : error ? (
-              <div>{error}</div>
-            ) : (
-              <div className="table-container">
-                <table className="table table-striped table-bordered table-hover custom-table">
-                  <thead>
-                    <tr>
-                      <th>Order Date</th>
-                      <th>Material Name</th>
-                      <th>Model</th>
-                      <th>Customer Name</th>
-                      <th>Status</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orders.map((order, index) => (
-                      <tr key={index}>
-                        <td>{order?.order_date || 'N/A'}</td>
-                        <td>{order?.material_name || 'N/A'}</td>
-                        <td>{order?.model || 'N/A'}</td>
-                        <td>{order?.name_of_customer || 'N/A'}</td>
-                        <td>{order?.status || 'N/A'}</td>
-                        <td>
-                          <button
-                            className="btn btn-primary"
-                            onClick={() => openReversalModal(order)}
-                            disabled={order?.status !== 'Delivered'}
-                          >
-                            Raise Reversal
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <nav className="nav flex-column">
+                  <button className="btn btn-primary mb-2" onClick={openModal}>
+                    Add Order
+                  </button>
+                  <button className="btn btn-primary mb-2" onClick={handleForwardOrderClick}>
+                    View Orders
+                  </button>
+                </nav>
+                <button className="btn btn-danger mt-auto" onClick={logOut}>
+                  Logout
+                </button>
+                <button
+                  className="btn btn-light d-md-none toggle-sidebar-btn"
+                  onClick={toggleSidebar}
+                >
+                  {sidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
+                </button>
               </div>
             )}
+    
+            {/* Main content */}
+            <div className={`col ${sidebarVisible ? 'col-md-10' : 'col-12'} main-content`}>
+              <div className="header bg-dark text-white p-3 d-flex justify-content-between">
+                {/* Toggle button for smaller screens */}
+                <div
+                  className={`header-section ${activeSection === 'forward' ? 'active' : ''}`}
+                  onClick={handleForwardOrderClick}
+                >
+                  Forward Orders
+                </div>
+                <div
+                  className={`header-section ${activeSection === 'reversal' ? 'active' : ''}`}
+                  onClick={handleReversalOrderClick}
+                >
+                  Reversal Orders
+                </div>
+              </div>
+              <div className="content-area p-3">
+                {loading ? (
+                  <div className="loading-overlay">
+                    <div className="loading-modal">
+                      <div className="loading-content">
+                        <div className="spinner-border text-primary" role="status" />
+                        <p>Loading data, please wait...</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : error ? (
+                  <div>{error}</div>
+                ) : (
+                  <div className="table-container">
+                    <div className="table-responsive">
+                      <table className="table table-striped table-bordered table-hover custom-table">
+                        <thead>
+                          <tr>
+                            <th>Order Date</th>
+                            <th>Material Name</th>
+                            <th>Model</th>
+                            <th>Customer Name</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {orders.map((order, index) => (
+                            <tr key={index}>
+                              <td>{order?.order_date || 'N/A'}</td>
+                              <td>{order?.material_name || 'N/A'}</td>
+                              <td>{order?.model || 'N/A'}</td>
+                              <td>{order?.name_of_customer || 'N/A'}</td>
+                              <td>{order?.status || 'N/A'}</td>
+                              <td>
+                                <button
+                                  className="btn btn-primary"
+                                  onClick={() => openReversalModal(order)}
+                                  disabled={order?.status !== 'Delivered'}
+                                >
+                                  Raise Reversal
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
+          <AddOrderModal isModalOpen={isModalOpen} closeModal={closeModal} />
+          {selectedOrder && (
+            <RaiseReversalModal
+              isModalOpen={isReversalModalOpen}
+              closeModal={closeReversalModal}
+              order={selectedOrder}
+            />
+          )}
+          {reversalMessage && (
+            <div className="reversal-message-overlay">
+              <div className="reversal-message-dialog">
+                <h5>Notice</h5>
+                <p>{reversalMessage}</p>
+                <button type="button" className="btn btn-primary" onClick={() => setReversalMessage('')}>
+                  OK
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      <AddOrderModal isModalOpen={isModalOpen} closeModal={closeModal} />
-      {selectedOrder && (
-        <RaiseReversalModal
-          isModalOpen={isReversalModalOpen}
-          closeModal={closeReversalModal}
-          order={selectedOrder}
-        />
-      )}
-      {reversalMessage && (
-        <div className="reversal-message-overlay">
-          <div className="reversal-message-dialog">
-            <h5>Notice</h5>
-            <p>{reversalMessage}</p>
-            <button type="button" className="btn btn-primary" onClick={() => setReversalMessage('')}>
-              OK
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+    );
+    
 };
 
 export default EmployeeDashboard;

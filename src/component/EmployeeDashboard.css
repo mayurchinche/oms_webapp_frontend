@@ -1,72 +1,110 @@
-.container-fluid.dashboard {
-  padding: 0;
-}
+/* EmployeeDashboard.css */
 
+/* Sidebar styling */
 .sidebar {
-  min-height: 100vh;
-  overflow-y: auto;
-  width: 100%; /* Adjusts to 100% on smaller screens */
+  transition: all 0.3s ease;
 }
 
-.user-info {
-  margin-bottom: 20px;
+/* Sidebar visibility toggle */
+.sidebar {
+  display: block;
 }
 
-.user-logo {
-  width: 100px;
-  height: 100px;
+.main-content {
+  transition: all 0.3s ease;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.dashboard .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Adjust layout when sidebar is hidden */
+.main-content {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.dashboard .col-md-10 {
+  padding-left: 0;
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: fixed;  /* Position it over the entire page */
+  top: 0;
+  left: 0;
+  width: 100%;  /* Full screen width */
+  height: 100%;  /* Full screen height */
+  background: rgba(0, 0, 0, 0.5);  /* Semi-transparent background */
+  display: flex;
+  justify-content: center;  /* Center horizontally */
+  align-items: center;  /* Center vertically */
+  z-index: 1000;  /* Ensure it sits above all content */
+}
+
+/* Loader modal */
+.loading-modal {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  width: 200px;  /* Fixed width for the loader modal */
+}
+
+.loading-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.spinner-border {
+  margin-bottom: 10px;  /* Space between spinner and text */
+}
+
+/* Table and content styling */
+.custom-table th, .custom-table td {
+  text-align: center;
+}
+
+.reversal-message-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.reversal-message-dialog {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.toggle-sidebar-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
 }
 
 .nav .btn {
   width: 100%;
-  text-align: left;
+  margin-bottom: 10px;
 }
 
-.main-content {
-  min-height: 100vh;
-  overflow-y: auto;
-  padding: 1rem;
-}
-
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  flex-wrap: wrap;
-  padding: 10px;
-}
-
-.header-section {
-  cursor: pointer;
-  padding: 10px 20px;
-  border-radius: 5px;
-  flex: 1;
-  text-align: center;
-}
-
-.header-section.active {
-  background-color: #007bff;
-  color: white;
-}
-
-.table-container {
-  margin-top: 20px;
-}
-
-.custom-table {
-  display: block;
-  overflow-x: auto;
-  white-space: nowrap;
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    display: none;
-    width: 100%;
-  }
-
-  .main-content {
-    padding: 0;
-  }
+/* Prevent the page from shrinking when the loader appears */
+.page-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;  /* Prevent content overflow */
 }

@@ -1,0 +1,123 @@
+/* Sidebar user info section */
+.sidebar-user-info {
+    text-align: center;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* User icon styling */
+  .sidebar-user-icon {
+    font-size: 48px; /* Medium-sized icon */
+    color: #007bff;
+    margin-bottom: 10px;
+  }
+  
+  /* Username styling */
+  .sidebar-username {
+    color: #007bff; /* Blue color */
+    font-size: 18px;
+    font-weight: bold;
+    margin: 5px 0;
+  }
+  
+  /* Contact number styling */
+  .sidebar-contact-number {
+    color: #333; /* Darker color for contact number */
+    font-size: 14px;
+    font-weight: normal;
+    margin: 5px 0;
+  }
+  
+  /* Divider styling */
+  .sidebar-divider {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 15px 0;
+  }
+  
+  /* Sidebar menu styling */
+  .sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Add spacing between menu items */
+  }
+  
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    color: #333;
+    cursor: pointer;
+  }
+  
+  .sidebar-item span {
+    margin-left: 10px;
+  }
+  
+  /* Sidebar toggle button */
+  .sidebar-toggle-btn {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .sidebar-toggle-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .sidebar-toggle-btn svg {
+    font-size: 24px;
+  }
+  
+  /* Sidebar collapse and expanded states */
+  .sidebar-container {
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    background-color: #f4f4f4;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: width 0.3s ease;
+  }
+  
+  .sidebar-collapsed {
+    width: 80px;
+    padding: 10px;
+  }
+  
+  .sidebar-collapsed .sidebar-item span {
+    display: none;
+  }
+  
+  /* User info collapsed state */
+  .sidebar-collapsed .sidebar-user-info {
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .sidebar-collapsed .sidebar-user-icon {
+    font-size: 36px;
+  }
+  
+  .sidebar-collapsed .sidebar-username,
+  .sidebar-collapsed .sidebar-contact-number {
+    display: none;
+  }
+    

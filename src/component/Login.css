@@ -51,14 +51,12 @@ body {
 
 .form-group input {
   width: 100%;
-  padding: 18px; /* Increased padding for better visibility */
-  font-size: 18px; /* Adjusted font size for placeholder visibility */
+  padding: 16px; /* Increased padding for larger input fields */
+  font-size: 18px; /* Bigger text for better visibility */
   border: 1px solid #ccc;
-  border-radius: 8px; /* Keeps the modern rounded look */
-  box-sizing: border-box;
-  line-height: 1.5; /* Ensures text doesn't get cropped */
+  border-radius: 8px; /* Slightly larger border-radius for inputs */
+  box-sizing: border-box; /* Ensures consistent spacing */
 }
-
 
 .log-in-btn-primary {
   width: 100%;
