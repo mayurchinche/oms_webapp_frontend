@@ -6,13 +6,13 @@ Container for the entire dashboard
 
 .main-content {
   flex-grow: 1; 
-  margin-left: 250px;
+  margin-left: 10px;
   padding: 20px;
   transition: margin-left 0.3s ease; 
 } 
 
-/*Adjust for collapsed sidebar this will help in dynamic adjustment of data. 
-.main-content-collapsed {
+/* Adjust for collapsed sidebar this will help in dynamic adjustment of data.  */
+/* .main-content-collapsed {
   margin-left: 80px; 
 }
 
