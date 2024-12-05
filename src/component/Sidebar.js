@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import './Sidebar.css';
 import {
   FaClipboardList,
@@ -20,61 +21,52 @@ const iconMapping = {
   'View Orders': <FaClipboardList />,
   'Add Order': <FaBoxOpen />,
   'Manage Materials': <FaCogs />,
-  'Pending Reviews': <FaTasks />,
-  'Reversal Pending Reviews': <FaSignOutAlt />,
+  'Manage Suppliers': <FaUserTie />,
+  'Review Pending': <FaTasks />,
   'Analysis': <FaChartBar />,
   'Raise PO': <FaPaperPlane />,
-  'Mark Delivery': <FaTruck />,
   'Raise DC': <FaShippingFast />,
+  'Mark Delivery': <FaTruck />,
   'Mark Reversal Delivery': <FaBox />,
-  'Manage Suppliers': <FaUserTie />,
 };
 
 // Function to fetch menu items based on user role
 const getMenuItems = (role) => {
   switch (role) {
     case 'manager':
-      return {
-        order: ['View Orders', 'Add Order'],
-        management: ['Manage Materials'], // Manager has actions only in 'MANAGEMENT' group
-        reviewAction: ['Pending Reviews','Reversal Pending Reviews'], // No actions for 'manager' in review actions
-        deliveryActions: [], // No actions for 'manager' in delivery actions
-        analysis: ['Analysis']
-      };
+      return [
+        'View Orders',
+        'Add Order',
+        'Manage Materials',
+        'Manage Suppliers',
+        'Review Pending',
+        'Analysis',
+      ];
     case 'po_team':
-      return {
-        order: [],
-        management: ['Manage Suppliers'],
-        reviewAction: [],
-        deliveryActions: ['Raise PO', 'Mark Delivery', 'Raise DC', 'Mark Reversal Delivery'],
-        analysis: []
-      };
+      return [
+        'View Orders',
+        'Add Order',
+        'Raise PO',
+        'Raise DC',
+        'Mark Delivery',
+        'Mark Reversal Delivery',
+        'Manage Suppliers',
+      ];
     case 'employee':
     default:
-      return {
-        order: ['View Orders', 'Add Order'],
-        management: [], // No management actions for 'employee'
-        reviewAction: [], // No review actions for 'employee'
-        deliveryActions: [], // No delivery actions for 'employee'
-        analysis: []
-      };
+      return ['View Orders', 'Add Order'];
   }
 };
 
-const Sidebar = ({ onCollapseToggle, role }) => {
+const Sidebar = ({ onCollapseToggle, role, onViewOrdersClick, onAddOrderClick, onReviewPendingClick, onLogout }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
     onCollapseToggle(!isCollapsed);
   };
-
+  const { mobileNumber, userName } = useSelector((state) => state.auth);
   const menuItems = getMenuItems(role);
-
-  const handleLogout = () => {
-    // Your logout logic here
-    alert('Logged out');
-  };
 
   return (
     <div className={`sidebar-container ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
@@ -83,8 +75,8 @@ const Sidebar = ({ onCollapseToggle, role }) => {
         <FaUserCircle className="sidebar-user-icon" />
         {!isCollapsed && (
           <>
-            <p className="sidebar-username">John Doe</p>
-            <p className="sidebar-contact-number">+1 (123) 456-7890</p>
+            <p className="sidebar-username">{userName}</p>
+            <p className="sidebar-contact-number">{mobileNumber}</p>
           </>
         )}
       </div>
@@ -93,38 +85,52 @@ const Sidebar = ({ onCollapseToggle, role }) => {
       {/* Sidebar Menu */}
       <div className="sidebar-menu">
         {/* ORDER Group */}
-        {menuItems.order.length > 0 && (
+        {menuItems.includes('View Orders') || menuItems.includes('Add Order') ? (
           <div className="sidebar-item-group">
-          <p className="sidebar-group-title">ORDER</p>
-          {menuItems.order.map((item, index) => (
-            <div className="sidebar-item" key={index}>
-              {iconMapping[item]} <span>{item}</span>
-            </div>
-          ))}
-        </div>
-        )}
+            <p className="sidebar-group-title">ORDER</p>
+            {['View Orders', 'Add Order'].map(
+              (item, index) =>
+                menuItems.includes(item) && (
+                  <div
+                    className="sidebar-item"
+                    key={index}
+                    onClick={() => {
+                      if (item === 'View Orders' && onViewOrdersClick) onViewOrdersClick();
+                      if (item === 'Add Order' && onAddOrderClick) onAddOrderClick();
+                    }}
+                  >
+                    {iconMapping[item]} <span>{item}</span>
+                  </div>
+                )
+            )}
+          </div>
+        ) : null}
+
         <div className="sidebar-divider" />
 
-        {/* MANAGEMENT Group - Only show for 'manager' and 'po_team' */}
-        {menuItems.management.length > 0 && (
+        {/* MANAGEMENT Group */}
+        {menuItems.some((item) => ['Manage Materials', 'Manage Suppliers'].includes(item)) && (
           <div className="sidebar-item-group">
             <p className="sidebar-group-title">MANAGEMENT</p>
-            {menuItems.management.map((item, index) => (
-              <div className="sidebar-item" key={index}>
-                {iconMapping[item]} <span>{item}</span>
-              </div>
-            ))}
+            {['Manage Materials', 'Manage Suppliers'].map(
+              (item, index) =>
+                menuItems.includes(item) && (
+                  <div className="sidebar-item" key={index}>
+                    {iconMapping[item]} <span>{item}</span>
+                  </div>
+                )
+            )}
           </div>
         )}
 
         <div className="sidebar-divider" />
 
-        {/* REVIEW ACTION Group - Only show for 'manager' */}
-        {menuItems.reviewAction.length > 0 && (
+        {/* REVIEW ACTION Group */}
+        {menuItems.includes('Review Pending') && (
           <div className="sidebar-item-group">
             <p className="sidebar-group-title">REVIEW ACTION</p>
-            {menuItems.reviewAction.map((item, index) => (
-              <div className="sidebar-item" key={index}>
+            {['Review Pending'].map((item, index) => (
+              <div className="sidebar-item" key={index} onClick={onReviewPendingClick}>
                 {iconMapping[item]} <span>{item}</span>
               </div>
             ))}
@@ -133,25 +139,28 @@ const Sidebar = ({ onCollapseToggle, role }) => {
 
         <div className="sidebar-divider" />
 
-        {/* DELIVERY ACTIONS Group - Only show for 'po_team' */}
-        {menuItems.deliveryActions.length > 0 && (
+        {/* DELIVERY ACTIONS Group */}
+        {menuItems.some((item) => ['Raise PO', 'Raise DC', 'Mark Delivery', 'Mark Reversal Delivery'].includes(item)) && (
           <div className="sidebar-item-group">
             <p className="sidebar-group-title">DELIVERY ACTIONS</p>
-            {menuItems.deliveryActions.map((item, index) => (
-              <div className="sidebar-item" key={index}>
-                {iconMapping[item]} <span>{item}</span>
-              </div>
-            ))}
+            {['Raise PO', 'Raise DC', 'Mark Delivery', 'Mark Reversal Delivery'].map(
+              (item, index) =>
+                menuItems.includes(item) && (
+                  <div className="sidebar-item" key={index}>
+                    {iconMapping[item]} <span>{item}</span>
+                  </div>
+                )
+            )}
           </div>
         )}
 
         <div className="sidebar-divider" />
 
         {/* ANALYSIS Group */}
-        {menuItems.analysis.length > 0 && (
+        {menuItems.includes('Analysis') && (
           <div className="sidebar-item-group">
             <p className="sidebar-group-title">ANALYSIS</p>
-            {menuItems.analysis.map((item, index) => (
+            {['Analysis'].map((item, index) => (
               <div className="sidebar-item" key={index}>
                 {iconMapping[item]} <span>{item}</span>
               </div>
@@ -160,7 +169,7 @@ const Sidebar = ({ onCollapseToggle, role }) => {
         )}
 
         {/* Logout Button */}
-        <button className="sidebar-logout-btn" onClick={handleLogout}>
+        <button className="sidebar-logout-btn" onClick={onLogout}>
           Logout <FaSignOutAlt />
         </button>
       </div>

@@ -1,11 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect,useCallback } from 'react';
+import Sidebar from './Sidebar';
+import Header from './Header';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './EmployeeDashboard.css'; // Import the updated CSS file
 import AddOrderModal from './AddOrderModal';
 import RaiseReversalModal from './RaiseReversalModal';
 import { useNavigate } from 'react-router-dom';
+import LoadingDialog from './LoadingDialog';
+import './NewManagerDahsboard.css';
 
 const EmployeeDashboard = () => {
   const { role, token, mobileNumber, userName } = useSelector((state) => state.auth);
@@ -18,8 +21,8 @@ const EmployeeDashboard = () => {
   const [reversalMessage, setReversalMessage] = useState('');
   const [activeSection, setActiveSection] = useState('forward');
   const [sidebarVisible, setSidebarVisible] = useState(true); // Toggle sidebar visibility for smaller screens
+  const [orderType, SetOrderType] =  useState('forward orders');
   const navigate = useNavigate();
-
   const fetchOrders = useCallback((url) => {
     setLoading(true);
     setError(null);
@@ -45,27 +48,38 @@ const EmployeeDashboard = () => {
       });
   }, [token, role]);
 
+  console.log('order data',orders);
+
   useEffect(() => {
     if (mobileNumber && token && role) {
       fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/ordered_by/${mobileNumber}`);
     }
   }, [mobileNumber, token, role, fetchOrders]);
 
+  // Handlers for the sidebar buttons
+  const handleViewOrdersClick = () => {
+    setActiveSection('forward');
+    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/ordered_by/${mobileNumber}`);
+  };
+
+const handleAddOrderClick = () => {
+    setIsModalOpen(true);
+  };
   const handleForwardOrderClick = () => {
+    console.log('Forward Order clicked');
+    SetOrderType('forward orders')
     setActiveSection('forward');
     fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/ordered_by/${mobileNumber}`);
   };
 
   const handleReversalOrderClick = () => {
+    SetOrderType('reversal orders')
     setActiveSection('reversal');
     fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/get_reversal_orders/${mobileNumber}`);
   };
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
-
   const openReversalModal = (order) => {
-    if (order?.status === 'Delivered') {
+    if (order.status === 'Order_Delivered') {
       setSelectedOrder(order);
       setIsReversalModalOpen(true);
     } else {
@@ -79,141 +93,135 @@ const EmployeeDashboard = () => {
     setSelectedOrder(null);
   };
 
-  const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
+  const toggleSidebar = () => {
+    // Only toggle visibility for mobile screen (on smaller screens)
+    setSidebarVisible(!sidebarVisible);
+  };
 
   const logOut = () => navigate('/login');
 
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-    return (
-      <div className="page-container">
-        <div className="container-fluid dashboard">
-          <div className="row">
-            {/* Sidebar */}
-            {sidebarVisible && (
-              <div className="col-md-2 sidebar bg-dark text-white vh-100 p-3">
-                <div className="user-info text-center">
-                  <img
-                    src="https://th.bing.com/th?id=OIP.Q9rsZpd4tcVdZAmeChgtXAHaHa&w=250&h=250&c=8&rs=1&qlt=90&o=6&dpr=1.5&pid=3.1&rm=2"
-                    alt="User Logo"
-                    className="user-logo img-fluid rounded-circle mb-3"
-                  />
-                  <h5>Welcome, {userName}</h5>
-                  <p>{mobileNumber}</p>
-                  <hr />
-                </div>
-                <nav className="nav flex-column">
-                  <button className="btn btn-primary mb-2" onClick={openModal}>
-                    Add Order
-                  </button>
-                  <button className="btn btn-primary mb-2" onClick={handleForwardOrderClick}>
-                    View Orders
-                  </button>
-                </nav>
-                <button className="btn btn-danger mt-auto" onClick={logOut}>
-                  Logout
-                </button>
-                <button
-                  className="btn btn-light d-md-none toggle-sidebar-btn"
-                  onClick={toggleSidebar}
-                >
-                  {sidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
-                </button>
-              </div>
-            )}
-    
-            {/* Main content */}
-            <div className={`col ${sidebarVisible ? 'col-md-10' : 'col-12'} main-content`}>
-              <div className="header bg-dark text-white p-3 d-flex justify-content-between">
-                {/* Toggle button for smaller screens */}
-                <div
-                  className={`header-section ${activeSection === 'forward' ? 'active' : ''}`}
-                  onClick={handleForwardOrderClick}
-                >
-                  Forward Orders
-                </div>
-                <div
-                  className={`header-section ${activeSection === 'reversal' ? 'active' : ''}`}
-                  onClick={handleReversalOrderClick}
-                >
-                  Reversal Orders
-                </div>
-              </div>
-              <div className="content-area p-3">
-                {loading ? (
-                  <div className="loading-overlay">
-                    <div className="loading-modal">
-                      <div className="loading-content">
-                        <div className="spinner-border text-primary" role="status" />
-                        <p>Loading data, please wait...</p>
-                      </div>
-                    </div>
-                  </div>
-                ) : error ? (
-                  <div>{error}</div>
-                ) : (
-                  <div className="table-container">
-                    <div className="table-responsive">
-                      <table className="table table-striped table-bordered table-hover custom-table">
-                        <thead>
-                          <tr>
-                            <th>Order Date</th>
-                            <th>Material Name</th>
-                            <th>Model</th>
-                            <th>Customer Name</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                          </tr>
-                        </thead>
+  const handleSidebarToggle = (isCollapsed) => {
+    setIsSidebarCollapsed(isCollapsed);
+    document.documentElement.style.setProperty(
+      '--sidebar-width',
+      isCollapsed ? '80px' : '250px'
+    );
+  };
+
+  const handleSwitch = (orderType) => {
+    switch (orderType) {
+
+      case 'Forward Orders':
+        // Handle Forward Orders action
+        handleForwardOrderClick()
+        console.log('Forward Orders action triggered');
+        break;
+      case 'Reversal Orders':
+        handleReversalOrderClick()
+        console.log('Reversal Orders action triggered');
+        break;
+      default:
+        console.log('Unknown action');
+    }
+  };
+
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      '--sidebar-width',
+      isSidebarCollapsed ? '80px' : '250px'
+    );
+  }, [isSidebarCollapsed]);
+
+  return (
+    <div className="dashboard-container">
+      <Sidebar role={role} onCollapseToggle={handleSidebarToggle} 
+              onViewOrdersClick={handleViewOrdersClick}
+              onAddOrderClick={handleAddOrderClick}
+              onReviewPendingClick={handleReversalOrderClick}
+              onLogout={logOut}/>
+      
+      <div className={`main-content ${isSidebarCollapsed ? 'main-content-collapsed' : ''}`}>
+        <Header onSwitch={handleSwitch} />
+
+          <div style={{marginTop :'30px', marginLeft:'20px'}}><h3>
+            You are veiwing {orderType}
+          </h3></div>
+
+              <div>
+               <div className="table-container">
+                    <div>
+              {loading ? (
+                <LoadingDialog open={loading} />
+              ) : error ? (
+                <div>{error}</div>
+              ) : (
+
+                      <table className="table table-bordered table-hover custom-table">
+                      <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', color: 'black', zIndex: 1 }}>
+          <tr>
+            <th style={{ padding: '12px 8px', backgroundColor:'#007bff',color:'white' }}>Order Date</th>
+            <th style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>Material Name</th>
+            <th style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>Model</th>
+            <th style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white'}}>Customer Name</th>
+            <th style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>Status</th>
+            <th style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>Action</th>
+          </tr>
+        </thead>
                         <tbody>
                           {orders.map((order, index) => (
-                            <tr key={index}>
-                              <td>{order?.order_date || 'N/A'}</td>
-                              <td>{order?.material_name || 'N/A'}</td>
-                              <td>{order?.model || 'N/A'}</td>
-                              <td>{order?.name_of_customer || 'N/A'}</td>
-                              <td>{order?.status || 'N/A'}</td>
-                              <td>
-                                <button
-                                  className="btn btn-primary"
-                                  onClick={() => openReversalModal(order)}
-                                  disabled={order?.status !== 'Delivered'}
-                                >
-                                  Raise Reversal
-                                </button>
-                              </td>
-                            </tr>
+                            order && order.order_date ? (
+                              <tr key={index}>
+                                <td>{order.order_date}</td>
+                                <td>{order.material_name}</td>
+                                <td>{order.model}</td>
+                                <td>{order.name_of_customer}</td>
+                                <td>{order.status}</td>
+                                <td>
+                                  <button  style={{ backgroundColor: '#085fbc'}}
+                                    onClick={() => openReversalModal(order)}
+                                  >
+                                    Raise Reversal
+                                  </button>
+                                </td>
+                              </tr>
+                            ) : (
+                              <tr key={index}>
+                                <td colSpan="6">Invalid order data</td>
+                              </tr>
+                            )
                           ))}
                         </tbody>
                       </table>
+                       )}
+                       </div>
                     </div>
-                  </div>
-                )}
+                       
+               
               </div>
+              
+      </div>
+      <AddOrderModal isModalOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} />
+        {selectedOrder && (
+          <RaiseReversalModal
+            isModalOpen={isReversalModalOpen}
+            closeModal={closeReversalModal}
+            order={selectedOrder}
+          />
+        )}
+        {reversalMessage && (
+          <div className="reversal-message-overlay">
+            <div className="reversal-message-dialog">
+              <h5>Notice</h5>
+              <p>{reversalMessage}</p>
+              <button type="button" className="btn btn-primary" onClick={() => setReversalMessage('')}>
+                OK
+              </button>
             </div>
           </div>
-          <AddOrderModal isModalOpen={isModalOpen} closeModal={closeModal} />
-          {selectedOrder && (
-            <RaiseReversalModal
-              isModalOpen={isReversalModalOpen}
-              closeModal={closeReversalModal}
-              order={selectedOrder}
-            />
-          )}
-          {reversalMessage && (
-            <div className="reversal-message-overlay">
-              <div className="reversal-message-dialog">
-                <h5>Notice</h5>
-                <p>{reversalMessage}</p>
-                <button type="button" className="btn btn-primary" onClick={() => setReversalMessage('')}>
-                  OK
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        )}
       </div>
-    );
-    
+  );
 };
-
 export default EmployeeDashboard;
