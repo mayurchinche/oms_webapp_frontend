@@ -2,56 +2,68 @@ import React from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box, Button, Typography } from '@mui/material';
 
-const Header = ({ onSwitch }) => {
+const Header = ({ onSwitch, isSidebarCollapsed }) => {
   const theme = useTheme();
-  
+
   return (
     <Box
       sx={{
         position: 'fixed',
         top: 0,
-        left: { xs: '20px', sm: 'var(--sidebar-width)' },
+        left: isSidebarCollapsed ? '80px' : '250px', // Dynamically adjust based on sidebar state
         right: 0,
-        height: '80px',
+        minHeight: '60px',
         display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: { xs: '0 8px', sm: '0 16px' },
+        padding: { xs: '8px 16px', sm: '16px 32px' },
         backgroundColor: '#fff',
         borderBottom: '1px solid #ddd',
         zIndex: 1000,
-        transition: 'left 0.3s ease',
+        transition: 'left 0.3s ease', // Smooth transition for alignment
       }}
     >
-      
+      <Typography
+        variant="h6"
+        noWrap
+        sx={{
+          flexGrow: { xs: 0, sm: 1 },
+          fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
+          textAlign: { xs: 'center', sm: 'left' }
+        }}
+      >
+        Order Details
+      </Typography>
+
       <Box
         sx={{
           display: 'flex',
-          justifyContent: 'center',
-          width: '100%',
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          marginLeft: 'auto',
-          marginRight: 'auto',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-around',
+          gap: theme.spacing(2),
+          width: { xs: '100%', sm: 'auto' },
+          paddingTop: { xs: '8px', sm: '0' },
         }}
       >
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            gap: theme.spacing(3), // Increased spacing between buttons
-            width: { xs: '100%', sm: '50%' },
-            padding: '0 16px', // Padding to keep spacing on smaller screens
-          }}
+        <Button
+          variant="contained"
+          color="primary"
+          fullWidth={true}
+          onClick={() => onSwitch('Forward Orders')}
+          sx={{ margin: { xs: '4px 0', sm: '0 4px' } }}
         >
-          <Button variant="contained" color="primary" onClick={() => onSwitch('Forward Orders')}>
-            Forward
-          </Button>
-          <Button variant="contained" color="primary" onClick={() => onSwitch('Reversal Orders')}>
-            Reversal
-          </Button>
-        </Box>
+          Forward
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          fullWidth={true}
+          onClick={() => onSwitch('Reversal Orders')}
+          sx={{ margin: { xs: '4px 0', sm: '0 4px' } }}
+        >
+          Reversal
+        </Button>
       </Box>
     </Box>
   );
