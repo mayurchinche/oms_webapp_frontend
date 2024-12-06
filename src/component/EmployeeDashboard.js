@@ -23,9 +23,30 @@ const EmployeeDashboard = () => {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [orderType, setOrderType] = useState('forward orders');
+  const [columns, setColumns] = useState([]); // State to manage columns
   const navigate = useNavigate();
 
-  const fetchOrders = useCallback((url) => {
+  const forwardOrderColumns = [
+    { header: 'Order Date', accessor: 'order_date' },
+    { header: 'Material Name', accessor: 'material_name' },
+    { header: 'Model', accessor: 'model' },
+    { header: 'Customer Name', accessor: 'name_of_customer' },
+    { header: 'Status', accessor: 'status' },
+    { header: 'Action', accessor: 'actions', isButton: true, buttonText: 'Raise Reversal' }
+  ];
+
+  const reversalOrderColumns = [
+    { header: 'Created At', accessor: 'created_at' },
+    { header: 'Material Name', accessor: 'original_order_material_name' },
+    { header: 'Supplier Name', accessor: 'origin_order_supplier_name' },
+    { header: 'Description', accessor: 'description' },
+    { header: 'original_order_quantity', accessor: 'original_order_quantity' },
+    { header: 'Reversal Quantity', accessor: 'reversal_quantity' },
+    { header: 'Status', accessor: 'status' },
+    { header: 'DC Number', accessor: 'dc_number' }
+  ];
+  
+  const fetchOrders = useCallback((url, columnsConfig) => {
     setLoading(true);
     setError(null);
     axios
@@ -39,6 +60,7 @@ const EmployeeDashboard = () => {
         const data = response.data?.[0]?.data || [];
         if (data.length > 0) {
           setOrders(data);
+          setColumns(columnsConfig); // Set the columns configuration
         } else {
           setError('No records found');
         }
@@ -51,14 +73,16 @@ const EmployeeDashboard = () => {
   }, [token, role]);
 
   useEffect(() => {
+    setOrderType('forward orders')
     if (mobileNumber && token && role) {
-      fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/ordered_by/${mobileNumber}`);
+      fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/ordered_by/${mobileNumber}`, forwardOrderColumns);
     }
   }, [mobileNumber, token, role, fetchOrders]);
 
   const handleViewOrdersClick = () => {
     setActiveSection('forward');
-    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/ordered_by/${mobileNumber}`);
+    setOrderType('Forward Orders');
+    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/ordered_by/${mobileNumber}`, forwardOrderColumns);
   };
 
   const handleAddOrderClick = () => {
@@ -68,13 +92,13 @@ const EmployeeDashboard = () => {
   const handleForwardOrderClick = () => {
     setOrderType('forward orders');
     setActiveSection('forward');
-    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/ordered_by/${mobileNumber}`);
+    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/ordered_by/${mobileNumber}`, forwardOrderColumns);
   };
 
   const handleReversalOrderClick = () => {
     setOrderType('reversal orders');
     setActiveSection('reversal');
-    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/get_reversal_orders/${mobileNumber}`);
+    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/get_reversal_orders/${mobileNumber}`, reversalOrderColumns);
   };
 
   const openReversalModal = (order) => {
@@ -117,92 +141,87 @@ const EmployeeDashboard = () => {
 
   return (
     <div className={`dashboard-container ${isSidebarCollapsed ? 'collapsed' : ''}`}>
-    <Sidebar
+      <Sidebar
         role={role}
         onCollapseToggle={handleSidebarToggle}
         onViewOrdersClick={handleViewOrdersClick}
         onAddOrderClick={handleAddOrderClick}
         onReviewPendingClick={handleReversalOrderClick}
         onLogout={logOut}
-    />
+      />
 
-    <div className={`main-content ${isSidebarCollapsed ? 'main-content-collapsed' : ''}`}>
+      <div className={`main-content ${isSidebarCollapsed ? 'main-content-collapsed' : ''}`}>
         <Header onSwitch={handleSwitch} isSidebarCollapsed={isSidebarCollapsed} />
 
         <div className={`header-caption ${isSidebarCollapsed ? 'collapsed' : ''}`}>
-    <h3>You are viewing {orderType}</h3>
-</div>
+          <h3>You are viewing {orderType}</h3>
+        </div>
 
         <div className="table-container">
-            <div>
-                {loading ? (
-                    <LoadingDialog open={loading} />
-                ) : error ? (
-                    <div>{error}</div>
-                ) : (
-                    <table className="table table-bordered table-hover custom-table">
-                        <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', color: 'black', zIndex: 1 }}>
-                            <tr>
-                                <th style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>Order Date</th>
-                                <th style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>Material Name</th>
-                                <th style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>Model</th>
-                                <th style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>Customer Name</th>
-                                <th style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>Status</th>
-                                <th style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {orders.map((order, index) => (
-                                order && order.order_date ? (
-                                    <tr key={index}>
-                                        <td>{order.order_date}</td>
-                                        <td>{order.material_name}</td>
-                                        <td>{order.model}</td>
-                                        <td>{order.name_of_customer}</td>
-                                        <td>{order.status}</td>
-                                        <td>
-                                            <button
-                                                style={{ backgroundColor: '#085fbc' }}
-                                                onClick={() => openReversalModal(order)}
-                                            >
-                                                Raise Reversal
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    <tr key={index}>
-                                        <td colSpan="6">Invalid order data</td>
-                                    </tr>
-                                )
-                            ))}
-                        </tbody>
-                    </table>
-                )}
-            </div>
+          <div>
+            {loading ? (
+              <LoadingDialog open={loading} />
+            ) : error ? (
+              <div>{error}</div>
+            ) : (
+              <table className="table table-bordered table-hover custom-table">
+                <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', color: 'black', zIndex: 1 }}>
+                  <tr>
+                    {columns.map((column, index) => (
+                      <th key={index} style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>
+                        {column.header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order, index) => (
+                    <tr key={index}>
+                      {columns.map((column, colIndex) => (
+                        <td key={colIndex}>
+                          {column.isButton ? (
+                            <button
+                              style={{ backgroundColor: '#085fbc' }}
+                              onClick={() => openReversalModal(order)}
+                            >
+                              {column.buttonText}
+                            </button>
+                          ) : (
+                            order[column.accessor]
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
 
         <AddOrderModal isModalOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} />
         {selectedOrder && (
-            <RaiseReversalModal
-                isModalOpen={isReversalModalOpen}
-                closeModal={closeReversalModal}
-                order={selectedOrder}
-            />
+          <RaiseReversalModal
+            isModalOpen={isReversalModalOpen}
+            closeModal={closeReversalModal}
+            order={selectedOrder}
+          />
         )}
         {reversalMessage && (
-            <div className="reversal-message-overlay">
-                <div className="reversal-message-dialog">
-                    <h5>Notice</h5>
-                    <p>{reversalMessage}</p>
-                    <button type="button" className="btn btn-primary" onClick={() => setReversalMessage('')}>
-                        OK
-                    </button>
-                </div>
+          <div className="reversal-message-overlay">
+            <div className="reversal-message-dialog">
+              <h5>Notice</h5>
+              <p>{reversalMessage}</p>
+              <button type="button" className="btn btn-primary" onClick={() => setReversalMessage('')}>
+                OK
+              </button>
             </div>
+          </div>
         )}
+      </div>
     </div>
-</div>
-      );
-    };
-    
-    export default EmployeeDashboard;
+  );
+};
+
+export default EmployeeDashboard;
+
