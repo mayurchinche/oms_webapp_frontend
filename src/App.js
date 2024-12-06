@@ -6,14 +6,17 @@ import ManagerDashboard from './component/ManagerDashboard';
 import PODashboard from './component/PODashboard';
 import ForgotPassword from './component/ForgotPassword';
 import Register from './component/Register';
+import NewManagerDashboard from './component/NewManagerDahsboard';
+
+
 
 function App() {
   return (
     <Router>
     <Routes>
-      
+      <Route path="/NewManagerDashboard" element={<NewManagerDashboard />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/" element={<Register />} />
+      <Route path="/Register" element={<Register />} />
       <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
       <Route path="/manager-dashboard" element={<ManagerDashboard />} />
       <Route path="/po-dashboard" element={<PODashboard />} />

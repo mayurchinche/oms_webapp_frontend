@@ -58,9 +58,9 @@ const RaiseReversalModal = ({ isModalOpen, closeModal, order }) => {
       <div className={`modal ${isModalOpen ? 'show' : ''}`} style={{ display: isModalOpen ? 'block' : 'none' }}>
         <div className="modal-dialog">
           <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Raise Reversal</h5>
-              <button type="button" className="close" onClick={closeModal}>&times;</button>
+            <div >
+              <h5>Raise Reversal</h5>
+              <button type="button" onClick={closeModal}>&times;</button>
             </div>
             <div className="modal-body">
               {loading ? (
@@ -95,8 +95,8 @@ const RaiseReversalModal = ({ isModalOpen, closeModal, order }) => {
               )}
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-danger" onClick={closeModal}>Close</button>
-              <button type="button" className="btn btn-primary" onClick={handleAddReversal}>Add Reversal</button>
+              <button type="button"  onClick={closeModal}>Close</button>
+              <button type="button"  onClick={handleAddReversal}>Add Reversal</button>
             </div>
           </div>
         </div>

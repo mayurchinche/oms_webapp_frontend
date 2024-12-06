@@ -18,14 +18,7 @@ body {
 .main-content {
   flex-grow: 1;
   margin-left: var(--sidebar-width);
-  padding-top: 60px; /* Adjust for header height */
-  box-sizing: border-box;
-  overflow: auto; /* Ensure both vertical and horizontal scrolling if needed */
-  transition: margin-left 0.3s ease;
-}
-.main-content_1 {
-  flex-grow: 1;
-  margin-left: var(--sidebar-width);
+  padding-top: var(--header-height); 
   padding-top: 60px; /* Adjust for header height */
   box-sizing: border-box;
   overflow: auto; /* Ensure both vertical and horizontal scrolling if needed */
@@ -36,9 +29,6 @@ body {
   margin-left: 80px; /* Adjust for collapsed sidebar width */
 }
 
-.main-content-collapsed_1 {
-  margin-left: 80px; /* Adjust for collapsed sidebar width */
-}
 .content-area {
   flex: 1;
   display: flex;
@@ -47,4 +37,14 @@ body {
 
 .content-padding {
   padding: 20px;
+}
+.header-caption {
+  margin-top: 30px;
+  margin-left: 20px;
+}
+
+@media (max-width: 768px) {
+  .header-caption {
+      visibility: hidden; /* Makes the div invisible */
+  }
 }

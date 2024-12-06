@@ -1,0 +1,41 @@
+/* Unique styles for the information box */
+.info-box-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f4f4f4; /* Light gray background */
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 20px 0; /* Add some spacing */
+    width: calc(100% - 60px); /* Adjust width considering sidebar margin */
+    margin-left: 60px; /* Space from the sidebar */
+  }
+  
+  .info-box-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0;
+    color: #333; /* Dark gray text */
+  }
+  
+  .info-box-buttons {
+    display: flex;
+    gap: 10px; /* Spacing between buttons */
+  }
+  
+  .info-box-button {
+    background-color: #007bff; /* Primary blue color */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .info-box-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+  

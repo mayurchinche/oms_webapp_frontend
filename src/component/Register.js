@@ -1,191 +1,172 @@
-// src/component/Register.js
-import React, { useState } from 'react';
-import { auth } from '../firebase';
-import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef } from "react";
+import firebase from "../firebase.config";
+import axios from "axios";
+import { useNavigate, Link } from "react-router-dom"; // Import Link
 import './Register.css';
 
 const Register = () => {
-  const [step, setStep] = useState(1);
-  const [mobileNumber, setMobileNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [countryCode, setCountryCode] = useState('+91');
-  const [otp, setOtp] = useState('');
-  const [firstName, setFirstName] = useState('');
+  const [verificationId, setVerificationId] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isVerified, setIsVerified] = useState(false);
+  const [name, setName] = useState('');
   const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
-  const [rePassword, setRePassword] = useState('');
-  const [role, setRole] = useState('employee');
-  const [otpTimer, setOtpTimer] = useState(60);
-  const [idToken, setIdToken] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [registrationMessage, setRegistrationMessage] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpMessage, setOtpMessage] = useState('');
+  const [isPasswordMatch, setIsPasswordMatch] = useState(true);
+  const [selectedRole, setSelectedRole] = useState('employee'); // Default role is 'employee'
+  const recaptchRef = useRef(null);
   const navigate = useNavigate();
 
-  const handleSendOtp = () => {
-    console.log('Sending OTP to:', `${countryCode}${mobileNumber}`);
-    window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {}, auth);
-    const appVerifier = window.recaptchaVerifier;
-    signInWithPhoneNumber(auth, `${countryCode}${mobileNumber}`, appVerifier)
-      .then((confirmationResult) => {
-        window.confirmationResult = confirmationResult;
-        setStep(2);
-        startOtpTimer();
-        console.log('OTP sent successfully');
-      })
-      .catch((error) => {
-        console.error('Error sending OTP:', error);
-      });
-  };
-
   const handleVerifyOtp = () => {
-    console.log('Verifying OTP:', otp);
-    window.confirmationResult.confirm(otp)
-      .then((result) => {
-        result.user.getIdToken().then((token) => {
-          setIdToken(token);
-          setStep(3);
-          console.log('OTP verified successfully, ID token:', token);
-        });
-      })
-      .catch((error) => {
-        console.error('Error verifying OTP:', error);
+    const credentials = firebase.auth.PhoneAuthProvider.credential(verificationId, verificationCode);
+    firebase.auth().signInWithCredential(credentials)
+      .then(userCredential => {
+        setIsVerified(true);
+      }).catch(error => {
+        console.error('Error in verifying OTP', error);
       });
   };
 
-  const startOtpTimer = () => {
-    let timer = 60;
-    setOtpTimer(timer);
-    const interval = setInterval(() => {
-      timer -= 1;
-      setOtpTimer(timer);
-      if (timer <= 0) {
-        clearInterval(interval);
+  const handleSendOtp = () => {
+    if (phoneNumber.length !== 10) {
+      setOtpMessage('Enter a valid 10-digit number');
+      return;
+    }
+    setOtpMessage('');
+    const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+
+    if (recaptchRef.current) {
+      recaptchRef.current.innerHTML = '<div id="recaptcha-container"></div>';
+    }
+
+    const verifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      size: 'invisible',
+      callback: (response) => {
+        console.log("reCAPTCHA verified:", response);
+      },
+      'expired-callback': () => {
+        console.log("reCAPTCHA expired.");
       }
-    }, 1000);
+    });
+    document.getElementById('recaptcha-container').style.display = 'none';
+
+    firebase.auth().signInWithPhoneNumber(fullPhoneNumber, verifier)
+      .then(confirmationResult => {
+        setVerificationId(confirmationResult.verificationId);
+        setOtpSent(true);
+        setOtpMessage('OTP sent successfully');
+      }).catch(error => {
+        console.log('Error sending OTP', error);
+      });
   };
 
-  const handleRegister = () => {
-    const userData = {
-      contact_number: `${countryCode}${mobileNumber}`,
+  const handleSignUp = async () => {
+    if (password !== confirmPassword) {
+      setIsPasswordMatch(false);
+      return;
+    }
+    setIsPasswordMatch(true);
+
+    const idToken = await firebase.auth().currentUser.getIdToken();
+    const userDetails = {
+      contact_number: `+91${phoneNumber}`,
       id_token: idToken,
+      user_name: `${name} ${lastName}`,
       password: password,
-      role: role,
-      user_name: `${firstName} ${lastName}`
+      role: selectedRole, // Send the selected role here
     };
 
-    console.log('Registering user with data:', userData);
-
-    axios.post('/auth/register', userData)
-      .then((response) => {
-        console.log('Registration successful:', response.data);
-        navigate('/login');
-      })
-      .catch((error) => {
-        console.error('Error registering user:', error);
-      });
+    try {
+      const response = await axios.post('https://stage-testflask.onrender.com/auth/register', userDetails);
+      if (response.status === 200) {
+        setRegistrationMessage(response.data.message);
+        navigate('/');
+      } else {
+        setRegistrationMessage(response.data.message || "Registration failed.");
+      }
+    } catch (error) {
+      console.error('Error during registration:', error);
+      setRegistrationMessage('Failed to register, please try again.');
+    }
   };
 
   return (
     <div className="register-container">
-      <h2>Register</h2>
-      {step === 1 && (
-        <div>
-          <label>
-            Country Code:
-            <select value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
-              <option value="+91">India (+91)</option>
-              {/* Add more country codes as needed */}
+      <div className="register-card">
+        <h1>Sign Up</h1>
+        <div ref={recaptchRef}></div>
+        {!isVerified ? (
+          <>
+            <select value={countryCode} onChange={e => setCountryCode(e.target.value)}>
+              <option value="+91">🇮🇳 +91</option>
             </select>
-          </label>
-          <label>
-            Mobile Number:
             <input
-              type="text"
-              value={mobileNumber}
-              onChange={(e) => setMobileNumber(e.target.value)}
+              type="tel"
               placeholder="Enter mobile number"
-              required
+              value={phoneNumber}
+              onChange={e => setPhoneNumber(e.target.value)}
             />
-          </label>
-          <button onClick={handleSendOtp}>Send OTP</button>
-          <div id="recaptcha-container"></div>
-        </div>
-      )}
-      {step === 2 && (
-        <div>
-          <label>
-            OTP:
+            <button onClick={handleSendOtp}>Send OTP</button>
+            {otpMessage && <p className="message">{otpMessage}</p>}
+            {/* Reference Text */}
+            <p className="reference-text">
+              Already registered? <Link to="/login">Click here to login</Link>
+            </p>
+            {otpSent && (
+              <>
+                <input
+                  type="text"
+                  placeholder="Enter OTP"
+                  value={verificationCode}
+                  onChange={e => setVerificationCode(e.target.value)}
+                />
+                <button onClick={handleVerifyOtp}>Verify OTP</button>
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            <p className="verified-text">OTP Verified</p>
             <input
               type="text"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              placeholder="Enter OTP"
-              required
+              placeholder="First Name"
+              value={name}
+              onChange={e => setName(e.target.value)}
             />
-          </label>
-          <p>OTP expires in {otpTimer} seconds</p>
-          <button onClick={handleVerifyOtp}>Verify OTP</button>
-          <button onClick={handleSendOtp}>Send Again</button>
-        </div>
-      )}
-      {step === 3 && (
-        <div>
-          <label>
-            First Name:
             <input
               type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="Enter first name"
-              required
-            />
-          </label>
-          <label>
-            Last Name:
-            <input
-              type="text"
+              placeholder="Last Name"
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Enter last name"
-              required
+              onChange={e => setLastName(e.target.value)}
             />
-          </label>
-          <label>
-            Password:
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
-              required
-            />
-          </label>
-          <label>
-            Re-enter Password:
-            <input
-              type="password"
-              value={rePassword}
-              onChange={(e) => setRePassword(e.target.value)}
-              placeholder="Re-enter password"
-              required
-            />
-          </label>
-          {password && rePassword && (
-            <p>{password === rePassword ? 'Passwords match' : 'Passwords do not match'}</p>
-          )}
-          <label>
-            Role:
-            <select value={role} onChange={(e) => setRole(e.target.value)}>
+            <select value={selectedRole} onChange={e => setSelectedRole(e.target.value)}>
               <option value="employee">Employee</option>
               <option value="manager">Manager</option>
               <option value="po_team">PO Team</option>
             </select>
-          </label>
-          <button onClick={handleRegister}>Register</button>
-        </div>
-      )}
-      <p>
-        Already registered? <a href="/login">Go to Login</a>
-      </p>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+            />
+            {!isPasswordMatch && <p className="message">Passwords do not match!</p>}
+            <button onClick={handleSignUp}>Sign Up</button>
+            {registrationMessage && <p className="message">{registrationMessage}</p>}
+          </>
+        )}
+      </div>
     </div>
   );
 };

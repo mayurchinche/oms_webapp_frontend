@@ -1,55 +1,115 @@
-/* src/component/Register.css */
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
 .register-container {
-    max-width: 400px;
-    margin: 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.register-card {
+  background-color: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 450px;
+  width: 100%;
+  text-align: center;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+select,
+input {
+  width: 100%;
+  padding: 18px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  padding: 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.message {
+  text-align: center;
+  color: red;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.verified-text {
+  color: green;
+  text-align: center;
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.reference-text {
+  margin-top: 10px;
+  color: green;
+  font-size: 14px;
+}
+
+.reference-text a {
+  color: green;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .register-card {
+    padding: 30px;
+  }
+  select,
+  input {
+    padding: 14px;
+  }
+  button {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-card {
     padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
-  
-  .register-container h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .register-container label {
-    display: block;
-    margin-bottom: 10px;
-  }
-  
-  .register-container input,
-  .register-container select {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  .register-container button {
-    width: 100%;
+  select,
+  input {
     padding: 10px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
   }
-  
-  .register-container button:hover {
-    background-color: #0056b3;
+  button {
+    padding: 10px;
   }
-  
-  .register-container p {
-    text-align: center;
-  }
-  
-  .register-container a {
-    color: #007bff;
-    text-decoration: none;
-  }
-  
-  .register-container a:hover {
-    text-decoration: underline;
-  }
+}
