@@ -66,6 +66,16 @@ const ManagerDashboard = () => {
 
   ];
   
+  const reversalReviewPendingColumns =[
+    { header: 'Created At', accessor: 'created_at' },
+    { header: 'Supplier Name', accessor: 'origin_order_supplier_name' },
+    { header: 'Material Name', accessor: 'original_order_material_name' },
+    { header: 'Customer Name', accessor: 'name_of_customer' },
+    { header: 'Ordered By', accessor: 'user_contact_number' },
+    { header: 'Quantity', accessor: 'original_order_quantity' },
+    { header: 'Reversal Quantity', accessor: 'reversal_quantity' },
+    { header: 'Action', accessor: 'actions', isButton: true, buttonText: 'Review & Approve' }
+  ]
 
   const fetchOrders = useCallback((url, columnsConfig) => {
     setLoading(true);
@@ -100,6 +110,10 @@ const ManagerDashboard = () => {
     }
   }, [mobileNumber, token, role, fetchOrders]);
 
+  const handleReversalReveiwPendingClick = () => {
+    fetchOrders(' https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/get_reversal_review_pending',reversalReviewPendingColumns);
+  };
+
   const handleViewOrdersClick = () => {
     setActiveSection('forward');
     setOrderType('Forward Orders');
@@ -116,7 +130,7 @@ const handelManageSupplierClick=()=>{
   openManageSupplierModal()
 }
 
-const handelReviewPendingClick=()=>{
+const handleReveiwPendingClick=()=>{
   fetchOrders(' https://ordermanagementservice-backend.onrender.com/api/core/orders/review_pending',reviewPendingColumns);
 }
 const handelAnalysisClick = () =>{
@@ -214,9 +228,9 @@ const handelAnalysisClick = () =>{
         onAddOrderClick={handleAddOrderClick}
         onManageMaterailClick={openManageMaterialModal}
         onManageSupplierClick={handelManageSupplierClick}
-        onReviewPendingClick={handelReviewPendingClick}
+        onReviewPendingClick={handleReveiwPendingClick}
         onAnalysisClick={handelAnalysisClick}
-        onReversalOrderClick={handleReversalOrderClick}
+        onReversalReviewPendingClick={handleReversalReveiwPendingClick}
         onLogout={logOut}
       />
     

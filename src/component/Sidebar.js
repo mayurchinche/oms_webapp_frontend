@@ -24,6 +24,7 @@ const iconMapping = {
   'Manage Materials': <FaCogs />,
   'Manage Suppliers': <FaUserTie />,
   'Review Pending': <FaTasks />,
+  'Reversal Review Pending': <FaTasks />,
   'Analysis': <FaChartBar />,
   'Raise PO': <FaPaperPlane />,
   'Raise DC': <FaShippingFast />,
@@ -41,6 +42,7 @@ const getMenuItems = (role) => {
         'Add Order',
         'Manage Materials',
         'Manage Suppliers',
+        'Reversal Review Pending',
         'Review Pending',
         'Analysis',
       ];
@@ -60,7 +62,7 @@ const getMenuItems = (role) => {
   }
 };
 
-const Sidebar = ({ onCollapseToggle, role, onViewOrdersClick, onAddOrderClick, onManageMaterailClick, onManageSupplierClick, onReviewPendingClick,onAnalysisClick, onLogout }) => {
+const Sidebar = ({ onCollapseToggle, role, onViewOrdersClick, onAddOrderClick, onManageMaterailClick, onManageSupplierClick, onReviewPendingClick,onReversalReviewPendingClick,onAnalysisClick, onLogout }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -132,14 +134,20 @@ const Sidebar = ({ onCollapseToggle, role, onViewOrdersClick, onAddOrderClick, o
         <div className="sidebar-divider" />
 
         {/* REVIEW ACTION Group */}
-        {menuItems.includes('Review Pending') && (
+        {menuItems.includes('Review Pending','Reversal Review Pending') && (
           <div className="sidebar-item-group">
             <p className="sidebar-group-title">REVIEW ACTION</p>
-            {['Review Pending'].map((item, index) => (
-              <div className="sidebar-item" key={index} onClick={onReviewPendingClick}>
+            {['Review Pending', 'Reversal Review Pending'].map((item, index) => 
+            menuItems.includes(item) && (
+              <div className="sidebar-item" key={index}
+              onClick={() => {
+                if (item === 'Review Pending' && onReviewPendingClick) onReviewPendingClick();
+                if (item === 'Reversal Review Pending' && onReversalReviewPendingClick) onReversalReviewPendingClick();
+              }}>
                 {iconMapping[item]} <span>{item}</span>
               </div>
-            ))}
+            )
+            )}
           </div>
         )}
 
