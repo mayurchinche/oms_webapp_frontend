@@ -1,7 +1,18 @@
-import { setAuth } from '../redux/Actions/authActions';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { setAuth } from '../redux/Actions/authActions';
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Link,
+  Paper,
+  Box,
+  useTheme,
+  useMediaQuery
+} from '@mui/material';
 import './Login.css';
 
 const Login = () => {
@@ -10,6 +21,8 @@ const Login = () => {
   const [countryCode] = useState('91'); // Set the country code to '91' (India) by default
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -24,17 +37,14 @@ const Login = () => {
     const fullMobileNumber = `+${countryCode}${mobileNumber}`;
 
     try {
-      const response = await fetch(
-        'https://ordermanagementservice-backend.onrender.com/auth/login',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-          },
-          body: JSON.stringify({ contact_number: fullMobileNumber, password }),
-        }
-      );
+      const response = await fetch('https://ordermanagementservice-backend.onrender.com/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          accept: 'application/json',
+        },
+        body: JSON.stringify({ contact_number: fullMobileNumber, password }),
+      });
 
       const responseData = await response.json();
       const data = responseData[0];
@@ -62,43 +72,61 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h2 className="login-title">Sign into your account</h2>
-        <form onSubmit={handleLogin} className="login-form">
-          <div className="form-group">
-            <label>Mobile Number:</label>
-            <input
-              type="text"
-              value={mobileNumber}
-              onChange={(e) => setMobileNumber(e.target.value)}
-              placeholder="Enter your 10-digit mobile number"
-              maxLength="10"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Password:</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
-            />
-          </div>
-          <button type="submit" className="log-in-btn-primary">
+    <Container component="main" maxWidth="xs">
+      <Paper elevation={isSmallScreen ? 0 : 3} sx={{ p: 4, mt: 8, borderRadius: 2 }}>
+        <Typography component="h1" variant="h5" align="center">
+          Sign into your account
+        </Typography>
+        <Box component="form" onSubmit={handleLogin} sx={{ mt: 1 }}>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="mobileNumber"
+            label="Mobile Number"
+            name="mobileNumber"
+            autoComplete="tel"
+            autoFocus
+            value={mobileNumber}
+            onChange={(e) => setMobileNumber(e.target.value)}
+            placeholder="Enter your 10-digit mobile number"
+            inputProps={{ maxLength: 10 }}
+          />
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            sx={{ mt: 3, mb: 2 }}
+          >
             Login
-          </button>
-        </form>
-        <a className="link-green" href="/forgot-password">
-          Forgot password?
-        </a>
-        <p className="link-green">
-          Don't have an account? <a href="/Register">Register here</a>
-        </p>
-      </div>
-    </div>
+          </Button>
+          <Box display="flex" justifyContent="space-between">
+            <Link href="/forgot-password" variant="body2">
+              Forgot password?
+            </Link>
+            <Link href="/Register" variant="body2">
+              Don't have an account? Register here
+            </Link>
+          </Box>
+        </Box>
+      </Paper>
+    </Container>
   );
 };
 

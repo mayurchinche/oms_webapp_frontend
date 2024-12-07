@@ -1,31 +1,49 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import Sidebar from './Sidebar';
+import Header from './Header';
+import AddOrderModal from './AddOrderModal';
+import RaiseReversalModal from './RaiseReversalModal';
+import LoadingDialog from './LoadingDialog';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './PODashboard.css'; // Import the CSS file
 import ManageSupplierModal from './ManageSupplierModal';
 import RaisePOModal from './RaisePOModal';
 import MarkDeliverModal from './MarkDeliverModal'; // Import the MarkDeliverModal component
 import DcDeliverModal from './DcDeliverModal'; // Import the DcDeliverModal component
 
+
 const PODashboard = () => {
-  const userName = "John Doe"; // Example user name
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  
+  
+  
+  
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [columns, setColumns] = useState([]); // State to manage columns
+  
   const [isManageSupplierModalOpen, setIsManageSupplierModalOpen] = useState(false); 
-  const { role, token } = useSelector((state) => state.auth);
+  
   const [isRaisePOModalOpen, setIsRaisePOModalOpen] = useState(false);
   const [isMarkDeliverModalOpen, setIsMarkDeliverModalOpen] = useState(false); // Mark Deliver Modal state
   const [isDcDeliverModalOpen, setIsDcDeliverModalOpen] = useState(false); // DC Deliver Modal state
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [responseMessage, setResponseMessage] = useState(''); // Response message for actions
   const [currentView, setCurrentView] = useState(''); // Track the current view
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const { role, token, mobileNumber, userName } = useSelector((state) => state.auth);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isReversalModalOpen, setIsReversalModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [reversalMessage, setReversalMessage] = useState('');
+  const [activeSection, setActiveSection] = useState('forward');
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [orderType, setOrderType] = useState('forward orders');
+  const [columns, setColumns] = useState([]); // State to manage columns
+  const navigate = useNavigate();
 
   const fetchOrders = (url, columnsConfig, view) => {
     setLoading(true);
@@ -59,7 +77,25 @@ const PODashboard = () => {
       fetchOrders('https://ordermanagementservice-backend.onrender.com/api/core/orders/get_po_pending_orders', pendingPOColumns, 'pendingPO');
     }
   }, [token, role]);
+  const forwardOrderColumns = [
+    { header: 'Order Date', accessor: 'order_date' },
+    { header: 'Material Name', accessor: 'material_name' },
+    { header: 'Model', accessor: 'model' },
+    { header: 'Customer Name', accessor: 'name_of_customer' },
+    { header: 'Status', accessor: 'status' },
+    { header: 'Action', accessor: 'actions', isButton: true, buttonText: 'Raise Reversal' }
+  ];
 
+  const reversalOrderColumns = [
+    { header: 'Created At', accessor: 'created_at' },
+    { header: 'Material Name', accessor: 'original_order_material_name' },
+    { header: 'Supplier Name', accessor: 'origin_order_supplier_name' },
+    { header: 'Description', accessor: 'description' },
+    { header: 'original_order_quantity', accessor: 'original_order_quantity' },
+    { header: 'Reversal Quantity', accessor: 'reversal_quantity' },
+    { header: 'Status', accessor: 'status' },
+    { header: 'DC Number', accessor: 'dc_number' }
+  ];
   const pendingPOColumns = [
     { header: 'Order ID', accessor: 'order_id' },
     { header: 'User Contact Number', accessor: 'user_contact_number' },
@@ -134,7 +170,64 @@ const PODashboard = () => {
     { header: 'Status', accessor: 'status' },
     { header: 'DC Deliver', accessor: 'dc_deliver', isButton: true, buttonText: 'DC Deliver' }
   ];
+  const handleViewOrdersClick = () => {
+    setActiveSection('forward');
+    setOrderType('Forward Orders');
+    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/ordered_by/${mobileNumber}`, forwardOrderColumns);
+  };
+  const handleAddOrderClick = () => {
+    setIsModalOpen(true);
+  };
 
+  const handleForwardOrderClick = () => {
+    setOrderType('forward orders');
+    setActiveSection('forward');
+    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/ordered_by/${mobileNumber}`, forwardOrderColumns);
+  };
+
+  const handleReversalOrderClick = () => {
+    setOrderType('reversal orders');
+    setActiveSection('reversal');
+    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/get_reversal_orders/${mobileNumber}`, reversalOrderColumns);
+  };
+
+  const openReversalModal = (order) => {
+    if (order.status === 'Order_Delivered') {
+      setSelectedOrder(order);
+      setIsReversalModalOpen(true);
+    } else {
+      setReversalMessage('Order has not been delivered yet.');
+      setTimeout(() => setReversalMessage(''), 3000);
+    }
+  };
+
+  const closeReversalModal = () => {
+    setIsReversalModalOpen(false);
+    setSelectedOrder(null);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
+  };
+
+  const logOut = () => navigate('/login');
+
+  const handleSidebarToggle = (isCollapsed) => {
+    setIsSidebarCollapsed(isCollapsed);
+  };
+
+  const handleSwitch = (orderType) => {
+    switch (orderType) {
+      case 'Forward Orders':
+        handleForwardOrderClick();
+        break;
+      case 'Reversal Orders':
+        handleReversalOrderClick();
+        break;
+      default:
+        console.log('Unknown action');
+    }
+  };
   const handlePendingOrdersClick = () => {
     fetchOrders('https://ordermanagementservice-backend.onrender.com/api/core/orders/get_po_pending_orders', pendingPOColumns, 'pendingPO');
   };
@@ -256,82 +349,14 @@ const PODashboard = () => {
 
   return (
     <div className="dashboard-container">
-      {loading && (
-        <div className="loader-overlay">
-          <div className="loader"></div>
-        </div>
-      )}
-      <aside className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
-        <div className="user-info">
-          <h2>{userName}</h2>
-        </div>
-        <nav className="sidebar-nav">
-          <button className="sidebar-button" onClick={handlePendingOrdersClick}>Pending PO</button>
-          <button className="sidebar-button" onClick={handleDCPendingClick}>DC Pending</button>
-          <button className="sidebar-button" onClick={handleDeliveryPendingClick}>Delivery Pending</button>
-          <button className="sidebar-button" onClick={handleDcDeliveryPendingClick}>DC Delivery Pending</button>
-          <button className="sidebar-button" onClick={openManageSupplierModal}>Manage Supplier</button>
-          {/* Add more buttons as needed */}
-        </nav>
-      </aside>
-      <main className={`main-content ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-        <header className="header">
-          <button className="toggle-button" onClick={toggleSidebar}>
-            {isSidebarOpen ? 'Hide Sidebar' : 'Show Sidebar'}
-          </button>
-          <div className="header-section" onClick={handlePendingOrdersClick}>Forward Orders</div>
-          <div className="header-section" onClick={handleReversalOrdersClick}>Reversal Orders</div>
-        </header>
-        <section className="content-area">
-          {error ? (
-            <div>{error}</div>
-          ) : (
-            <div className="table-container">
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    {columns.map((column, index) => (
-                      <th key={index}>{column.header}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {orders.map((order, index) => (
-                    <tr key={index}>
-                      {columns.map((column, colIndex) => (
-                        <td key={colIndex}>
-                          {column.isButton ? (
-                            <button onClick={() => {
-                              if (column.accessor === 'raise_dc') {
-                                raiseDC(order.id);
-                              } else if (column.accessor === 'actions') {
-                                openRaisePOModal(order.order_id);
-                              } else if (column.accessor === 'mark_deliver') {
-                                openMarkDeliverModal(order.order_id);
-                              } else if (column.accessor === 'dc_deliver') {
-                                openDcDeliverModal(order.id);
-                              }
-                            }}>
-                              {column.buttonText}
-                            </button>
-                          ) : (
-                            order[column.accessor]
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-      </main>
-      {responseMessage && <div className="response-message">{responseMessage}</div>}
-      <ManageSupplierModal isModalOpen={isManageSupplierModalOpen} closeModal={closeManageSupplierModal} />
-      <RaisePOModal isModalOpen={isRaisePOModalOpen} closeModal={closeRaisePOModal} orderId={selectedOrderId} userName={userName} />
-      <MarkDeliverModal isModalOpen={isMarkDeliverModalOpen} closeModal={closeMarkDeliverModal} orderId={selectedOrderId} />
-      <DcDeliverModal isModalOpen={isDcDeliverModalOpen} closeModal={closeDcDeliverModal} orderId={selectedOrderId} dcDeliver={dcDeliver} />
+      <Sidebar
+        role={role}
+        onCollapseToggle={handleSidebarToggle}
+        onViewOrdersClick={handleViewOrdersClick}
+        onAddOrderClick={handleAddOrderClick}
+        onReviewPendingClick={handleReversalOrderClick}
+        onLogout={logOut}
+      />
     </div>
   );
 };

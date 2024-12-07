@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import './Sidebar.css';
 import {
   FaClipboardList,
@@ -30,6 +31,7 @@ const iconMapping = {
   'Mark Reversal Delivery': <FaBox />,
 };
 
+
 // Function to fetch menu items based on user role
 const getMenuItems = (role) => {
   switch (role) {
@@ -58,9 +60,8 @@ const getMenuItems = (role) => {
   }
 };
 
-const Sidebar = ({ onCollapseToggle, role, onViewOrdersClick, onAddOrderClick, onReviewPendingClick, onLogout }) => {
+const Sidebar = ({ onCollapseToggle, role, onViewOrdersClick, onAddOrderClick, onManageMaterailClick, onManageSupplierClick, onReviewPendingClick,onAnalysisClick, onLogout }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
     onCollapseToggle(!isCollapsed);
@@ -115,7 +116,12 @@ const Sidebar = ({ onCollapseToggle, role, onViewOrdersClick, onAddOrderClick, o
             {['Manage Materials', 'Manage Suppliers'].map(
               (item, index) =>
                 menuItems.includes(item) && (
-                  <div className="sidebar-item" key={index}>
+                  <div className="sidebar-item" key={index}
+                  onClick={() => {
+                    if (item === 'Manage Materials' && onManageMaterailClick) onManageMaterailClick();
+                    if (item === 'Manage Suppliers' && onManageSupplierClick) onManageSupplierClick();
+                    
+                  }}>
                     {iconMapping[item]} <span>{item}</span>
                   </div>
                 )
@@ -161,7 +167,7 @@ const Sidebar = ({ onCollapseToggle, role, onViewOrdersClick, onAddOrderClick, o
           <div className="sidebar-item-group">
             <p className="sidebar-group-title">ANALYSIS</p>
             {['Analysis'].map((item, index) => (
-              <div className="sidebar-item" key={index}>
+              <div className="sidebar-item" key={index} onClick={onAnalysisClick}>
                 {iconMapping[item]} <span>{item}</span>
               </div>
             ))}
