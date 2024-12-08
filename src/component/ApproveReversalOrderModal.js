@@ -18,7 +18,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { Add, Remove } from '@mui/icons-material';
 
-const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
+const ApproveReversalOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
   const [expectedPrice, setExpectedPrice] = useState('');
   const [orderQuantity, setOrderQuantity] = useState(order.order_quantity || 0);
   const [loading, setLoading] = useState(false);
@@ -35,16 +35,12 @@ const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
 
   const handleApproveOrder = () => {
     const approvalData = {
-      approved_by: userName,
-      expected_price: expectedPrice,
-      order_quantity: orderQuantity
+      reversal_order_id: order.id
     };
     setLoading(true);
 
     // Determine the appropriate URL based on the order type
-    const url = orderType === 'reversal' ? 
-                `https://ordermanagementservice-backend.onrender.com/api/core/orders/reverse/${order.order_id}` : 
-                `https://ordermanagementservice-backend.onrender.com/api/core/orders/approve/${order.order_id}`;
+    const url = `https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/approve_reversal_order/${order.id}`;
 
     axios
       .put(
@@ -108,33 +104,7 @@ const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
         <DialogContent>
           {order && (
             <Box display="flex" flexDirection="column" gap={2}>
-              <Typography variant="h6">Order ID: {order.order_id}</Typography>
-              <TextField
-                label="Expected Price"
-                type="number"
-                value={expectedPrice}
-                onChange={(e) => setExpectedPrice(e.target.value)}
-                variant="outlined"
-                fullWidth
-              />
-              <Box display="flex" alignItems="center" gap={2}>
-                <Typography>Order Quantity:</Typography>
-                <IconButton onClick={decreaseQuantity}>
-                  <Remove />
-                </IconButton>
-                <TextField
-                  type="number"
-                  value={orderQuantity}
-                  onChange={(e) => setOrderQuantity(Number(e.target.value))}
-                  variant="outlined"
-                  size="small"
-                  sx={{ width: '80px' }}
-                />
-                <IconButton onClick={increaseQuantity}>
-                  <Add />
-                  <Add />
-                </IconButton>
-              </Box>
+              <Typography variant="h6">Order ID: {order.id}</Typography>
             </Box>
           )}
 
@@ -158,4 +128,4 @@ const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
   );
 };
 
-export default ApproveOrderModal;
+export default ApproveReversalOrderModal;

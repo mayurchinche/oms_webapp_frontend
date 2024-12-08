@@ -20,8 +20,9 @@ const ManageSupplierModal = ({ isModalOpen, closeModal }) => {
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
   const [searchTerm, setSearchTerm] = useState('');
-const [isAddSupplierModalOpen, setIsAddSupplierModalOpen] = useState(false);
+  const [isAddSupplierModalOpen, setIsAddSupplierModalOpen] = useState(false);
   const [newSupplierName, setNewSupplierName] = useState('');
   const [newContactNumber, setNewContactNumber] = useState('');
   const [currentSupplier, setCurrentSupplier] = useState(null);
@@ -54,7 +55,9 @@ const [isAddSupplierModalOpen, setIsAddSupplierModalOpen] = useState(false);
   }, [isModalOpen]);
 
   const filteredSuppliers = suppliers.filter(supplier =>
-    supplier.supplier_name && typeof supplier.supplier_name === 'string' && supplier.supplier_name.toLowerCase().includes(searchTerm.toLowerCase())
+    supplier.supplier_name && 
+    typeof supplier.supplier_name === 'string' && 
+    supplier.supplier_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const openAddSupplierModal = () => {
@@ -148,7 +151,12 @@ const [isAddSupplierModalOpen, setIsAddSupplierModalOpen] = useState(false);
       </Backdrop>
 
       {/* Main Modal Dialog for managing suppliers */}
-      <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="md">
+      <Dialog
+        open={isModalOpen}
+        onClose={closeModal}
+        fullWidth
+        maxWidth="md"
+      >
         <DialogTitle>
           Manage Suppliers
           <IconButton
@@ -208,7 +216,9 @@ const [isAddSupplierModalOpen, setIsAddSupplierModalOpen] = useState(false);
                       </Button>
                     </Box>
                   </Box>
-                  <Typography variant="subtitle1" sx={{ mt: 1 }}>Contact Number: {supplier.contact_number}</Typography>
+                  <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                    Contact Number: {supplier.contact_number}
+                  </Typography>
                 </Box>
               ))}
             </Box>
@@ -216,14 +226,19 @@ const [isAddSupplierModalOpen, setIsAddSupplierModalOpen] = useState(false);
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={closeModal} color="primary">
+          <Button onClick={closeAddSupplierModal} color="primary">
             Close
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Add or Update Supplier Modal */}
-      <Dialog open={isAddSupplierModalOpen} onClose={closeAddSupplierModal} fullWidth maxWidth="sm">
+      <Dialog
+        open={isAddSupplierModalOpen}
+        onClose={closeAddSupplierModal}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>
           {currentSupplier ? 'Update Supplier' : 'Add Supplier'}
           <IconButton
@@ -236,6 +251,7 @@ const [isAddSupplierModalOpen, setIsAddSupplierModalOpen] = useState(false);
             <CloseIcon />
           </IconButton>
         </DialogTitle>
+        
         <DialogContent>
           <TextField
             autoFocus
@@ -255,6 +271,7 @@ const [isAddSupplierModalOpen, setIsAddSupplierModalOpen] = useState(false);
             onChange={(e) => setNewContactNumber(e.target.value)}
           />
         </DialogContent>
+
         <DialogActions>
           <Button onClick={closeAddSupplierModal} color="primary">
             Cancel

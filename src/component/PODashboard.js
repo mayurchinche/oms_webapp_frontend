@@ -13,6 +13,7 @@ import ManageSupplierModal from './ManageSupplierModal';
 import RaisePOModal from './RaisePOModal';
 import MarkDeliverModal from './MarkDeliverModal'; // Import the MarkDeliverModal component
 import DcDeliverModal from './DcDeliverModal'; // Import the DcDeliverModal component
+import RaiseDcModal from './RaiseDcModal';
 
 
 const PODashboard = () => {
@@ -27,6 +28,9 @@ const PODashboard = () => {
   const [isRaisePOModalOpen, setIsRaisePOModalOpen] = useState(false);
   const [isMarkDeliverModalOpen, setIsMarkDeliverModalOpen] = useState(false); // Mark Deliver Modal state
   const [isDcDeliverModalOpen, setIsDcDeliverModalOpen] = useState(false); // DC Deliver Modal state
+
+  const [isRaiseDCModel, setIsRaiseDCModel] = useState(false); // DC Deliver Modal state
+  
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [responseMessage, setResponseMessage] = useState(''); // Response message for actions
   const [currentView, setCurrentView] = useState(''); // Track the current view
@@ -44,6 +48,7 @@ const PODashboard = () => {
   const [orderType, setOrderType] = useState('forward orders');
   const [columns, setColumns] = useState([]); // State to manage columns
   const navigate = useNavigate();
+  
 
   const fetchOrders = (url, columnsConfig, view) => {
     setLoading(true);
@@ -97,31 +102,20 @@ const PODashboard = () => {
     { header: 'DC Number', accessor: 'dc_number' }
   ];
   const pendingPOColumns = [
-    { header: 'Order ID', accessor: 'order_id' },
-    { header: 'User Contact Number', accessor: 'user_contact_number' },
     { header: 'Order Date', accessor: 'order_date' },
     { header: 'Name of Customer', accessor: 'name_of_customer' },
-    { header: 'PO No', accessor: 'po_no' },
-    { header: 'Whatsapp Date', accessor: 'whatsapp_date' },
     { header: 'Material Name', accessor: 'material_name' },
     { header: 'Model', accessor: 'model' },
     { header: 'Order Quantity', accessor: 'order_quantity' },
-    { header: 'Order To', accessor: 'order_to' },
-    { header: 'Received Date', accessor: 'received_date' },
-    { header: 'Pending Quantity', accessor: 'pending_quantity' },
     { header: 'Ordered By', accessor: 'ordered_by' },
     { header: 'Approved By', accessor: 'approved_by' },
-    { header: 'PO Raised By', accessor: 'po_raised_by' },
-    { header: 'Status', accessor: 'status' },
     { header: 'Note', accessor: 'note' },
     { header: 'Expected Price', accessor: 'expected_price' },
-    { header: 'Ordered Price', accessor: 'ordered_price' },
-    { header: 'Supplier Name', accessor: 'supplier_name' },
-    { header: 'Action', accessor: 'actions', isButton: true, buttonText: 'Raise PO' }
+    { header: 'Action', accessor: 'Raise PO', isButton: true, buttonText: 'Raise PO' }
   ];
 
   const dcPendingColumns = [
-    { header: 'Reversal Order ID', accessor: 'id' },
+
     { header: 'User Contact Number', accessor: 'user_contact_number' },
     { header: 'Created At', accessor: 'created_at' },
     { header: 'Description', accessor: 'description' },
@@ -130,7 +124,7 @@ const PODashboard = () => {
     { header: 'Original Order Quantity', accessor: 'original_order_quantity' },
     { header: 'Reversal Quantity', accessor: 'reversal_quantity' },
     { header: 'Status', accessor: 'status' },
-    { header: 'Raise DC', accessor: 'raise_dc', isButton: true, buttonText: 'Raise DC' }
+    { header: 'Raise DC', accessor: 'Raise DC', isButton: true, buttonText: 'Raise DC' }
   ];
 
   const deliveryPendingColumns = [
@@ -154,8 +148,7 @@ const PODashboard = () => {
     { header: 'Expected Price', accessor: 'expected_price' },
     { header: 'Ordered Price', accessor: 'ordered_price' },
     { header: 'Supplier Name', accessor: 'supplier_name' },
-    { header: 'Raise DC', accessor: 'raise_dc', isButton: true, buttonText: 'Raise DC' },
-    { header: 'Mark Deliver', accessor: 'mark_deliver', isButton: true, buttonText: 'Mark Deliver' }
+    { header: 'Mark Deliver', accessor: 'Mark Delivery', isButton: true, buttonText: 'Mark Delivery' }
   ];
 
   const reversalDeliveryPendingColumns = [
@@ -168,8 +161,45 @@ const PODashboard = () => {
     { header: 'Original Order Quantity', accessor: 'original_order_quantity' },
     { header: 'Reversal Quantity', accessor: 'reversal_quantity' },
     { header: 'Status', accessor: 'status' },
-    { header: 'DC Deliver', accessor: 'dc_deliver', isButton: true, buttonText: 'DC Deliver' }
+    { header: 'DC Deliver', accessor: 'DC Deliver', isButton: true, buttonText: 'DC Deliver' }
   ];
+
+  const handelRaisePOClick = () =>{
+    handleForwardOrderClick()
+  }
+
+  const handelRaiseDCButtonClick =(order) =>
+  {
+    console.log("handelRaiseDCButtonClick",order)
+    openRaiseDCModal(order)
+  }
+  const handelRaiseDCClick = () =>{
+    handleReversalOrderClick()
+  }
+
+  const handelMarkDeliveryClick = () =>{
+    handleDeliveryPendingClick()
+  }
+
+  const handelMarkDeliveryButtonClick =(order)=>{
+    console.log("handelMarkDeliveryButtonClick",order)
+    openMarkDeliverModal(order)
+  }
+  const handelDCDevliveryButtonClick= (order) =>
+  {
+    console.log("handelDCDevliveryButtonClick",order)
+    openDcDeliverModal(order);
+  }
+
+  const handelMarkReversalDeliveryClick = ()=>{
+    handleReversalOrdersClick()
+  }
+
+  const handelRaisePOButtonClick =(order)=>{
+    openRaisePOModal(order);
+    handelRaisePOClick()
+  }
+
   const handleViewOrdersClick = () => {
     setActiveSection('forward');
     setOrderType('Forward Orders');
@@ -182,13 +212,13 @@ const PODashboard = () => {
   const handleForwardOrderClick = () => {
     setOrderType('forward orders');
     setActiveSection('forward');
-    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/ordered_by/${mobileNumber}`, forwardOrderColumns);
+    fetchOrders('https://ordermanagementservice-backend.onrender.com/api/core/orders/get_po_pending_orders', pendingPOColumns, 'pendingPO');
   };
 
   const handleReversalOrderClick = () => {
     setOrderType('reversal orders');
     setActiveSection('reversal');
-    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/get_reversal_orders/${mobileNumber}`, reversalOrderColumns);
+    fetchOrders('https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/get_dc_pending', dcPendingColumns, 'dcPending');
   };
 
   const openReversalModal = (order) => {
@@ -200,6 +230,9 @@ const PODashboard = () => {
       setTimeout(() => setReversalMessage(''), 3000);
     }
   };
+  const handelManageSupplierClick=()=>{
+    openManageSupplierModal()
+  }
 
   const closeReversalModal = () => {
     setIsReversalModalOpen(false);
@@ -214,19 +247,6 @@ const PODashboard = () => {
 
   const handleSidebarToggle = (isCollapsed) => {
     setIsSidebarCollapsed(isCollapsed);
-  };
-
-  const handleSwitch = (orderType) => {
-    switch (orderType) {
-      case 'Forward Orders':
-        handleForwardOrderClick();
-        break;
-      case 'Reversal Orders':
-        handleReversalOrderClick();
-        break;
-      default:
-        console.log('Unknown action');
-    }
   };
   const handlePendingOrdersClick = () => {
     fetchOrders('https://ordermanagementservice-backend.onrender.com/api/core/orders/get_po_pending_orders', pendingPOColumns, 'pendingPO');
@@ -256,8 +276,8 @@ const PODashboard = () => {
     setIsManageSupplierModalOpen(false);
   };
 
-  const openRaisePOModal = (orderId) => {
-    setSelectedOrderId(orderId);
+  const openRaisePOModal = (order) => {
+    setSelectedOrder(order);
     setIsRaisePOModalOpen(true);
   };
 
@@ -265,25 +285,38 @@ const PODashboard = () => {
     setIsRaisePOModalOpen(false);
   };
 
-  const openMarkDeliverModal = (orderId) => {
-    setSelectedOrderId(orderId);
+  const openMarkDeliverModal = (order) => {
+    setSelectedOrder(order);
+    console.log("Marking delivery")
     setIsMarkDeliverModalOpen(true);
+    console.log("Marking delivery Successful")
   };
 
   const closeMarkDeliverModal = () => {
     setIsMarkDeliverModalOpen(false);
   };
 
-  const openDcDeliverModal = (orderId) => {
-    setSelectedOrderId(orderId);
+  const openDcDeliverModal = (order) => {
+    setSelectedOrder(order);
     setIsDcDeliverModalOpen(true);
   };
 
   const closeDcDeliverModal = () => {
     setIsDcDeliverModalOpen(false);
   };
+  
+  const openRaiseDCModal= (order) => {
+    setSelectedOrder(order);
+    setIsRaiseDCModel(true);
+  };
+
+  const closeDRaisecDCModal = () => {
+    setIsRaiseDCModel(false);
+  };
+  
 
   const raiseDC = (orderId) => {
+    console.log("On raise DC")
     const dcData = {
       dc_number: orderId
     };
@@ -346,17 +379,103 @@ const PODashboard = () => {
         setResponseMessage('Failed to mark DC as delivered');
       });
   };
+  const handleSwitch = (orderType) => {
+    switch (orderType) {
+      case 'Forward Orders':
+        handleForwardOrderClick();
+        break;
+      case 'Reversal Orders':
+        handleReversalOrderClick();
+        break;
+      default:
+        console.log('Unknown action');
+    }
+  };
 
   return (
     <div className="dashboard-container">
       <Sidebar
         role={role}
         onCollapseToggle={handleSidebarToggle}
+        onRaisePOClick={handelRaisePOClick}
+        onRaiseDCClick={handelRaiseDCClick}
+        onMarkDeliveryClick={handelMarkDeliveryClick}
+        onMarkReversalDeliveryClick={handelMarkReversalDeliveryClick}
         onViewOrdersClick={handleViewOrdersClick}
         onAddOrderClick={handleAddOrderClick}
         onReviewPendingClick={handleReversalOrderClick}
+        onManageSupplierClick={handelManageSupplierClick}
         onLogout={logOut}
       />
+       <div className={`main-content ${isSidebarCollapsed ? 'main-content-collapsed' : ''}`}>
+        <Header onSwitch={handleSwitch} isSidebarCollapsed={isSidebarCollapsed} />
+
+        <div className={`header-caption ${isSidebarCollapsed ? 'collapsed' : ''}`}>
+          <h3>You are viewing {orderType}</h3>
+        </div>
+        <div className="table-container">
+          <div>
+            {loading ? (
+              <LoadingDialog open={loading} />
+            ) : error ? (
+              <div>{error}</div>
+            ) : (
+              <table className="table table-bordered table-hover custom-table">
+                <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', color: 'black', zIndex: 1 }}>
+                  <tr>
+                    {columns.map((column, index) => (
+                      <th key={index} style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>
+                        {column.header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order, index) => (
+                    <tr key={index}>
+                      {columns.map((column, colIndex) => (
+                        <td key={colIndex}>
+                        {column.isButton ? (
+                          <button onClick={() => {
+                            if (column.accessor === 'Raise DC') {
+                              handelRaiseDCButtonClick(order)
+                              // raiseDC(order.id);
+                            } else if (column.accessor === 'Raise PO') {
+                              handelRaisePOButtonClick(order)
+                              
+                            } else if (column.accessor === 'Mark Delivery') {
+                            
+                              handelMarkDeliveryButtonClick(order)
+                              
+                            } else if (column.accessor === 'DC Deliver') {
+
+                              handelDCDevliveryButtonClick(order)
+                              
+                            }
+                          }}>
+                            {column.buttonText}
+                          </button>
+                        ) : (
+                          order[column.accessor]
+                        )}
+                      </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+        <ManageSupplierModal  isModalOpen={isManageSupplierModalOpen} closeModal ={openManageSupplierModal} />
+        {selectedOrder && <RaisePOModal isModalOpen={isRaisePOModalOpen} closeModal ={closeRaisePOModal} order={selectedOrder}  />}
+        {selectedOrder && <MarkDeliverModal isModalOpen={isMarkDeliverModalOpen} closeModal ={closeMarkDeliverModal} order={selectedOrder}  />}
+        {selectedOrder && <DcDeliverModal isModalOpen={isDcDeliverModalOpen} closeModal ={closeDcDeliverModal} order={selectedOrder}  />}
+        {selectedOrder && <RaiseDcModal isModalOpen={isRaiseDCModel} closeModal ={closeDRaisecDCModal} order={selectedOrder} fetchOrders={fetchOrders} dcPendingColumns={dcPendingColumns}  />}
+
+        
+        {/* <RaisePOModal isModalOpen={isRaisePOModalOpen} closeModal ={openRaisePOModal} order  /> */}
+        </div>
     </div>
   );
 };

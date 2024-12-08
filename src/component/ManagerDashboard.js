@@ -11,6 +11,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import ManageMaterialModal from './ManageMaterialModal'; // Import the ManageMaterialModal component
 import ManageSupplierModal from './ManageSupplierModal'; // Import the ManageSupplierModal component
 import ApproveOrderModal from './ApproveOrderModal';
+import ApproveReversalOrderModal from './ApproveReversalOrderModal';
 import './NewManagerDahsboard.css';
 
 const ManagerDashboard = () => {
@@ -29,6 +30,7 @@ const ManagerDashboard = () => {
   const [columns, setColumns] = useState([]); // State to manage columns
   const navigate = useNavigate();
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false); // Approve Modal state
+  const [isApproveReversalOrderModal, setIsApproveReversalOrderModal] = useState(false); // Approve Reversal Modal state
   const [isManageMaterialModalOpen, setIsManageMaterialModalOpen] = useState(false); // Manage Material Modal state
   const [isManageSupplierModalOpen, setIsManageSupplierModalOpen] = useState(false); // Manage Supplier Modal state
   
@@ -62,11 +64,12 @@ const ManagerDashboard = () => {
     { header: 'Ordered By', accessor: 'ordered_by' },
     { header: 'Quantity', accessor: 'order_quantity' },
     { header: 'Status', accessor: 'status' },
-    { header: 'Action', accessor: 'actions', isButton: true, buttonText: 'Review & Approve' }
+    { header: 'Action', accessor: 'Review & Approve', isButton: true, buttonText: 'Review & Approve' }
 
   ];
   
   const reversalReviewPendingColumns =[
+    { header: 'Order Id', accessor: 'id' },
     { header: 'Created At', accessor: 'created_at' },
     { header: 'Supplier Name', accessor: 'origin_order_supplier_name' },
     { header: 'Material Name', accessor: 'original_order_material_name' },
@@ -74,7 +77,7 @@ const ManagerDashboard = () => {
     { header: 'Ordered By', accessor: 'user_contact_number' },
     { header: 'Quantity', accessor: 'original_order_quantity' },
     { header: 'Reversal Quantity', accessor: 'reversal_quantity' },
-    { header: 'Action', accessor: 'actions', isButton: true, buttonText: 'Review & Approve' }
+    { header: 'Action', accessor: 'Approve Reversal', isButton: true, buttonText: 'Approve Reversal' }
   ]
 
   const fetchOrders = useCallback((url, columnsConfig) => {
@@ -199,6 +202,16 @@ const handelAnalysisClick = () =>{
     setIsApproveModalOpen(false);
   };
 
+  const openApproveReversalModal =(order) =>{
+    console.log('Opening approve reversal modal for order:', order);
+    setSelectedOrder(order);
+    setIsApproveReversalOrderModal(true);
+  }
+  const closeApproveReversalModal =(order) =>{
+    console.log('Opening approve reversal modal for order:', order);
+    setIsApproveReversalOrderModal(false);
+  }
+
   const openManageMaterialModal = () => {
     console.log('Opening manage material modal');
     setIsManageMaterialModalOpen(true);
@@ -266,7 +279,15 @@ const handelAnalysisClick = () =>{
                         {column.isButton ? (
                           <button
                             style={{ backgroundColor: '#085fbc' }}
-                            onClick={() => openApproveModal(order)}
+                            onClick={() =>{ 
+                              {
+                                if (column.accessor === 'Review & Approve') {
+                                  openApproveModal(order)
+                                } else if (column.accessor === 'Approve Reversal') {
+                                  openApproveReversalModal(order);
+                                }
+                              }
+                              }}
                           >
                             {column.buttonText}
                           </button>
@@ -284,9 +305,13 @@ const handelAnalysisClick = () =>{
         </div>
 
         <AddOrderModal isModalOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} />
+        
+
         <ManageMaterialModal isModalOpen={isManageMaterialModalOpen} closeModal={closeManageMaterialModal} />
         <ManageSupplierModal  isModalOpen={isManageSupplierModalOpen} closeModal ={openManageSupplierModal} />
+
         {selectedOrder && <ApproveOrderModal isModalOpen={isApproveModalOpen} closeModal={closeApproveModal} order={selectedOrder} />}
+        {selectedOrder && <ApproveReversalOrderModal isModalOpen={isApproveReversalOrderModal} closeModal={closeApproveReversalModal} order={selectedOrder} />}
         {selectedOrder && (
           <RaiseReversalModal
             isModalOpen={isReversalModalOpen}
