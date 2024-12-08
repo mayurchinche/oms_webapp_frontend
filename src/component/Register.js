@@ -1,25 +1,7 @@
-import React, { useState, useRef } from 'react';
-import firebase from '../firebase.config';
-import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom';
-import {
-  Container,
-  Typography,
-  TextField,
-  Button,
-  Paper,
-  Box,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-  Alert,
-  Backdrop,
-  CircularProgress,
-  useTheme,
-  useMediaQuery
-} from '@mui/material';
-import LinkMUI from '@mui/material/Link'; // Alias import to avoid conflicts with React Router's Link
+import React, { useState, useRef } from "react";
+import firebase from "../firebase.config";
+import axios from "axios";
+import { useNavigate, Link } from "react-router-dom"; // Import Link
 import './Register.css';
 
 const Register = () => {
@@ -37,22 +19,16 @@ const Register = () => {
   const [otpMessage, setOtpMessage] = useState('');
   const [isPasswordMatch, setIsPasswordMatch] = useState(true);
   const [selectedRole, setSelectedRole] = useState('employee'); // Default role is 'employee'
-  const [loading, setLoading] = useState(false); // Loader state
   const recaptchRef = useRef(null);
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleVerifyOtp = () => {
-    setLoading(true); // Show loader while verifying OTP
     const credentials = firebase.auth.PhoneAuthProvider.credential(verificationId, verificationCode);
     firebase.auth().signInWithCredential(credentials)
-      .then(() => {
+      .then(userCredential => {
         setIsVerified(true);
-        setLoading(false); // Hide loader after verification
       }).catch(error => {
         console.error('Error in verifying OTP', error);
-        setLoading(false); // Hide loader if there's an error
       });
   };
 
@@ -62,7 +38,6 @@ const Register = () => {
       return;
     }
     setOtpMessage('');
-    setLoading(true); // Show loader while sending OTP
     const fullPhoneNumber = `${countryCode}${phoneNumber}`;
 
     if (recaptchRef.current) {
@@ -71,11 +46,11 @@ const Register = () => {
 
     const verifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
       size: 'invisible',
-      callback: () => {
-        // reCAPTCHA verified
+      callback: (response) => {
+        console.log("reCAPTCHA verified:", response);
       },
       'expired-callback': () => {
-        // reCAPTCHA expired
+        console.log("reCAPTCHA expired.");
       }
     });
     document.getElementById('recaptcha-container').style.display = 'none';
@@ -85,11 +60,8 @@ const Register = () => {
         setVerificationId(confirmationResult.verificationId);
         setOtpSent(true);
         setOtpMessage('OTP sent successfully');
-        setLoading(false); // Hide loader after OTP sent
       }).catch(error => {
         console.log('Error sending OTP', error);
-        setOtpMessage('Error sending OTP. Please try again.');
-        setLoading(false); // Hide loader if there's an error
       });
   };
 
@@ -99,219 +71,103 @@ const Register = () => {
       return;
     }
     setIsPasswordMatch(true);
-    setLoading(true); // Show loader while signing up
 
     const idToken = await firebase.auth().currentUser.getIdToken();
     const userDetails = {
       contact_number: `+91${phoneNumber}`,
       id_token: idToken,
       user_name: `${name} ${lastName}`,
-      password,
+      password: password,
       role: selectedRole, // Send the selected role here
     };
 
     try {
-      const response = await axios.post('https://ordermanagementservice-backend.onrender/auth/register', userDetails);
+      const response = await axios.post('https://ordermanagementservice-backend.onrender.com/auth/register', userDetails);
       if (response.status === 200) {
         setRegistrationMessage(response.data.message);
-        setLoading(false); // Hide loader after successful registration
         navigate('/');
       } else {
-        setRegistrationMessage(response.data.message || 'Registration failed.');
-        setLoading(false); // Hide loader if there's an issue
+        setRegistrationMessage(response.data.message || "Registration failed.");
       }
     } catch (error) {
       console.error('Error during registration:', error);
       setRegistrationMessage('Failed to register, please try again.');
-      setLoading(false); // Hide loader if there's an error
     }
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
-      <Paper elevation={isSmallScreen ? 0 : 3} sx={{ p: 4, mt: 8, borderRadius: 2 }}>
-        <Typography component="h1" variant="h5" align="center">
-          Sign Up
-        </Typography>
+    <div className="register-container">
+      <div className="register-card">
+        <h1>Sign Up</h1>
         <div ref={recaptchRef}></div>
-
         {!isVerified ? (
           <>
-            <FormControl fullWidth margin="normal">
-              <InputLabel id="country-code-label">Country Code</InputLabel>
-              <Select
-                labelId="country-code-label"
-                id="country-code"
-                value={countryCode}
-                onChange={(e) => setCountryCode(e.target.value)}
-                label="Country Code"
-              >
-                <MenuItem value="+91">�������� +91</MenuItem>
-              </Select>
-            </FormControl>
-            
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="phoneNumber"
-              label="Mobile Number"
-              name="phoneNumber"
-              autoComplete="tel"
-              autoFocus
+            <select value={countryCode} onChange={e => setCountryCode(e.target.value)}>
+              <option value="+91">🇮🇳 +91</option>
+            </select>
+            <input
+              type="tel"
+              placeholder="Enter mobile number"
               value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="Enter your 10-digit mobile number"
-              inputProps={{ maxLength: 10 }}
+              onChange={e => setPhoneNumber(e.target.value)}
             />
-            
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              sx={{ mt: 2, mb: 2 }}
-              onClick={handleSendOtp}
-            >
-              Send OTP
-            </Button>
-            
-            {otpMessage && <Alert severity="info">{otpMessage}</Alert>}
-            
+            <button onClick={handleSendOtp}>Send OTP</button>
+            {otpMessage && <p className="message">{otpMessage}</p>}
+            {/* Reference Text */}
+            <p className="reference-text">
+              Already registered? <Link to="/login">Click here to login</Link>
+            </p>
             {otpSent && (
               <>
-                <TextField
-                  variant="outlined"
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="verificationCode"
-                  label="Enter OTP"
-                  name="verificationCode"
-                  autoComplete="one-time-code"
+                <input
+                  type="text"
+                  placeholder="Enter OTP"
                   value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value)}
+                  onChange={e => setVerificationCode(e.target.value)}
                 />
-                
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  sx={{ mt: 2, mb: 2 }}
-                  onClick={handleVerifyOtp}
-                >
-                  Verify OTP
-                </Button>
+                <button onClick={handleVerifyOtp}>Verify OTP</button>
               </>
             )}
-
-            <Box display="flex" justifyContent="center">
-              <LinkMUI component={Link} to="/login">
-                Already registered? Click here to login
-              </LinkMUI>
-            </Box>
           </>
         ) : (
           <>
-            <Alert severity="success">OTP Verified</Alert>
-            
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="name"
-              label="First Name"
-              name="name"
-              autoComplete="given-name"
-              autoFocus
+            <p className="verified-text">OTP Verified</p>
+            <input
+              type="text"
+              placeholder="First Name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={e => setName(e.target.value)}
             />
-            
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="lastName"
-              label="Last Name"
-              name="lastName"
-              autoComplete="family-name"
+            <input
+              type="text"
+              placeholder="Last Name"
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={e => setLastName(e.target.value)}
             />
-            
-            <FormControl fullWidth margin="normal">
-              <InputLabel id="role-label">Role</InputLabel>
-              <Select
-                labelId="role-label"
-                id="role"
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
-                label="Role"
-              >
-                <MenuItem value="employee">Employee</MenuItem>
-                <MenuItem value="manager">Manager</MenuItem>
-                <MenuItem value="po_team">PO Team</MenuItem>
-              </Select>
-            </FormControl>
-            
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
+            <select value={selectedRole} onChange={e => setSelectedRole(e.target.value)}>
+              <option value="employee">Employee</option>
+              <option value="manager">Manager</option>
+              <option value="po_team">PO Team</option>
+            </select>
+            <input
               type="password"
-              id="password"
-              autoComplete="new-password"
+              placeholder="Password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
             />
-            
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              name="confirmPassword"
-              label="Confirm Password"
+            <input
               type="password"
-              id="confirmPassword"
-              autoComplete="new-password"
+              placeholder="Confirm Password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={e => setConfirmPassword(e.target.value)}
             />
-            
-            {!isPasswordMatch && <Alert severity="error">Passwords do not match!</Alert>}
-            
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              sx={{ mt: 2, mb: 2 }}
-              onClick={handleSignUp}
-            >
-              Sign Up
-            </Button>
-            
-            {registrationMessage && (
-              <Alert severity="info" sx={{ mt: 2 }}>
-                {registrationMessage}
-              </Alert>
-            )}
+            {!isPasswordMatch && <p className="message">Passwords do not match!</p>}
+            <button onClick={handleSignUp}>Sign Up</button>
+            {registrationMessage && <p className="message">{registrationMessage}</p>}
           </>
         )}
-      </Paper>
-    </Container>
+      </div>
+    </div>
   );
 };
 
