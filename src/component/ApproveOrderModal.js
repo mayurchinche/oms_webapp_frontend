@@ -1,36 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import './ApproveOrderModal.css'; // For custom styles
+import {
+  TextField,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Backdrop,
+  CircularProgress,
+  IconButton,
+  Typography,
+  Box
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import { Add, Remove } from '@mui/icons-material';
 
-const ApproveOrderModal = ({ isModalOpen, closeModal, order }) => {
+const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
   const [expectedPrice, setExpectedPrice] = useState('');
-  const [orderQuantity, setOrderQuantity] = useState('');
+  const [orderQuantity, setOrderQuantity] = useState(order.order_quantity || 0);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
-  const { role, token } = useSelector((state) => state.auth);
+  const { role, token, userName } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (order && order.order_quantity) {
+      setOrderQuantity(order.order_quantity);
+    }
+  }, [order]);
 
   const handleApproveOrder = () => {
     const approvalData = {
-      approved_by: 'vijay', // Hardcoded for now
+      approved_by: userName,
       expected_price: expectedPrice,
       order_quantity: orderQuantity
     };
-
-    console.log('Approving order:', approvalData);
     setLoading(true);
-    axios.put(` https://ordermanagementservice-backend.onrender.com/api/core/orders/approve/${order.order_id}`, approvalData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        role: role,
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(response => {
-        console.log('Order approved:', response.data);
+
+    // Determine the appropriate URL based on the order type
+    const url = orderType === 'reversal' ? 
+                `https://ordermanagementservice-backend.onrender.com/api/core/orders/reverse/${order.order_id}` : 
+                `https://ordermanagementservice-backend.onrender.com/api/core/orders/approve/${order.order_id}`;
+
+    axios
+      .put(
+        url,
+        approvalData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            role: role,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+      .then((response) => {
         if (response.status === 200) {
           setLoading(false);
           setSuccessMessage('Order successfully approved');
@@ -41,59 +69,91 @@ const ApproveOrderModal = ({ isModalOpen, closeModal, order }) => {
           }, 2000);
         }
       })
-      .catch(error => {
-        console.error('Error approving order:', error);
+      .catch((error) => {
         setLoading(false);
         alert('Failed to approve order');
       });
   };
 
+  const increaseQuantity = () => {
+    setOrderQuantity(orderQuantity + 1);
+  };
+
+  const decreaseQuantity = () => {
+    setOrderQuantity(orderQuantity > 0 ? orderQuantity - 1 : 0);
+  };
+
   return (
     <>
-      {isModalOpen && <div className="modal-overlay"></div>}
-      <div className={`modal ${isModalOpen ? 'show' : ''}`} style={{ display: isModalOpen ? 'block' : 'none' }}>
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Approve Order</h5>
-              <button type="button" className="close" onClick={closeModal}>&times;</button>
-            </div>
-            <div className="modal-body">
-              {loading ? (
-                <div className="loader">Loading...</div>
-              ) : (
-                <>
-                  <div className="form-group">
-                    <label>Order ID</label>
-                    <input type="text" className="form-control" value={order.order_id} readOnly />
-                  </div>
-                  <div className="form-group">
-                    <label>Approved By</label>
-                    <input type="text" className="form-control" value="vijay" readOnly />
-                  </div>
-                  <div className="form-group">
-                    <label>Expected Price</label>
-                    <input type="number" className="form-control" value={expectedPrice} onChange={(e) => setExpectedPrice(e.target.value)} />
-                  </div>
-                  <div className="form-group">
-                    <label>Order Quantity</label>
-                    <input type="number" className="form-control" value={orderQuantity} onChange={(e) => setOrderQuantity(e.target.value)} />
-                  </div>
-                </>
-              )}
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-danger" onClick={closeModal}>Close</button>
-              <button type="button" className="btn btn-primary" onClick={handleApproveOrder}>Approve</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      {successMessage && (
-        <div className="success-message">
-          <p>{successMessage}</p>
-        </div>
-      )}
+      {/* Loader - Backdrop with CircularProgress */}
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+
+      {/* Main Modal Dialog for approving orders */}
+      <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="sm">
+        <DialogTitle>
+          Approve Order
+          <IconButton
+            edge="end"
+            color="inherit"
+            onClick={closeModal}
+            aria-label="close"
+            sx={{ position: 'absolute', right: 16, top: 16 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        
+        <DialogContent>
+          {order && (
+            <Box display="flex" flexDirection="column" gap={2}>
+              <Typography variant="h6">Order ID: {order.order_id}</Typography>
+              <TextField
+                label="Expected Price"
+                type="number"
+                value={expectedPrice}
+                onChange={(e) => setExpectedPrice(e.target.value)}
+                variant="outlined"
+                fullWidth
+              />
+              <Box display="flex" alignItems="center" gap={2}>
+                <Typography>Order Quantity:</Typography>
+                <IconButton onClick={decreaseQuantity}>
+                  <Remove />
+                </IconButton>
+                <TextField
+                  type="number"
+                  value={orderQuantity}
+                  onChange={(e) => setOrderQuantity(Number(e.target.value))}
+                  variant="outlined"
+                  size="small"
+                  sx={{ width: '80px' }}
+                />
+                <IconButton onClick={increaseQuantity}>
+                  <Add />
+                  <Add />
+                </IconButton>
+              </Box>
+            </Box>
+          )}
+
+          {successMessage && (
+            <Box mt={2}>
+              <Typography color="success.main">{successMessage}</Typography>
+            </Box>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={closeModal} color="secondary">
+            Close
+          </Button>
+          <Button onClick={handleApproveOrder} color="primary" variant="contained">
+            Approve
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

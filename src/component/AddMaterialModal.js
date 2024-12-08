@@ -1,7 +1,18 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import './AddMaterialModal.css'; // Import the CSS file
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  CircularProgress,
+  Typography
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import IconButton from '@mui/material/IconButton';
 
 const AddMaterialModal = ({ isModalOpen, closeModal, refreshMaterials }) => {
   const [materialName, setMaterialName] = useState('');
@@ -19,7 +30,7 @@ const AddMaterialModal = ({ isModalOpen, closeModal, refreshMaterials }) => {
       material_name: materialName,
       description: description
     };
-    axios.post(' https://ordermanagementservice-backend.onrender.com/api/materials', newMaterial, {
+    axios.post('https://ordermanagementservice-backend.onrender.com/api/materials', newMaterial, {
       headers: {
         Authorization: `Bearer ${token}`,
         role: role,
@@ -43,51 +54,63 @@ const AddMaterialModal = ({ isModalOpen, closeModal, refreshMaterials }) => {
   };
 
   return (
-    <>
-      {isModalOpen && <div className="modal-overlay"></div>}
-      <div className={`modal ${isModalOpen ? 'show' : ''}`} style={{ display: isModalOpen ? 'block' : 'none' }}>
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Add Material</h5>
-              <button type="button" className="close" onClick={closeModal}>&times;</button>
-            </div>
-            <div className="modal-body">
-              {loading ? (
-                <div>Loading...</div>
-              ) : (
-                <>
-                  <div className="form-group">
-                    <label>Material Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={materialName}
-                      onChange={(e) => setMaterialName(e.target.value)}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Description</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                    />
-                  </div>
-                  {error && <div className="error-message">{error}</div>}
-                  {successMessage && <div className="success-message">{successMessage}</div>}
-                </>
-              )}
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={closeModal}>Close</button>
-              <button type="button" className="btn btn-primary" onClick={handleAddMaterial}>Add Material</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
+    <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="sm">
+      <DialogTitle>
+        Add Material
+        <IconButton
+          edge="end"
+          color="inherit"
+          onClick={closeModal}
+          aria-label="close"
+          sx={{ position: 'absolute', right: 8, top: 8 }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent dividers>
+        {loading ? (
+          <CircularProgress />
+        ) : (
+          <>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Material Name"
+              type="text"
+              fullWidth
+              variant="outlined"
+              value={materialName}
+              onChange={(e) => setMaterialName(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              margin="dense"
+              label="Description"
+              type="text"
+              fullWidth
+              variant="outlined"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            {error && <Typography color="error">{error}</Typography>}
+            {successMessage && <Typography color="success">{successMessage}</Typography>}
+          </>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={closeModal} color="secondary">
+          Close
+        </Button>
+        <Button
+          onClick={handleAddMaterial}
+          color="primary"
+          variant="contained"
+        >
+          Add Material
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
