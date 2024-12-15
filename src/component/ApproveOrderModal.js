@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
   TextField,
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
@@ -13,10 +12,47 @@ import {
   CircularProgress,
   IconButton,
   Typography,
-  Box
+  Box,
+  Button as MuiButton,
+  styled,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 import { Add, Remove } from '@mui/icons-material';
+
+const StyledButton = styled(MuiButton)(({ theme }) => ({
+  backgroundColor: '#007bff', // Blue background color
+  color: '#fff',
+  padding: '10px 20px',
+  borderRadius: '8px',
+  fontSize: '14px',
+  '&:hover': {
+    // backgroundColor: '#388e3c', // Darker green on hover
+    backgroundColor: '#0056b3', // Darker Blue on hover
+
+  },
+}));
+
+const SecondaryButton = styled(MuiButton)(({ theme }) => ({
+  backgroundColor: '#007bff', // Blue background color
+  color: '#fff',
+  padding: '10px 20px',
+  borderRadius: '8px',
+  fontSize: '14px',
+  '&:hover': {
+    // backgroundColor: '#d32f2f', // Darker red on hover
+    backgroundColor: '#0056b3', // Darker red on hover
+  },
+}));
+
+const CustomIconButton = styled(IconButton)(({ theme }) => ({
+  padding: '0',
+  margin: '0 5px',
+  backgroundColor: 'transparent',
+  width: '35px',
+  height: '35px',
+  '& svg': {
+    fontSize: '20px',
+  },
+}));
 
 const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
   const [expectedPrice, setExpectedPrice] = useState('');
@@ -37,27 +73,23 @@ const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
     const approvalData = {
       approved_by: userName,
       expected_price: expectedPrice,
-      order_quantity: orderQuantity
+      order_quantity: orderQuantity,
     };
     setLoading(true);
 
     // Determine the appropriate URL based on the order type
-    const url = orderType === 'reversal' ? 
-                `https://ordermanagementservice-backend.onrender.com/api/core/orders/reverse/${order.order_id}` : 
-                `https://ordermanagementservice-backend.onrender.com/api/core/orders/approve/${order.order_id}`;
+    const url = orderType === 'reversal'
+      ? `https://ordermanagementservice-backend.onrender.com/api/core/orders/reverse/${order.order_id}`
+      : `https://ordermanagementservice-backend.onrender.com/api/core/orders/approve/${order.order_id}`;
 
     axios
-      .put(
-        url,
-        approvalData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            role: role,
-            'Content-Type': 'application/json'
-          }
-        }
-      )
+      .put(url, approvalData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          role: role,
+          'Content-Type': 'application/json',
+        },
+      })
       .then((response) => {
         if (response.status === 200) {
           setLoading(false);
@@ -94,17 +126,8 @@ const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
       <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="sm">
         <DialogTitle>
           Approve Order
-          <IconButton
-            edge="end"
-            color="inherit"
-            onClick={closeModal}
-            aria-label="close"
-            sx={{ position: 'absolute', right: 16, top: 16 }}
-          >
-            <CloseIcon />
-          </IconButton>
         </DialogTitle>
-        
+
         <DialogContent>
           {order && (
             <Box display="flex" flexDirection="column" gap={2}>
@@ -117,23 +140,22 @@ const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
                 variant="outlined"
                 fullWidth
               />
-              <Box display="flex" alignItems="center" gap={2}>
+              <Box display="flex" alignItems="center" gap={1}>
                 <Typography>Order Quantity:</Typography>
-                <IconButton onClick={decreaseQuantity}>
+                <CustomIconButton onClick={decreaseQuantity}>
                   <Remove />
-                </IconButton>
+                </CustomIconButton>
                 <TextField
-                  type="number"
+                  type="text"
                   value={orderQuantity}
                   onChange={(e) => setOrderQuantity(Number(e.target.value))}
-                  variant="outlined"
-                  size="small"
-                  sx={{ width: '80px' }}
+                  // variant="outlined"
+                  size="large"
+                  sx={{ width: '100px', textAlign: 'center' }}
                 />
-                <IconButton onClick={increaseQuantity}>
+                <CustomIconButton onClick={increaseQuantity}>
                   <Add />
-                  <Add />
-                </IconButton>
+                </CustomIconButton>
               </Box>
             </Box>
           )}
@@ -146,12 +168,12 @@ const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={closeModal} color="secondary">
+          <SecondaryButton onClick={closeModal} color="secondary" variant="contained">
             Close
-          </Button>
-          <Button onClick={handleApproveOrder} color="primary" variant="contained">
+          </SecondaryButton>
+          <StyledButton onClick={handleApproveOrder} color="primary" variant="contained">
             Approve
-          </Button>
+          </StyledButton>
         </DialogActions>
       </Dialog>
     </>

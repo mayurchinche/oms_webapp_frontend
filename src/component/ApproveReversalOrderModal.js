@@ -15,7 +15,6 @@ import {
   Typography,
   Box
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 import { Add, Remove } from '@mui/icons-material';
 
 const ApproveReversalOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
@@ -89,16 +88,7 @@ const ApproveReversalOrderModal = ({ isModalOpen, closeModal, order, orderType }
       {/* Main Modal Dialog for approving orders */}
       <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="sm">
         <DialogTitle>
-          Approve Order
-          <IconButton
-            edge="end"
-            color="inherit"
-            onClick={closeModal}
-            aria-label="close"
-            sx={{ position: 'absolute', right: 16, top: 16 }}
-          >
-            <CloseIcon />
-          </IconButton>
+          Approve Reversal Order
         </DialogTitle>
         
         <DialogContent>
@@ -116,7 +106,7 @@ const ApproveReversalOrderModal = ({ isModalOpen, closeModal, order, orderType }
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={closeModal} color="secondary">
+          <Button onClick={closeModal} color="primary" variant="contained">
             Close
           </Button>
           <Button onClick={handleApproveOrder} color="primary" variant="contained">
