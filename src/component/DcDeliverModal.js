@@ -18,6 +18,7 @@ const DcDeliverModal = ({ isModalOpen, closeModal, order }) => {
   const [deliveredAt, setDeliveredAt] = useState('');
   const orderId = order?.id; // Handle possible `undefined`
   const { role, token } = useSelector((state) => state.auth);
+  
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false); // State for snackbar
 
