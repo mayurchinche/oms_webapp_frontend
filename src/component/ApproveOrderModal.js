@@ -132,7 +132,6 @@ const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
                 />
                 <IconButton onClick={increaseQuantity}>
                   <Add />
-                  <Add />
                 </IconButton>
               </Box>
             </Box>

@@ -9,7 +9,7 @@ const apiInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'accept': 'application/json',
-    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb250YWN0X251bWJlciI6Iis5MTk2NTY3NDkxMjg4Iiwicm9sZSI6Im1hbmFnZXIiLCJleHAiOjE3MzM2ODIwNzR9.uyDpxUpgXIDEvvfmfzbGvvG3nvuRCAfrCcauHsyE1KU',
+    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb250YWN0X251bWJlciI6Iis5MTk2NTc0OTEyODgiLCJyb2xlIjoibWFuYWdlciIsImV4cCI6MTczMzkzNzE3OH0.w3-vnv35R5qwtAKmH5b6835PUzmbTRfm6ypmjs5BE_c',
     'role': 'manager',  // Replace with the dynamic role if needed
   },
 });
