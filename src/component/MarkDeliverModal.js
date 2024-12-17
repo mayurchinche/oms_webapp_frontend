@@ -14,7 +14,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import SuccessSnackbar from './SuccessSnackbar';
 
-const MarkDeliverModal = ({ isModalOpen, closeModal, order }) => {
+const MarkDeliverModal = ({ isModalOpen, closeModal, order,fetchOrders,deliveryPendingColumns }) => {
   const [deliveryDate, setDeliveryDate] = useState('');
   const [receivedQuantity, setReceivedQuantity] = useState('');
   const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -46,7 +46,10 @@ const MarkDeliverModal = ({ isModalOpen, closeModal, order }) => {
     const deliveryData = {
       delivery_date: deliveryDate,
       received_quantity: parseInt(receivedQuantity, 10), // Convert to integer
+   
     };
+    console.log(deliveryDate);
+    
 
     axios
       .put(
@@ -65,6 +68,7 @@ const MarkDeliverModal = ({ isModalOpen, closeModal, order }) => {
         setSnackbarOpen(true); // Open snackbar on success
         setTimeout(() => {
           closeModal();
+          fetchOrders('https://ordermanagementservice-backend.onrender.com/api/core/orders/get_delivery_pending_orders', deliveryPendingColumns, 'deliveryPending');
         }, 2000);
       })
       .catch((err) => {
