@@ -4,19 +4,25 @@ const API_BASE_URL = "https://ordermanagementservice-backend.onrender.com/api/co
 // const API_BASE_URL = "http://127.0.0.1:5000/api/core/api";
 
 // Set up a reusable axios instance with default headers
-
 const apiInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'accept': 'application/json',
-    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb250YWN0X251bWJlciI6Iis5MTk2NTc0OTEyODgiLCJyb2xlIjoibWFuYWdlciIsImV4cCI6MTczMzkzNzE3OH0.w3-vnv35R5qwtAKmH5b6835PUzmbTRfm6ypmjs5BE_c',
-    'role': 'manager',  // Replace with the dynamic role if needed
+    'accept': 'application/json'
   },
 });
+// Function to dynamically add token and role to headers
+const setAuthHeaders = (token, role) => {
+  apiInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  apiInstance.defaults.headers.common['role'] = role;
+};
+
 
 // Function to fetch cost analysis highlights
-export const getCostHighlights = async (startDate, endDate) => {
+export const getCostHighlights = async (startDate, endDate,  token, role) => {
   try {
+
+    setAuthHeaders(token, role);
+
     // Make the GET request with query parameters
     const response = await apiInstance.get('/cost-analysis/highlights', {
       params: { start_date: startDate, end_date: endDate }
@@ -28,8 +34,9 @@ export const getCostHighlights = async (startDate, endDate) => {
   }
 };
 // Fetch price trend
-export const getPriceTrend = async (startDate, endDate, interval) => {
+export const getPriceTrend = async (startDate, endDate, interval, token, role) => {
     try {
+      setAuthHeaders(token, role);
       const response = await apiInstance.get('/cost-analysis/get_price_trend', {
         params: { start_date: startDate, end_date: endDate, interval: interval },
       });
@@ -41,12 +48,13 @@ export const getPriceTrend = async (startDate, endDate, interval) => {
   };
   
   // Function to fetch supplier performance
-export const getSupplierPerformance = async (startDate, endDate) => {
+export const getSupplierPerformance = async (startDate, endDate,token, role) => {
     try {
+       setAuthHeaders(token, role);
       const response = await apiInstance.get('/core/api/supplier-performance', {
         params: { start_date: startDate, end_date: endDate },
       });
-
+      console.log("response.data",response.data)
       return response.data;
     } catch (error) {
       console.error("Error fetching supplier performance:", error);
