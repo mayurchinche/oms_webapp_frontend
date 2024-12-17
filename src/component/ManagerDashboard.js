@@ -1,71 +1,226 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import ApproveOrderModal from './ApproveOrderModal'; // Import the ApproveOrderModal component
+import { useNavigate } from 'react-router-dom';
+import Sidebar from './Sidebar';
+import Header from './Header';
+import AddOrderModal from './AddOrderModal';
+import RaiseReversalModal from './RaiseReversalModal';
+import LoadingDialog from './LoadingDialog';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import ManageMaterialModal from './ManageMaterialModal'; // Import the ManageMaterialModal component
-import './ManagerDashboard.css'; // Import the CSS file
-import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
+import ManageSupplierModal from './ManageSupplierModal'; // Import the ManageSupplierModal component
+import ApproveOrderModal from './ApproveOrderModal';
+import ApproveReversalOrderModal from './ApproveReversalOrderModal';
+import { FaFilter } from 'react-icons/fa';
+import { Dropdown, DropdownButton } from 'react-bootstrap'; // For dropdown menus
+
+import './NewManagerDahsboard.css';
 
 const ManagerDashboard = () => {
-  const userName = "John Doe"; // Example user name
+  const { role, token, mobileNumber, userName } = useSelector((state) => state.auth);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isReversalModalOpen, setIsReversalModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [reversalMessage, setReversalMessage] = useState('');
+  const [activeSection, setActiveSection] = useState('forward');
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [orderType, setOrderType] = useState('forward orders');
+  const [columns, setColumns] = useState([]); // State to manage columns
+  const navigate = useNavigate();
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false); // Approve Modal state
+  const [isApproveReversalOrderModal, setIsApproveReversalOrderModal] = useState(false); // Approve Reversal Modal state
   const [isManageMaterialModalOpen, setIsManageMaterialModalOpen] = useState(false); // Manage Material Modal state
-  const [selectedOrder, setSelectedOrder] = useState(null); // Selected order for approval
+  const [isManageSupplierModalOpen, setIsManageSupplierModalOpen] = useState(false); // Manage Supplier Modal state
+  
+  const [filters, setFilters] = useState({});
 
-  const { role, token } = useSelector((state) => state.auth);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+  const handleFilterChange = (column, value) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [column]: value,
+    }));
   };
 
-  const fetchOrders = (url) => {
+  const clearAllFilters = () => {
+    setFilters({
+      state: '',
+      ordered_by: '',
+      order_date: '',
+      material_name: '',
+    });
+  };
+  
+  const filteredOrders = orders.filter((order) => {
+    return Object.entries(filters).every(([column, value]) => {
+      return !value || order[column] === value;
+    });
+  });
+  
+  
+
+  const forwardOrderColumns = [
+    { header: 'Order Date', accessor: 'order_date' },
+    { header: 'Material Name', accessor: 'material_name' },
+    { header: 'Model', accessor: 'model' },
+    { header: 'Customer Name', accessor: 'name_of_customer' },
+    { header: 'Ordered By', accessor: 'ordered_by' },
+    { header: 'Quantity', accessor: 'order_quantity' },
+    { header: 'Status', accessor: 'status' }
+    
+  ];
+
+  const reversalOrderColumns = [
+    { header: 'Created At', accessor: 'created_at' },
+    { header: 'Material Name', accessor: 'original_order_material_name' },
+    { header: 'Supplier Name', accessor: 'origin_order_supplier_name' },
+    { header: 'Description', accessor: 'description' },
+    { header: 'original_order_quantity', accessor: 'original_order_quantity' },
+    { header: 'Reversal Quantity', accessor: 'reversal_quantity' },
+    { header: 'Status', accessor: 'status' },
+    { header: 'DC Number', accessor: 'dc_number' }
+  ];
+
+  const reviewPendingColumns = [
+    { header: 'Order Date', accessor: 'order_date' },
+    { header: 'Material Name', accessor: 'material_name' },
+    { header: 'Model', accessor: 'model' },
+    { header: 'Customer Name', accessor: 'name_of_customer' },
+    { header: 'Ordered By', accessor: 'ordered_by' },
+    { header: 'Quantity', accessor: 'order_quantity' },
+    { header: 'Status', accessor: 'status' },
+    { header: 'Action', accessor: 'Review & Approve', isButton: true, buttonText: 'Review & Approve' }
+
+  ];
+  
+  const reversalReviewPendingColumns =[
+    { header: 'Order Id', accessor: 'id' },
+    { header: 'Created At', accessor: 'created_at' },
+    { header: 'Supplier Name', accessor: 'origin_order_supplier_name' },
+    { header: 'Material Name', accessor: 'original_order_material_name' },
+    { header: 'Customer Name', accessor: 'name_of_customer' },
+    { header: 'Ordered By', accessor: 'user_contact_number' },
+    { header: 'Quantity', accessor: 'original_order_quantity' },
+    { header: 'Reversal Quantity', accessor: 'reversal_quantity' },
+    { header: 'Action', accessor: 'Approve Reversal', isButton: true, buttonText: 'Approve Reversal' }
+  ]
+
+  const fetchOrders = useCallback((url, columnsConfig) => {
     setLoading(true);
     setError(null);
-    axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        role: role
-      }
-    })
-      .then(response => {
-        console.log('API Response:', response.data);
-        if (response.data && response.data[0] && response.data[0].data && response.data[0].data.length > 0) {
-          setOrders(response.data[0].data); // Access the nested data array
-          console.log(response.data[0].data); // Log the data array
+    axios
+      .get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          role: role,
+        },
+      })
+      .then((response) => {
+        const data = response.data?.[0]?.data || [];
+        if (data.length > 0) {
+          setOrders(data);
+          setColumns(columnsConfig); // Set the columns configuration
         } else {
           setError('No records found');
         }
         setLoading(false);
       })
-      .catch(err => {
+      .catch(() => {
         setError('Failed to fetch data');
         setLoading(false);
       });
-  };
-
- 
-  useEffect(() => {
-    if (token && role) {
-      fetchOrders(' https://ordermanagementservice-backend.onrender.com/api/core/orders/get_all_orders');
-    }
   }, [token, role]);
 
+  useEffect(() => {
+    setOrderType('forward orders')
+    if (mobileNumber && token && role) {
+      fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/get_all_orders`, forwardOrderColumns);
+    }
+  }, [mobileNumber, token, role, fetchOrders]);
+
+  const handleReversalReveiwPendingClick = () => {
+    fetchOrders(' https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/get_reversal_review_pending',reversalReviewPendingColumns);
+  };
+
+  const handleViewOrdersClick = () => {
+    setActiveSection('forward');
+    setOrderType('Forward Orders');
+    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/get_all_orders`, forwardOrderColumns);
+  };
+
+  const handleAddOrderClick = () => {
+    setIsModalOpen(true);
+  };
+const handelManageMaterailClick=()=>{
+  openManageMaterialModal()
+  }
+const handelManageSupplierClick=()=>{
+  openManageSupplierModal()
+}
+
+const handleReveiwPendingClick=()=>{
+  fetchOrders(' https://ordermanagementservice-backend.onrender.com/api/core/orders/review_pending',reviewPendingColumns);
+}
+const handelAnalysisClick = () =>{
+  console.log("Clicked handel Analysis")
+  navigate('/dashboard');
+}
+
+  const handleForwardOrderClick = () => {
+    setOrderType('forward orders');
+    setActiveSection('forward');
+    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/get_all_orders`, forwardOrderColumns);
+  };
+
   const handleReversalOrderClick = () => {
-    fetchOrders(' https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/get_all_reversal_orders');
+    clearAllFilters();
+    setOrderType('reversal orders');
+    setActiveSection('reversal');
+    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/get_all_reversal_orders`, reversalOrderColumns);
   };
 
-  const handlePendingOrdersClick = () => {
-    fetchOrders(' https://ordermanagementservice-backend.onrender.com/api/core/orders/review_pending');
+  const openReversalModal = (order) => {
+    if (order.status === 'Order_Delivered') {
+      setSelectedOrder(order);
+      setIsReversalModalOpen(true);
+    } else {
+      setReversalMessage('Order has not been delivered yet.');
+      setTimeout(() => setReversalMessage(''), 3000);
+    }
   };
 
-  const handleReversalPendingClick = () => {
-    fetchOrders(' https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/get_reversal_review_pending');
+  const closeReversalModal = () => {
+    setIsReversalModalOpen(false);
+    setSelectedOrder(null);
   };
 
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
+  };
+
+  const logOut = () => navigate('/login');
+
+  const handleSidebarToggle = (isCollapsed) => {
+    setIsSidebarCollapsed(isCollapsed);
+  };
+
+  const handleSwitch = (orderType) => {
+    switch (orderType) {
+      case 'Forward Orders':
+        handleForwardOrderClick();
+        break;
+      case 'Reversal Orders':
+        handleReversalOrderClick();
+        break;
+      default:
+        console.log('Unknown action');
+    }
+  };
+  
   const openApproveModal = (order) => {
     console.log('Opening approve modal for order:', order);
     setSelectedOrder(order);
@@ -77,6 +232,16 @@ const ManagerDashboard = () => {
     setIsApproveModalOpen(false);
   };
 
+  const openApproveReversalModal =(order) =>{
+    console.log('Opening approve reversal modal for order:', order);
+    setSelectedOrder(order);
+    setIsApproveReversalOrderModal(true);
+  }
+  const closeApproveReversalModal =(order) =>{
+    console.log('Opening approve reversal modal for order:', order);
+    setIsApproveReversalOrderModal(false);
+  }
+
   const openManageMaterialModal = () => {
     console.log('Opening manage material modal');
     setIsManageMaterialModalOpen(true);
@@ -87,105 +252,238 @@ const ManagerDashboard = () => {
     setIsManageMaterialModalOpen(false);
   };
 
+  const openManageSupplierModal = () => {
+    console.log('Opening manage material modal');
+    setIsManageSupplierModalOpen(true);
+  };
+  const closeManageSupplierModal = () => {
+    console.log('Closing manage material modal');
+    setIsManageSupplierModalOpen(false);
+  };
+
+
   return (
-    <div className="dashboard-container">
-      {loading && (
-        <div className="loader-overlay">
-          <div className="loader"></div>
+    <div className={`dashboard-container ${isSidebarCollapsed ? 'collapsed' : ''}`}>
+      <Sidebar
+        role={role}
+        onCollapseToggle={handleSidebarToggle}
+        onViewOrdersClick={handleViewOrdersClick}
+        onAddOrderClick={handleAddOrderClick}
+        onManageMaterailClick={openManageMaterialModal}
+        onManageSupplierClick={handelManageSupplierClick}
+        onReviewPendingClick={handleReveiwPendingClick}
+        onAnalysisClick={handelAnalysisClick}
+        onReversalReviewPendingClick={handleReversalReveiwPendingClick}
+        onLogout={logOut}
+      />
+    
+      <div className={`main-content ${isSidebarCollapsed ? 'main-content-collapsed' : ''}`}>
+        <Header onSwitch={handleSwitch} isSidebarCollapsed={isSidebarCollapsed} />
+
+        <div className={`header-caption ${isSidebarCollapsed ? 'collapsed' : ''}`}>
+          <h3>You are viewing {orderType}</h3>
         </div>
-      )}
-      <aside className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
-        <div className="user-info">
-          <img src="path/to/user-image.jpg" alt="User" className="user-image" />
-          <h2>{userName}</h2>
-          <hr />
-        </div>
-        <nav className="sidebar-nav">
-          <button className="sidebar-button" onClick={openManageMaterialModal}>Manage Material</button>
-          <button className="sidebar-button" onClick={handlePendingOrdersClick}>Pending Orders</button>
-          <button className="sidebar-button" onClick={handleReversalPendingClick}>Reversal Pending</button>
-          <button className="sidebar-button" onClick={handleReversalOrderClick}>Reversal Orders</button>
-          {/* Add more buttons as needed */}
-        </nav>
-      </aside>
-      <main className={`main-content ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-        <header className="header">
-          <button className="toggle-button" onClick={toggleSidebar}>
-            {isSidebarOpen ? 'Hide Sidebar' : 'Show Sidebar'}
-          </button>
-          <div className="header-section" onClick={() => fetchOrders(' https://ordermanagementservice-backend.onrender.com/api/core/orders/get_all_orders')}>All Orders</div>
-          <div className="header-section" onClick={handleReversalOrderClick}>Reversal Orders</div>
-        </header>
-        <section className="content-area">
-          {error ? (
-            <div>{error}</div>
-          ) : (
-            <div className="table-container">
-              <table className="custom-table">
-                <thead>
+
+        <div className="table-container">
+          <div>
+            {loading ? (
+              <LoadingDialog open={loading} />
+            ) : error ? (
+              <div>{error}</div>
+            ) : (
+              <table className="table table-bordered table-hover custom-table">
+                {/* <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', color: 'black', zIndex: 1 }}>
                   <tr>
-                    <th>Order ID</th>
-                    <th>User Contact Number</th>
-                    <th>Order Date</th>
-                    <th>Name of Customer</th>
-                    <th>PO No</th>
-                    <th>Whatsapp Date</th>
-                    <th>Material Name</th>
-                    <th>Model</th>
-                    <th>Order Quantity</th>
-                    <th>Order To</th>
-                    <th>Received Date</th>
-                    <th>Pending Quantity</th>
-                    <th>Ordered By</th>
-                    <th>Approved By</th>
-                    <th>PO Raised By</th>
-                    <th>Status</th>
-                    <th>Note</th>
-                    <th>Expected Price</th>
-                    <th>Ordered Price</th>
-                    <th>Supplier Name</th>
-                    <th>Approve</th>
+                    {columns.map((column, index) => (
+                      <th key={index} style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>
+                        {column.header}
+                      </th>
+                    ))}
                   </tr>
-                </thead>
-                <tbody>
+                </thead> */}
+                {/* <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', color: 'black', zIndex: 1 }}>
+  <tr>
+    {columns.map((column, index) => (
+      <th key={index} style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          {column.header}
+          {['status', 'ordered_by', 'order_date', 'material_name'].includes(column.accessor) && (
+            <DropdownButton
+              id={`filter-${column.accessor}`}
+              title={<FaFilter style={{ cursor: 'pointer', color: '#fff' }} />}
+              variant="secondary"
+              size="sm"
+              onSelect={(value) => handleFilterChange(column.accessor, value)}
+            >
+              <Dropdown.Item eventKey="">All</Dropdown.Item>
+              {[...new Set(orders.map((order) => order[column.accessor]))].map((value) => (
+                <Dropdown.Item key={value} eventKey={value}>
+                  {value}
+                </Dropdown.Item>
+              ))}
+            </DropdownButton>
+          )}
+        </div>
+      </th>
+    ))}
+  </tr>
+</thead> */}
+<thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', color: 'black', zIndex: 1 }}>
+  <tr>
+    {columns.map((column, index) => (
+      <th key={index} style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>{column.header}</span>
+          
+          {/* Show selected filter value if it exists */}
+          {['status', 'ordered_by', 'order_date', 'material_name'].includes(column.accessor) && filters[column.accessor] && (
+            <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              backgroundColor: '#f1f1f1',
+              color: '#333',
+              padding: '2px 6px', // Reduced padding
+              fontSize: '12px', // Smaller font size
+              borderRadius: '10px',
+              marginLeft: '8px',
+              height: '18px', // Limit height for compactness
+              lineHeight: '16px', // Adjust line height to make text align better
+              whiteSpace: 'nowrap', // Prevent wrapping
+            }}
+          >
+            {filters[column.accessor]}
+            <button
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#f44336',
+                cursor: 'pointer',
+                marginLeft: '4px', // Smaller margin
+                fontSize: '12px', // Reduce font size for the close icon
+              }}
+              onClick={() => handleFilterChange(column.accessor, '')} // Clear filter
+            >
+              x
+            </button>
+          </span>
+          
+          )}
+
+          {/* Filter Dropdown */}
+          {['status', 'ordered_by', 'order_date', 'material_name'].includes(column.accessor) && (
+            <DropdownButton
+              id={`filter-${column.accessor}`}
+              title={<FaFilter style={{ cursor: 'pointer', color: '#fff' }} />}
+              variant="secondary"
+              size="sm"
+              onSelect={(value) => handleFilterChange(column.accessor, value)}
+            >
+              <Dropdown.Item eventKey="">All</Dropdown.Item>
+              {[...new Set(orders.map((order) => order[column.accessor]))].map((value) => (
+                <Dropdown.Item key={value} eventKey={value}>
+                  {value}
+                </Dropdown.Item>
+              ))}
+            </DropdownButton>
+          )}
+        </div>
+      </th>
+    ))}
+  </tr>
+</thead>
+
+                {/* <tbody>
                   {orders.map((order, index) => (
                     <tr key={index}>
-                      <td>{order.order_id}</td>
-                      <td>{order.user_contact_number}</td>
-                      <td>{order.order_date}</td>
-                      <td>{order.name_of_customer}</td>
-                      <td>{order.po_no}</td>
-                      <td>{order.whatsapp_date}</td>
-                      <td>{order.material_name}</td>
-                      <td>{order.model}</td>
-                      <td>{order.order_quantity}</td>
-                      <td>{order.order_to}</td>
-                      <td>{order.received_date}</td>
-                      <td>{order.pending_quantity}</td>
-                      <td>{order.ordered_by}</td>
-                      <td>{order.approved_by}</td>
-                      <td>{order.po_raised_by}</td>
-                      <td>{order.status}</td>
-                      <td>{order.note}</td>
-                      <td>{order.expected_price}</td>
-                      <td>{order.ordered_price}</td>
-                      <td>{order.supplier_name}</td>
-                      <td><button onClick={() => openApproveModal(order)}>Approve</button></td>
+                      {columns.map((column, colIndex) => (
+                        <td key={colIndex}>
+                        {column.isButton ? (
+                          <button
+                            style={{ backgroundColor: '#085fbc' }}
+                            onClick={() =>{ 
+                              {
+                                if (column.accessor === 'Review & Approve') {
+                                  openApproveModal(order)
+                                } else if (column.accessor === 'Approve Reversal') {
+                                  openApproveReversalModal(order);
+                                }
+                              }
+                              }}
+                          >
+                            {column.buttonText}
+                          </button>
+                        ) : (
+                          order[column.accessor]
+                        )}
+                      </td>
+                      ))}
                     </tr>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </tbody> */}
+                <tbody>
+  {filteredOrders.map((order, index) => (
+    <tr key={index}>
+      {columns.map((column, colIndex) => (
+        <td key={colIndex}>
+          {column.isButton ? (
+            <button
+              style={{ backgroundColor: '#085fbc' }}
+              onClick={() => {
+                if (column.accessor === 'Review & Approve') {
+                  openApproveModal(order);
+                } else if (column.accessor === 'Approve Reversal') {
+                  openApproveReversalModal(order);
+                }
+              }}
+            >
+              {column.buttonText}
+            </button>
+          ) : (
+            order[column.accessor]
           )}
-        </section>
-      </main>
-      {selectedOrder && <ApproveOrderModal isModalOpen={isApproveModalOpen} closeModal={closeApproveModal} order={selectedOrder} />}
-      <ManageMaterialModal isModalOpen={isManageMaterialModalOpen} closeModal={closeManageMaterialModal} />
+        </td>
+      ))}
+    </tr>
+  ))}
+</tbody>
+
+              </table>
+            )}
+          </div>
+        </div>
+
+        <AddOrderModal isModalOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} />
+        
+
+        <ManageMaterialModal isModalOpen={isManageMaterialModalOpen} closeModal={closeManageMaterialModal} />
+        <ManageSupplierModal  isModalOpen={isManageSupplierModalOpen} closeModal ={openManageSupplierModal} />
+
+        {selectedOrder && <ApproveOrderModal isModalOpen={isApproveModalOpen} closeModal={closeApproveModal} order={selectedOrder} />}
+        {selectedOrder && <ApproveReversalOrderModal isModalOpen={isApproveReversalOrderModal} closeModal={closeApproveReversalModal} order={selectedOrder} />}
+        {selectedOrder && (
+          <RaiseReversalModal
+            isModalOpen={isReversalModalOpen}
+            closeModal={closeReversalModal}
+            order={selectedOrder}
+          />
+        )}
+        {reversalMessage && (
+          <div className="reversal-message-overlay">
+            <div className="reversal-message-dialog">
+              <h5>Notice</h5>
+              <p>{reversalMessage}</p>
+              <button type="button" className="btn btn-primary" onClick={() => setReversalMessage('')}>
+                OK
+              </button>
+            </div>
+          </div>
+        )}
+
+      </div>
     </div>
   );
 };
 
 export default ManagerDashboard;
-
-
 

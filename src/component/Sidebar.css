@@ -185,6 +185,7 @@
     padding: 10px;
     border-radius: 5px;
     font-size: 16px;
+    
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 /* Style adjustments for collapsed state */
@@ -194,6 +195,7 @@
 }
 /* Hover Effect for Logout Button */
 .sidebar-logout-btn:hover {
+    
     color: #f4490a;
 }
 /* Hide Logout Text When Collapsed */

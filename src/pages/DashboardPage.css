@@ -1,0 +1,16 @@
+/* Ensure the datepicker is responsive */
+.custom-datepicker {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px;
+    border-radius: 8px;
+  }
+  
+  /* Adjust date picker styles for smaller screens */
+  @media (max-width: 768px) {
+    .custom-datepicker {
+      width: 100%;
+      max-width: 100%;
+    }
+  }
+  

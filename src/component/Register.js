@@ -82,7 +82,7 @@ const Register = () => {
     };
 
     try {
-      const response = await axios.post('https://stage-testflask.onrender.com/auth/register', userDetails);
+      const response = await axios.post('https://ordermanagementservice-backend.onrender.com/auth/register', userDetails);
       if (response.status === 200) {
         setRegistrationMessage(response.data.message);
         navigate('/');

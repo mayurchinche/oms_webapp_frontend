@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import './Sidebar.css';
 import {
   FaClipboardList,
@@ -23,12 +24,14 @@ const iconMapping = {
   'Manage Materials': <FaCogs />,
   'Manage Suppliers': <FaUserTie />,
   'Review Pending': <FaTasks />,
+  'Reversal Review Pending': <FaTasks />,
   'Analysis': <FaChartBar />,
   'Raise PO': <FaPaperPlane />,
   'Raise DC': <FaShippingFast />,
   'Mark Delivery': <FaTruck />,
   'Mark Reversal Delivery': <FaBox />,
 };
+
 
 // Function to fetch menu items based on user role
 const getMenuItems = (role) => {
@@ -38,14 +41,12 @@ const getMenuItems = (role) => {
         'View Orders',
         'Add Order',
         'Manage Materials',
-        'Manage Suppliers',
+        'Reversal Review Pending',
         'Review Pending',
         'Analysis',
       ];
     case 'po_team':
       return [
-        'View Orders',
-        'Add Order',
         'Raise PO',
         'Raise DC',
         'Mark Delivery',
@@ -58,9 +59,8 @@ const getMenuItems = (role) => {
   }
 };
 
-const Sidebar = ({ onCollapseToggle, role, onViewOrdersClick, onAddOrderClick, onReviewPendingClick, onLogout }) => {
+const Sidebar = ({ onCollapseToggle, role, onViewOrdersClick, onAddOrderClick, onManageMaterailClick, onManageSupplierClick, onReviewPendingClick,onReversalReviewPendingClick,onAnalysisClick, onRaisePOClick,onRaiseDCClick,onMarkDeliveryClick,onMarkReversalDeliveryClick,onLogout }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
     onCollapseToggle(!isCollapsed);
@@ -115,7 +115,12 @@ const Sidebar = ({ onCollapseToggle, role, onViewOrdersClick, onAddOrderClick, o
             {['Manage Materials', 'Manage Suppliers'].map(
               (item, index) =>
                 menuItems.includes(item) && (
-                  <div className="sidebar-item" key={index}>
+                  <div className="sidebar-item" key={index}
+                  onClick={() => {
+                    if (item === 'Manage Materials' && onManageMaterailClick) onManageMaterailClick();
+                    if (item === 'Manage Suppliers' && onManageSupplierClick) onManageSupplierClick();
+                    
+                  }}>
                     {iconMapping[item]} <span>{item}</span>
                   </div>
                 )
@@ -126,14 +131,20 @@ const Sidebar = ({ onCollapseToggle, role, onViewOrdersClick, onAddOrderClick, o
         <div className="sidebar-divider" />
 
         {/* REVIEW ACTION Group */}
-        {menuItems.includes('Review Pending') && (
+        {menuItems.includes('Review Pending','Reversal Review Pending') && (
           <div className="sidebar-item-group">
             <p className="sidebar-group-title">REVIEW ACTION</p>
-            {['Review Pending'].map((item, index) => (
-              <div className="sidebar-item" key={index} onClick={onReviewPendingClick}>
+            {['Review Pending', 'Reversal Review Pending'].map((item, index) => 
+            menuItems.includes(item) && (
+              <div className="sidebar-item" key={index}
+              onClick={() => {
+                if (item === 'Review Pending' && onReviewPendingClick) onReviewPendingClick();
+                if (item === 'Reversal Review Pending' && onReversalReviewPendingClick) onReversalReviewPendingClick();
+              }}>
                 {iconMapping[item]} <span>{item}</span>
               </div>
-            ))}
+            )
+            )}
           </div>
         )}
 
@@ -146,7 +157,14 @@ const Sidebar = ({ onCollapseToggle, role, onViewOrdersClick, onAddOrderClick, o
             {['Raise PO', 'Raise DC', 'Mark Delivery', 'Mark Reversal Delivery'].map(
               (item, index) =>
                 menuItems.includes(item) && (
-                  <div className="sidebar-item" key={index}>
+                  <div className="sidebar-item" key={index}
+                  onClick={() => {
+                    if (item === 'Raise PO' && onRaisePOClick) onRaisePOClick();
+                    if (item === 'Raise DC' && onRaiseDCClick) onRaiseDCClick();
+                    if (item === 'Mark Delivery' && onMarkDeliveryClick) onMarkDeliveryClick();
+                    if (item === 'Mark Reversal Delivery' && onMarkReversalDeliveryClick) onMarkReversalDeliveryClick();
+                  }}
+                  >
                     {iconMapping[item]} <span>{item}</span>
                   </div>
                 )
@@ -161,7 +179,7 @@ const Sidebar = ({ onCollapseToggle, role, onViewOrdersClick, onAddOrderClick, o
           <div className="sidebar-item-group">
             <p className="sidebar-group-title">ANALYSIS</p>
             {['Analysis'].map((item, index) => (
-              <div className="sidebar-item" key={index}>
+              <div className="sidebar-item" key={index} onClick={onAnalysisClick}>
                 {iconMapping[item]} <span>{item}</span>
               </div>
             ))}

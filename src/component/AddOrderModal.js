@@ -12,9 +12,10 @@ import {
   MenuItem,
   Typography,
   Box,
-  Alert
+  Alert,
 } from '@mui/material';
-import './AddOrderModal.css'; // Keep for any remaining custom styles
+import SuccessSnackbar from './SuccessSnackbar'; // Import the SuccessSnackbar component
+import './AddOrderModal.css'; // For custom styles
 
 const AddOrderModal = ({ isModalOpen, closeModal }) => {
   const [customerName, setCustomerName] = useState('');
@@ -30,7 +31,7 @@ const AddOrderModal = ({ isModalOpen, closeModal }) => {
   const [filteredModels, setFilteredModels] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingModels, setLoadingModels] = useState(false);
-const [successMessage,  setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isCustomerSelected, setIsCustomerSelected] = useState(false);
   const [isMaterialSelected, setIsMaterialSelected] = useState(false);
@@ -45,36 +46,30 @@ const [successMessage,  setSuccessMessage] = useState('');
 
       console.log('Fetching customers and materials...');
       axios.get('https://ordermanagementservice-backend.onrender.com/api/customers', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          role: role
-        }
+        headers: { Authorization: `Bearer ${token}`, role: role },
       })
-      .then(response => {
-        console.log('Customers fetched:', response.data[0]);
-        setCustomers(response.data[0].map(customer => customer.customer_name));
-      })
-      .catch(error => {
-        console.error('Error fetching customers:', error);
-      });
+        .then((response) => {
+          console.log('Customers fetched:', response.data[0]);
+          setCustomers(response.data[0].map((customer) => customer.customer_name));
+        })
+        .catch((error) => {
+          console.error('Error fetching customers:', error);
+        });
 
       axios.get('https://ordermanagementservice-backend.onrender.com/api/materials', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          role: role
-        }
+        headers: { Authorization: `Bearer ${token}`, role: role },
       })
-      .then(response => {
-        console.log('Materials fetched:', response.data[0]);
-        setMaterials(response.data[0].map(material => material.material_name));
-      })
-      .catch(error => {
-        console.error('Error fetching materials:', error);
-      });
+        .then((response) => {
+          console.log('Materials fetched:', response.data[0]);
+          setMaterials(response.data[0].map((material) => material.material_name));
+        })
+        .catch((error) => {
+          console.error('Error fetching materials:', error);
+        });
     }
   }, [isModalOpen, token, role]);
 
-  const resetModalState =  () => {
+  const resetModalState = () => {
     setCustomerName('');
     setMaterialName('');
     setModel('');
@@ -94,7 +89,7 @@ const [successMessage,  setSuccessMessage] = useState('');
     setCustomerName(value);
     setIsCustomerSelected(false);
     if (value.length > 0) {
-      setFilteredCustomers(customers.filter(customer => customer.toLowerCase().includes(value.toLowerCase())));
+      setFilteredCustomers(customers.filter((customer) => customer.toLowerCase().includes(value.toLowerCase())));
     } else {
       setFilteredCustomers([]);
     }
@@ -105,7 +100,7 @@ const [successMessage,  setSuccessMessage] = useState('');
     setMaterialName(value);
     setIsMaterialSelected(false);
     if (value.length > 0) {
-      setFilteredMaterials(materials.filter(material => material.toLowerCase().includes(value.toLowerCase())));
+      setFilteredMaterials(materials.filter((material) => material.toLowerCase().includes(value.toLowerCase())));
     } else {
       setFilteredMaterials([]);
     }
@@ -153,7 +148,7 @@ const [successMessage,  setSuccessMessage] = useState('');
 
   const handleAddOrder = () => {
     if (!isCustomerSelected || !isMaterialSelected || !isModelSelected || !quantity || !orderDate) {
-      setErrorMessage('All fields are required and must be selected from the list');
+      setErrorMessage('All fields are required and must be selected from the list.');
       return;
     }
 
@@ -179,7 +174,7 @@ const [successMessage,  setSuccessMessage] = useState('');
       console.log('Order added:', response.data);
       if (response.status === 200) {
         setLoading(false);
-        alert("Your Order Added successfully")
+        setSuccessMessage('Order successfully added');
         resetModalState();
       }
     })
@@ -191,17 +186,6 @@ const [successMessage,  setSuccessMessage] = useState('');
         setErrorMessage('');
       }, 2000);
     });
-  };
-
-  const handleSuccessConfirm = () => {
-    setSuccessMessage('');
-    closeModal();
-    navigate('/employee-dashboard'); // Redirect to the dashboard page
-  };
-
-  const handleSuccessCancel = () => {
-    setSuccessMessage('');
-    closeModal();
   };
 
   return (
@@ -229,9 +213,7 @@ const [successMessage,  setSuccessMessage] = useState('');
               p: 4,
             }}
           >
-            <Typography               variant="h5" 
-              component="h2"
-            >
+            <Typography variant="h5" component="h2">
               Add Order
             </Typography>
             {loading ? (
@@ -284,114 +266,80 @@ const [successMessage,  setSuccessMessage] = useState('');
                       </MenuItem>
                     ))}
                   </Box>
-                )}
-                {loadingModels ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                    <CircularProgress color="primary" />
-                  </Box>
-                ) : (
-                  <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Model"
-                    value={model}
-                    onChange={handleModelChange}
-                    variant="outlined"
-                    disabled={loadingModels}
-                  />
-                )}
-                {filteredModels.length > 0 && (
-                  <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
-                    {filteredModels.map((model, index) => (
-                      <MenuItem
-                        key={index}
-                        onClick={() => handleModelSelect(model)}
-                      >
-                        {model}
-                      </MenuItem>
-                    ))}
-                  </Box>
-                )}
-                <TextField
-                  fullWidth
-                  margin="normal"
-                  type="number"
-                  label="Order Quantity"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  variant="outlined"
-                />
-                <TextField
-                  fullWidth
-                  margin="normal"
-                  type="date"
-                  label="Order Date"
-                  value={orderDate}
-                  onChange={(e) => setOrderDate(e.target.value)}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  variant="outlined"
-                />
-                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
-                  <Button variant="contained" color="error" onClick={closeModal}>
-                    Close
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleAddOrder}
-                    disabled={!isCustomerSelected || !isMaterialSelected || !isModelSelected}
-                  >
-                    Add Order
-                  </Button>
-                </Box>
-              </>
-            )}
-          </Box>
-        </Fade>
-      </Modal>
-      {successMessage && (
-        <Modal
-          open={true}
-          onClose={handleSuccessCancel}
-          closeAfterTransition
-          BackdropComponent={Backdrop}
-          BackdropProps={{
-            timeout: 500,
-          }}
-        >
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 300,
-              bgcolor: 'lightgreen',
-              border: '2px solid #000',
-              boxShadow: 24,
-              p: 4,
-            }}
-          >
-            <Typography variant="h5" component="h2" sx={{ color: 'black' }}>
-              Success
-            </Typography>
-            <Typography sx={{ color: 'black' }}>{successMessage}</Typography>
-            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
-              <Button variant="contained" color="primary" onClick={handleSuccessConfirm}>
-                OK
-              </Button>
-              <Button variant="contained" color="secondary" onClick={handleSuccessCancel}>
-                Cancel
-              </Button>
-            </Box>
-          </Box>
-        </Modal>
-      )}
-    </>
-  );
-};
-
+                                  )}
+                                  {loadingModels ? (
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                                      <CircularProgress color="primary" />
+                                    </Box>
+                                  ) : (
+                                    <TextField
+                                      fullWidth
+                                      margin="normal"
+                                      label="Model"
+                                      value={model}
+                                      onChange={handleModelChange}
+                                      variant="outlined"
+                                      disabled={loadingModels}
+                                    />
+                                  )}
+                                  {filteredModels.length > 0 && (
+                                    <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
+                                      {filteredModels.map((model, index) => (
+                                        <MenuItem
+                                          key={index}
+                                          onClick={() => handleModelSelect(model)}
+                                        >
+                                          {model}
+                                        </MenuItem>
+                                      ))}
+                                    </Box>
+                                  )}
+                                  <TextField
+                                    fullWidth
+                                    margin="normal"
+                                    type="number"
+                                    label="Order Quantity"
+                                    value={quantity}
+                                    onChange={(e) => setQuantity(e.target.value)}
+                                    variant="outlined"
+                                  />
+                                  <TextField
+                                    fullWidth
+                                    margin="normal"
+                                    type="date"
+                                    label="Order Date"
+                                    value={orderDate}
+                                    onChange={(e) => setOrderDate(e.target.value)}
+                                    InputLabelProps={{
+                                      shrink: true,
+                                    }}
+                                    variant="outlined"
+                                  />
+                                  <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
+                                    <Button variant="contained" color="error" onClick={closeModal}>
+                                      Close
+                                    </Button>
+                                    <Button
+                                      variant="contained"
+                                      color="primary"
+                                      onClick={handleAddOrder}
+                                      disabled={!isCustomerSelected || !isMaterialSelected || !isModelSelected}
+                                    >
+                                      Add Order
+                                    </Button>
+                                  </Box>
+                                </>
+                              )}
+                            </Box>
+                          </Fade>
+                        </Modal>
+                        <SuccessSnackbar
+                          open={!!successMessage}
+                          message={successMessage}
+                          onClose={() => setSuccessMessage('')}
+                        />
+                      </>
+                    );
+                  };
+                  
 export default AddOrderModal;
-  
