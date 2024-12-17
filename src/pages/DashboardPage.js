@@ -72,12 +72,11 @@ const DashboardPage = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => navigate('/manager-dashboard')}
-        >
+          onClick={() => navigate('/manager-dashboard')}>
           Back To Dashboard
         </Button>
       </Box>
-
+    
       {loading && (
         <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
           <CircularProgress color="inherit" />
