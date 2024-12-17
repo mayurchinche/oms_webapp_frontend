@@ -14,10 +14,12 @@ import RaisePOModal from './RaisePOModal';
 import MarkDeliverModal from './MarkDeliverModal'; // Import the MarkDeliverModal component
 import DcDeliverModal from './DcDeliverModal'; // Import the DcDeliverModal component
 import RaiseDcModal from './RaiseDcModal';
+import { logout } from '../redux/Actions/authActions';
+import { useDispatch } from 'react-redux';
 const PODashboard = () => {
   
   
-  
+  const dispatch = useDispatch();
   
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
@@ -241,7 +243,11 @@ const PODashboard = () => {
     setSidebarVisible(!sidebarVisible);
   };
 
-  const logOut = () => navigate('/login');
+    const logOut = () =>
+    {
+      dispatch(logout());
+      navigate('/login');
+    }
 
   const handleSidebarToggle = (isCollapsed) => {
     setIsSidebarCollapsed(isCollapsed);
@@ -465,10 +471,10 @@ const PODashboard = () => {
             )}
           </div>
         </div>
-        <ManageSupplierModal  isModalOpen={isManageSupplierModalOpen} closeModal ={openManageSupplierModal} />
-        {selectedOrder && <RaisePOModal isModalOpen={isRaisePOModalOpen} closeModal ={closeRaisePOModal} order={selectedOrder}  />}
-        {selectedOrder && <MarkDeliverModal isModalOpen={isMarkDeliverModalOpen} closeModal ={closeMarkDeliverModal} order={selectedOrder}  />}
-        {selectedOrder && <DcDeliverModal isModalOpen={isDcDeliverModalOpen} closeModal ={closeDcDeliverModal} order={selectedOrder}  />}
+        <ManageSupplierModal  isModalOpen={isManageSupplierModalOpen} closeModal ={closeManageSupplierModal} />
+        {selectedOrder && <RaisePOModal isModalOpen={isRaisePOModalOpen} closeModal ={closeRaisePOModal} order={selectedOrder} fetchOrders={fetchOrders} pendingPOColumns={pendingPOColumns} />}
+        {selectedOrder && <MarkDeliverModal isModalOpen={isMarkDeliverModalOpen} closeModal ={closeMarkDeliverModal} order={selectedOrder} fetchOrders={fetchOrders} deliveryPendingColumns={deliveryPendingColumns} />}
+        {selectedOrder && <DcDeliverModal isModalOpen={isDcDeliverModalOpen} closeModal ={closeDcDeliverModal} order={selectedOrder} reversalDeliveryPendingColumns={reversalDeliveryPendingColumns} fetchOrders={fetchOrders} />}
         {selectedOrder && <RaiseDcModal isModalOpen={isRaiseDCModel} closeModal ={closeDRaisecDCModal} order={selectedOrder} fetchOrders={fetchOrders} dcPendingColumns={dcPendingColumns}  />}
 
         

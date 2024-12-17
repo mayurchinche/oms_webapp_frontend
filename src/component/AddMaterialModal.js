@@ -1,116 +1,155 @@
 import React, { useState } from 'react';
+import { TextField, Button, Box, Modal, Fade, CircularProgress, Typography, Backdrop, Alert } from '@mui/material';
+import SuccessSnackbar from './SuccessSnackbar'; // Import the SuccessSnackbar component
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  CircularProgress,
-  Typography
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import IconButton from '@mui/material/IconButton';
+import './AddMaterialModal.css'; // For custom styles
 
 const AddMaterialModal = ({ isModalOpen, closeModal, refreshMaterials }) => {
   const [materialName, setMaterialName] = useState('');
-  const [description, setDescription] = useState('');
+  const [materialDescription, setMaterialDescription] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(''); // State for success message
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isMaterialNameValid, setIsMaterialNameValid] = useState(true);
+  const [isMaterialDescriptionValid, setIsMaterialDescriptionValid] = useState(true);
 
-  const { role, token } = useSelector((state) => state.auth);
+  const { token, role } = useSelector((state) => state.auth);
 
+  // Handle Add Material button click
   const handleAddMaterial = () => {
+    // Validation
+    if (!materialName || !materialDescription) {
+      setIsMaterialNameValid(!!materialName);
+      setIsMaterialDescriptionValid(!!materialDescription);
+      setErrorMessage('All fields are required.');
+      return;
+    }
+
     setLoading(true);
-    setError(null);
-    const newMaterial = {
+    const materialData = {
       material_name: materialName,
-      description: description
+      material_description: materialDescription,
     };
-    axios.post('https://ordermanagementservice-backend.onrender.com/api/materials', newMaterial, {
-      headers: {
-        Authorization: `Bearer ${token}`,
+
+    // API request to add material
+    axios.post('https://ordermanagementservice-backend.onrender.com/api/materials', materialData, {
+      headers: { 
+        Authorization: `Bearer ${token}`, 
         role: role,
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json', // Ensure correct content-type
+      },
     })
-      .then(response => {
-        console.log('Material added:', response.data);
-        setLoading(false);
-        setSuccessMessage('Material added successfully');
+    .then(response => {
+      setLoading(false);
+      if (response.status === 200) {
+        setSuccessMessage('Material successfully added');
+        setMaterialName('');
+        setMaterialDescription('');
         setTimeout(() => {
           setSuccessMessage('');
           closeModal();
           refreshMaterials(); // Refresh the materials list
         }, 2000);
-      })
-      .catch(err => {
-        setError('Failed to add material');
-        setLoading(false);
-      });
+      }
+    })
+    .catch(error => {
+      setLoading(false);
+      setErrorMessage('Failed to add material. Please try again.');
+    });
+  };
+
+  // Handle input change for material name
+  const handleMaterialNameChange = (e) => {
+    const value = e.target.value;
+    setMaterialName(value);
+    // Reset validation state for material name if the user types anything
+    if (value) setIsMaterialNameValid(true);
+  };
+
+  // Handle input change for material description
+  const handleMaterialDescriptionChange = (e) => {
+    const value = e.target.value;
+    setMaterialDescription(value);
+    // Reset validation state for material description if the user types anything
+    if (value) setIsMaterialDescriptionValid(true);
   };
 
   return (
-    <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="sm">
-      <DialogTitle>
-        Add Material
-        <IconButton
-          edge="end"
-          color="inherit"
-          onClick={closeModal}
-          aria-label="close"
-          sx={{ position: 'absolute', right: 8, top: 8 }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent dividers>
-        {loading ? (
-          <CircularProgress />
-        ) : (
-          <>
-            <TextField
-              autoFocus
-              margin="dense"
-              label="Material Name"
-              type="text"
-              fullWidth
-              variant="outlined"
-              value={materialName}
-              onChange={(e) => setMaterialName(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              margin="dense"
-              label="Description"
-              type="text"
-              fullWidth
-              variant="outlined"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            {error && <Typography color="error">{error}</Typography>}
-            {successMessage && <Typography color="success">{successMessage}</Typography>}
-          </>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={closeModal} color="secondary">
-          Close
-        </Button>
-        <Button
-          onClick={handleAddMaterial}
-          color="primary"
-          variant="contained"
-        >
-          Add Material
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <>
+      <Modal
+        open={isModalOpen}
+        onClose={closeModal}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={isModalOpen}>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 400,
+              bgcolor: 'background.paper',
+              border: '2px solid #000',
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            <Typography variant="h5" component="h2">Add Material</Typography>
+            {loading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                <CircularProgress color="primary" />
+              </Box>
+            ) : (
+              <>
+                {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  label="Material Name"
+                  value={materialName}
+                  onChange={handleMaterialNameChange}
+                  variant="outlined"
+                  error={!isMaterialNameValid}
+                  helperText={!isMaterialNameValid ? 'Material name is required' : ''}
+                />
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  label="Material Description"
+                  value={materialDescription}
+                  onChange={handleMaterialDescriptionChange}
+                  variant="outlined"
+                  error={!isMaterialDescriptionValid}
+                  helperText={!isMaterialDescriptionValid ? 'Material description is required' : ''}
+                />
+                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
+                  <Button variant="contained" color="error" onClick={closeModal}>Close</Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleAddMaterial}
+                    disabled={loading}
+                  >
+                    Adding Material
+                  </Button>
+                </Box>
+              </>
+            )}
+          </Box>
+        </Fade>
+      </Modal>
+      <SuccessSnackbar
+        open={!!successMessage}
+        message={successMessage}
+        onClose={() => setSuccessMessage('')}
+      />
+    </>
   );
 };
 

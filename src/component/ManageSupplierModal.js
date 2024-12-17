@@ -15,7 +15,7 @@ import {
   Backdrop
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-
+import SuccessSnackbar from './SuccessSnackbar';
 const ManageSupplierModal = ({ isModalOpen, closeModal }) => {
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -28,6 +28,8 @@ const ManageSupplierModal = ({ isModalOpen, closeModal }) => {
   const [currentSupplier, setCurrentSupplier] = useState(null);
 
   const { role, token } = useSelector((state) => state.auth);
+   const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const fetchSuppliers = () => {
     setLoading(true);
@@ -59,7 +61,9 @@ const ManageSupplierModal = ({ isModalOpen, closeModal }) => {
     typeof supplier.supplier_name === 'string' && 
     supplier.supplier_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
   const openAddSupplierModal = () => {
     setNewSupplierName('');
     setNewContactNumber('');
@@ -76,6 +80,11 @@ const ManageSupplierModal = ({ isModalOpen, closeModal }) => {
       contact_number: newContactNumber,
       supplier_name: newSupplierName
     };
+    if (!supplierData) {
+      setSnackbarMessage('Please fill in all fields.');
+      setSnackbarOpen(true);
+      return;
+    }
 
     axios.post('https://ordermanagementservice-backend.onrender.com/api/suppliers', supplierData, {
       headers: {
@@ -84,14 +93,29 @@ const ManageSupplierModal = ({ isModalOpen, closeModal }) => {
         'Content-Type': 'application/json'
       }
     })
-      .then(response => {
-        alert('Supplier added successfully');
+    .then(() => {
+      setSnackbarMessage('Supplier added successfully');
+      setSnackbarOpen(true);
+      setTimeout(() => {
+        setSnackbarMessage('');
         closeAddSupplierModal();
+        // Call fetchOrders to refresh the list
         fetchSuppliers();
-      })
-      .catch(err => {
-        alert('Failed to add supplier');
-      });
+      }, 2000);
+    })
+    .catch((err) => {
+      console.error('Failed to Mark Delivery', err);
+      setSnackbarMessage('Failed to Mark Delivery');
+      setSnackbarOpen(true);
+    });
+      // .then(response => {
+      //   alert('Supplier added successfully');
+      //   closeAddSupplierModal();
+      //   fetchSuppliers();
+      // })
+      // .catch(err => {
+      //   alert('Failed to add supplier');
+      // });
   };
 
   const handleDeleteSupplier = (supplierName) => {
@@ -285,6 +309,7 @@ const ManageSupplierModal = ({ isModalOpen, closeModal }) => {
           </Button>
         </DialogActions>
       </Dialog>
+      <SuccessSnackbar open={snackbarOpen} message={snackbarMessage} onClose={handleSnackbarClose} />
     </>
   );
 };
