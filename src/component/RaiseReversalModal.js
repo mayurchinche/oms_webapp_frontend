@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import SuccessSnackbar from './SuccessSnackbar'; // Import the SuccessSnackbar component
 
-const RaiseReversalModal = ({ isModalOpen, closeModal, order }) => {
+const RaiseReversalModal = ({ isModalOpen, closeModal, order,forwardOrderColumns,fetchOrders }) => {
   const [reversalQuantity, setReversalQuantity] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
@@ -52,7 +52,7 @@ const RaiseReversalModal = ({ isModalOpen, closeModal, order }) => {
         setTimeout(() => {
           setSuccessMessage('');
           closeModal();
-          navigate('/employee-dashboard'); // Redirect to the dashboard page
+          fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/ordered_by/${mobileNumber}`, forwardOrderColumns);// Redirect to the dashboard page
         }, 2000);
       }
     })
