@@ -153,9 +153,11 @@ const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
                   size="large"
                   sx={{ width: '100px', textAlign: 'center' }}
                 />
+
                 <CustomIconButton onClick={increaseQuantity}>
                   <Add />
                 </CustomIconButton>
+
               </Box>
             </Box>
           )}

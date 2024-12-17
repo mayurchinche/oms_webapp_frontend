@@ -7,7 +7,7 @@ const API_BASE_URL = "https://ordermanagementservice-backend.onrender.com/api/co
 const apiInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'accept': 'application/json',
+    'accept': 'application/json'
   },
 });
 // Function to dynamically add token and role to headers
