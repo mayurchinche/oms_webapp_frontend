@@ -14,7 +14,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import SuccessSnackbar from './SuccessSnackbar';
 
-const DcDeliverModal = ({ isModalOpen, closeModal, order }) => {
+const DcDeliverModal = ({ isModalOpen, closeModal, order,fetchOrders,reversalDeliveryPendingColumns }) => {
   const [deliveredAt, setDeliveredAt] = useState('');
   const orderId = order?.id; // Handle possible `undefined`
   const { role, token } = useSelector((state) => state.auth);
@@ -63,6 +63,7 @@ const DcDeliverModal = ({ isModalOpen, closeModal, order }) => {
         setSnackbarOpen(true); // Open snackbar on success
         setTimeout(() => {
           closeModal();
+          fetchOrders('https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/get_reversal_delivery_pending_orders', reversalDeliveryPendingColumns, 'dcDeliveryPending');
         }, 2000);
       })
       .catch((err) => {
