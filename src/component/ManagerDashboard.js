@@ -38,7 +38,10 @@ const ManagerDashboard = () => {
   const [isManageSupplierModalOpen, setIsManageSupplierModalOpen] = useState(false); // Manage Supplier Modal state
   
   const [filters, setFilters] = useState({});
-
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0]; // Extracts 'YYYY-MM-DD' format
+  };
   const handleFilterChange = (column, value) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
@@ -439,6 +442,8 @@ const handelAnalysisClick = () =>{
             >
               {column.buttonText}
             </button>
+          ) : column.accessor === 'created_at' ? (
+            formatDate(order[column.accessor]) // Format the date here
           ) : (
             order[column.accessor]
           )}

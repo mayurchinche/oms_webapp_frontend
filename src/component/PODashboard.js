@@ -49,7 +49,10 @@ const PODashboard = () => {
   const [columns, setColumns] = useState([]); // State to manage columns
   const navigate = useNavigate();
   
-
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0]; // Extracts 'YYYY-MM-DD' format
+  };
   const fetchOrders = (url, columnsConfig, view) => {
     setLoading(true);
     setError(null);
@@ -459,6 +462,8 @@ const PODashboard = () => {
                           }}>
                             {column.buttonText}
                           </button>
+                        ) : column.accessor === 'created_at' ? (
+                          formatDate(order[column.accessor]) // Format the date here
                         ) : (
                           order[column.accessor]
                         )}
