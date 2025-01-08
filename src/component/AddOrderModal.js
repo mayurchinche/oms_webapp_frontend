@@ -20,6 +20,7 @@ import './AddOrderModal.css'; // For custom styles
 const AddOrderModal = ({ isModalOpen, closeModal }) => {
   const [customerName, setCustomerName] = useState('');
   const [materialName, setMaterialName] = useState('');
+  const [materialCode, setMaterialCode] = useState('');
   const [model, setModel] = useState('');
   const [quantity, setQuantity] = useState('');
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split('T')[0]);
@@ -36,8 +37,8 @@ const AddOrderModal = ({ isModalOpen, closeModal }) => {
   const [isCustomerSelected, setIsCustomerSelected] = useState(false);
   const [isMaterialSelected, setIsMaterialSelected] = useState(false);
   const [isModelSelected, setIsModelSelected] = useState(false);
-
-  const { role, token, mobileNumber } = useSelector((state) => state.auth);
+  
+  const { role, token, mobileNumber,userName } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,7 +62,11 @@ const AddOrderModal = ({ isModalOpen, closeModal }) => {
       })
         .then((response) => {
           console.log('Materials fetched:', response.data[0]);
-          setMaterials(response.data[0].map((material) => material.material_name));
+          const materials = response.data[0].map(material => ({
+            name: material.material_name,
+            code: material.material_code
+          }));
+          setMaterials(materials);
         })
         .catch((error) => {
           console.error('Error fetching materials:', error);
@@ -72,6 +77,7 @@ const AddOrderModal = ({ isModalOpen, closeModal }) => {
   const resetModalState = () => {
     setCustomerName('');
     setMaterialName('');
+    setMaterialCode('');
     setModel('');
     setQuantity('');
     setOrderDate(new Date().toISOString().split('T')[0]);
@@ -95,16 +101,36 @@ const AddOrderModal = ({ isModalOpen, closeModal }) => {
     }
   };
 
+  // const handleMaterialChange = (e) => {
+  //   const value = e.target.value;
+  //   setMaterialName(value);
+  //   setIsMaterialSelected(false);
+  //   if (value.length > 0) {
+  //     setFilteredMaterials(materials.filter((material) => material.toLowerCase().includes(value.toLowerCase())));
+  //   } else {
+  //     setFilteredMaterials([]);
+  //   }
+  // };
   const handleMaterialChange = (e) => {
-    const value = e.target.value;
-    setMaterialName(value);
+    const inputValue = e.target.value.toLowerCase();
+    setMaterialName(inputValue);
+    setMaterialCode(inputValue);
     setIsMaterialSelected(false);
-    if (value.length > 0) {
-      setFilteredMaterials(materials.filter((material) => material.toLowerCase().includes(value.toLowerCase())));
+  
+    if (inputValue.length > 0) {
+      const filteredMaterials = materials.filter(material => {
+        // Safeguard against undefined material properties
+        const nameMatch = material.name && material.name.toLowerCase().includes(inputValue);
+        const codeMatch = material.code && material.code.toLowerCase().includes(inputValue);
+        return nameMatch || codeMatch;
+      });
+      setFilteredMaterials(filteredMaterials);
     } else {
       setFilteredMaterials([]);
     }
   };
+  
+  
 
   const handleMaterialSelect = (material) => {
     setMaterialName(material);
@@ -155,10 +181,11 @@ const AddOrderModal = ({ isModalOpen, closeModal }) => {
     const orderData = {
       customer_name: customerName,
       material_name: materialName,
+      material_code: materialCode,
       model: model,
       order_date: orderDate,
       order_quantity: quantity,
-      ordered_by: 'juned', // Hardcoded for now
+      ordered_by: userName,
       user_contact_number: mobileNumber
     };
 
@@ -257,14 +284,18 @@ const AddOrderModal = ({ isModalOpen, closeModal }) => {
                 />
                 {materialName.length > 0 && filteredMaterials.length > 0 && (
                   <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
-                    {filteredMaterials.map((material, index) => (
-                      <MenuItem
-                        key={index}
-                        onClick={() => handleMaterialSelect(material)}
-                      >
-                        {material}
-                      </MenuItem>
-                    ))}
+                    {filteredMaterials.length > 0 && (
+  <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
+    {filteredMaterials.map((material, index) => (
+      <MenuItem
+        key={index}
+        onClick={() => handleMaterialSelect(material.name)}
+      >
+        {material.code} - {material.name}
+      </MenuItem>
+    ))}
+  </Box>
+)}
                   </Box>
                                   )}
                                   {loadingModels ? (

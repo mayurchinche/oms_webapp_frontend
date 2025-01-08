@@ -16,6 +16,11 @@ import DcDeliverModal from './DcDeliverModal'; // Import the DcDeliverModal comp
 import RaiseDcModal from './RaiseDcModal';
 import { logout } from '../redux/Actions/authActions';
 import { useDispatch } from 'react-redux';
+import ManageMaterialModal from './ManageMaterialModal'; // Import the ManageMaterialModal component
+
+import ApproveOrderModal from './ApproveOrderModal';
+import ApproveReversalOrderModal from './ApproveReversalOrderModal';
+
 const PODashboard = () => {
   
   
@@ -48,7 +53,62 @@ const PODashboard = () => {
   const [orderType, setOrderType] = useState('forward orders');
   const [columns, setColumns] = useState([]); // State to manage columns
   const navigate = useNavigate();
-  
+  const reviewPendingColumns = [
+    { header: 'Order Date', accessor: 'order_date' },
+    { header: 'Material Name', accessor: 'material_name' },
+    { header: 'Model', accessor: 'model' },
+    { header: 'Customer Name', accessor: 'name_of_customer' },
+    { header: 'Ordered By', accessor: 'ordered_by' },
+    { header: 'Quantity', accessor: 'order_quantity' },
+    { header: 'Status', accessor: 'status' },
+    { header: 'Action', accessor: 'Review & Approve', isButton: true, buttonText: 'Review & Approve' }
+
+  ];
+  const handleReveiwPendingClick=()=>{
+    fetchOrders(' https://ordermanagementservice-backend.onrender.com/api/core/orders/review_pending',reviewPendingColumns);
+  }
+  const reversalReviewPendingColumns =[
+    { header: 'Order Id', accessor: 'id' },
+    { header: 'Created At', accessor: 'created_at' },
+    { header: 'Supplier Name', accessor: 'origin_order_supplier_name' },
+    { header: 'Material Name', accessor: 'original_order_material_name' },
+    { header: 'Customer Name', accessor: 'name_of_customer' },
+    { header: 'Ordered By', accessor: 'user_contact_number' },
+    { header: 'Quantity', accessor: 'original_order_quantity' },
+    { header: 'Reversal Quantity', accessor: 'reversal_quantity' },
+    { header: 'Action', accessor: 'Approve Reversal', isButton: true, buttonText: 'Approve Reversal' }
+  ]
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false); // Approve Modal state
+  const [isApproveReversalOrderModal, setIsApproveReversalOrderModal] = useState(false); // Approve Reversal Modal state
+  const handleReversalReveiwPendingClick = () => {
+    fetchOrders(' https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/get_reversal_review_pending',reversalReviewPendingColumns);
+  };
+
+
+  const closeApproveModal = () => {
+    console.log('Closing approve modal');
+    setIsApproveModalOpen(false);
+  };
+
+  const closeApproveReversalModal =(order) =>{
+    console.log('Opening approve reversal modal for order:', order);
+    setIsApproveReversalOrderModal(false);
+  }
+
+
+  const [isManageMaterialModalOpen, setIsManageMaterialModalOpen] = useState(false); // Manage Material Modal state
+  const openManageMaterialModal = () => {
+    console.log('Opening manage material modal');
+    setIsManageMaterialModalOpen(true);
+  };
+
+
+  const closeManageMaterialModal = () => {
+    console.log('Closing manage material modal');
+    setIsManageMaterialModalOpen(false);
+  };
+
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toISOString().split('T')[0]; // Extracts 'YYYY-MM-DD' format
@@ -410,8 +470,10 @@ const PODashboard = () => {
         onMarkReversalDeliveryClick={handelMarkReversalDeliveryClick}
         onViewOrdersClick={handleViewOrdersClick}
         onAddOrderClick={handleAddOrderClick}
-        onReviewPendingClick={handleReversalOrderClick}
+        onReviewPendingClick={handleReveiwPendingClick}
         onManageSupplierClick={handelManageSupplierClick}
+        onManageMaterailClick={openManageMaterialModal}
+        onReversalReviewPendingClick={handleReversalReveiwPendingClick}
         onLogout={logOut}
       />
        <div className={`main-content ${isSidebarCollapsed ? 'main-content-collapsed' : ''}`}>
@@ -476,12 +538,15 @@ const PODashboard = () => {
             )}
           </div>
         </div>
+        <ManageMaterialModal isModalOpen={isManageMaterialModalOpen} closeModal={closeManageMaterialModal} />
         <ManageSupplierModal  isModalOpen={isManageSupplierModalOpen} closeModal ={closeManageSupplierModal} />
         {selectedOrder && <RaisePOModal isModalOpen={isRaisePOModalOpen} closeModal ={closeRaisePOModal} order={selectedOrder} fetchOrders={fetchOrders} pendingPOColumns={pendingPOColumns} />}
         {selectedOrder && <MarkDeliverModal isModalOpen={isMarkDeliverModalOpen} closeModal ={closeMarkDeliverModal} order={selectedOrder} fetchOrders={fetchOrders} deliveryPendingColumns={deliveryPendingColumns} />}
         {selectedOrder && <DcDeliverModal isModalOpen={isDcDeliverModalOpen} closeModal ={closeDcDeliverModal} order={selectedOrder} reversalDeliveryPendingColumns={reversalDeliveryPendingColumns} fetchOrders={fetchOrders} />}
         {selectedOrder && <RaiseDcModal isModalOpen={isRaiseDCModel} closeModal ={closeDRaisecDCModal} order={selectedOrder} fetchOrders={fetchOrders} dcPendingColumns={dcPendingColumns}  />}
-
+        {selectedOrder && <ApproveOrderModal isModalOpen={isApproveModalOpen} closeModal={closeApproveModal} order={selectedOrder} />}
+        {selectedOrder && <ApproveReversalOrderModal isModalOpen={isApproveReversalOrderModal} closeModal={closeApproveReversalModal} order={selectedOrder} />}
+ 
         
         {/* <RaisePOModal isModalOpen={isRaisePOModalOpen} closeModal ={openRaisePOModal} order  /> */}
         </div>

@@ -7,11 +7,13 @@ import './AddMaterialModal.css'; // For custom styles
 
 const AddMaterialModal = ({ isModalOpen, closeModal, refreshMaterials }) => {
   const [materialName, setMaterialName] = useState('');
+  const [materialCode, setMaterialCode] = useState('');
   const [materialDescription, setMaterialDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isMaterialNameValid, setIsMaterialNameValid] = useState(true);
+  const [isMaterialCodeValid, setIsMaterialCodeValid] = useState(true);
   const [isMaterialDescriptionValid, setIsMaterialDescriptionValid] = useState(true);
 
   const { token, role } = useSelector((state) => state.auth);
@@ -19,8 +21,9 @@ const AddMaterialModal = ({ isModalOpen, closeModal, refreshMaterials }) => {
   // Handle Add Material button click
   const handleAddMaterial = () => {
     // Validation
-    if (!materialName || !materialDescription) {
+    if (!materialName || !materialDescription || !materialCode) {
       setIsMaterialNameValid(!!materialName);
+      setIsMaterialCodeValid(!!materialCode);
       setIsMaterialDescriptionValid(!!materialDescription);
       setErrorMessage('All fields are required.');
       return;
@@ -29,9 +32,10 @@ const AddMaterialModal = ({ isModalOpen, closeModal, refreshMaterials }) => {
     setLoading(true);
     const materialData = {
       material_name: materialName,
+      product_shortcut:materialCode,
       material_description: materialDescription,
     };
-
+    console.log("materialData",materialData)
     // API request to add material
     axios.post('https://ordermanagementservice-backend.onrender.com/api/materials', materialData, {
       headers: { 
@@ -46,6 +50,7 @@ const AddMaterialModal = ({ isModalOpen, closeModal, refreshMaterials }) => {
         setSuccessMessage('Material successfully added');
         setMaterialName('');
         setMaterialDescription('');
+        setMaterialCode('');
         setTimeout(() => {
           setSuccessMessage('');
           closeModal();
@@ -67,8 +72,15 @@ const AddMaterialModal = ({ isModalOpen, closeModal, refreshMaterials }) => {
     if (value) setIsMaterialNameValid(true);
   };
 
+  // Handle input change for material Code
+  const handleMaterialCodeChange = (e) => {
+    const value = e.target.value;
+    setMaterialCode(value);
+    // Reset validation state for material name if the user types anything
+    if (value) setIsMaterialCodeValid(true);
+  };
   // Handle input change for material description
-  const handleMaterialDescriptionChange = (e) => {
+const handleMaterialDescriptionChange = (e) => {
     const value = e.target.value;
     setMaterialDescription(value);
     // Reset validation state for material description if the user types anything
@@ -117,6 +129,16 @@ const AddMaterialModal = ({ isModalOpen, closeModal, refreshMaterials }) => {
                   variant="outlined"
                   error={!isMaterialNameValid}
                   helperText={!isMaterialNameValid ? 'Material name is required' : ''}
+                />
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  label="Product Code"
+                  value={materialCode}
+                  onChange={handleMaterialCodeChange}
+                  variant="outlined"
+                  error={!isMaterialCodeValid}
+                  helperText={!isMaterialCodeValid ? 'Product Code is required' : ''}
                 />
                 <TextField
                   fullWidth
