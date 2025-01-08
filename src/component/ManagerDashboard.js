@@ -331,6 +331,7 @@ const handelAnalysisClick = () =>{
     ))}
   </tr>
 </thead> */}
+
 <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', color: 'black', zIndex: 1 }}>
   <tr>
     {columns.map((column, index) => (
