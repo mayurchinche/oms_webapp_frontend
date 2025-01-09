@@ -48,6 +48,7 @@ const getMenuItems = (role) => {
       ];
     case 'po_team':
       return [
+        'View Orders',
         'Raise PO',
         'Raise DC',
         'Mark Delivery',

@@ -62,6 +62,7 @@ const EmployeeDashboard = () => {
       ordered_by: '',
       order_date: '',
       material_name: '',
+      material_code:''
     });
   };
   
@@ -219,7 +220,7 @@ const EmployeeDashboard = () => {
           <span>{column.header}</span>
           
           {/* Show selected filter value if it exists */}
-          {['status', 'ordered_by', 'order_date', 'material_name'].includes(column.accessor) && filters[column.accessor] && (
+          {['status', 'ordered_by', 'order_date', 'material_name','material_code'].includes(column.accessor) && filters[column.accessor] && (
             <span
             style={{
               display: 'inline-flex',
@@ -254,7 +255,7 @@ const EmployeeDashboard = () => {
           )}
 
           {/* Filter Dropdown */}
-          {['status', 'ordered_by', 'order_date', 'material_name'].includes(column.accessor) && (
+          {['status', 'ordered_by', 'order_date', 'material_name','material_code'].includes(column.accessor) && (
             <DropdownButton
               id={`filter-${column.accessor}`}
               title={<FaFilter style={{ cursor: 'pointer', color: '#fff' }} />}

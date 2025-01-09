@@ -21,6 +21,9 @@ import ManageMaterialModal from './ManageMaterialModal'; // Import the ManageMat
 import ApproveOrderModal from './ApproveOrderModal';
 import ApproveReversalOrderModal from './ApproveReversalOrderModal';
 
+import { FaFilter } from 'react-icons/fa';
+import { Dropdown, DropdownButton } from 'react-bootstrap'; // For dropdown menus
+
 const PODashboard = () => {
   
   
@@ -35,7 +38,7 @@ const PODashboard = () => {
   const [isDcDeliverModalOpen, setIsDcDeliverModalOpen] = useState(false); // DC Deliver Modal state
 
   const [isRaiseDCModel, setIsRaiseDCModel] = useState(false); // DC Deliver Modal state
-  
+
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [responseMessage, setResponseMessage] = useState(''); // Response message for actions
   const [currentView, setCurrentView] = useState(''); // Track the current view
@@ -109,6 +112,9 @@ const PODashboard = () => {
   };
 
 
+  
+
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toISOString().split('T')[0]; // Extracts 'YYYY-MM-DD' format
@@ -148,10 +154,10 @@ const PODashboard = () => {
   const forwardOrderColumns = [
     { header: 'Order Date', accessor: 'order_date' },
     { header: 'Material Name', accessor: 'material_name' },
+    { header: 'Material Code', accessor: 'material_code' },
     { header: 'Model', accessor: 'model' },
     { header: 'Customer Name', accessor: 'name_of_customer' },
-    { header: 'Status', accessor: 'status' },
-    { header: 'Action', accessor: 'actions', isButton: true, buttonText: 'Raise Reversal' }
+    { header: 'Status', accessor: 'status' }
   ];
 
   const reversalOrderColumns = [
@@ -216,6 +222,7 @@ const PODashboard = () => {
 
   const reversalDeliveryPendingColumns = [
     { header: 'Reversal Order ID', accessor: 'id' },
+    { header: 'DC Number', accessor: 'dc_number' },
     { header: 'User Contact Number', accessor: 'user_contact_number' },
     { header: 'Created At', accessor: 'created_at' },
     { header: 'Description', accessor: 'description' },
@@ -226,6 +233,45 @@ const PODashboard = () => {
     { header: 'Status', accessor: 'status' },
     { header: 'DC Deliver', accessor: 'DC Deliver', isButton: true, buttonText: 'DC Deliver' }
   ];
+  const [filters, setFilters] = useState({});
+  const handleFilterChange = (column, value) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [column]: value,
+    }));
+  };
+  const clearAllFilters = () => {
+    setFilters({
+      state: '',
+      ordered_by: '',
+      order_date: '',
+      material_name: '',
+      material_code: '',
+      po_no:'',
+      dc_number:''
+    });
+  };
+    
+  const filteredOrders = orders.filter((order) => {
+    return Object.entries(filters).every(([column, value]) => {
+      return !value || order[column] === value;
+    });
+  });
+  
+  
+const handleReversalOrderViewClick = () => {
+    clearAllFilters();
+    setOrderType('reversal orders');
+    setActiveSection('reversal');
+    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/get_all_reversal_orders`, reversalOrderColumns);
+  };
+
+  const handleForwardOrderViewClick = () => {
+    setActiveSection('forward');
+    setOrderType('Forward Orders');
+    fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/get_all_orders`, forwardOrderColumns);
+  };
+
 
   const handelRaisePOClick = () =>{
     handleForwardOrderClick()
@@ -446,13 +492,25 @@ const PODashboard = () => {
         setResponseMessage('Failed to mark DC as delivered');
       });
   };
+  // const handleSwitch = (orderType) => {
+  //   switch (orderType) {
+  //     case 'Forward Orders':
+  //       handleForwardOrderClick();
+  //       break;
+  //     case 'Reversal Orders':
+  //       handleReversalOrderClick();
+  //       break;
+  //     default:
+  //       console.log('Unknown action');
+  //   }
+  // };
   const handleSwitch = (orderType) => {
     switch (orderType) {
       case 'Forward Orders':
-        handleForwardOrderClick();
+        handleForwardOrderViewClick()
         break;
       case 'Reversal Orders':
-        handleReversalOrderClick();
+        handleReversalOrderViewClick()
         break;
       default:
         console.log('Unknown action');
@@ -468,7 +526,7 @@ const PODashboard = () => {
         onRaiseDCClick={handelRaiseDCClick}
         onMarkDeliveryClick={handelMarkDeliveryClick}
         onMarkReversalDeliveryClick={handelMarkReversalDeliveryClick}
-        onViewOrdersClick={handleViewOrdersClick}
+        onViewOrdersClick={handleForwardOrderViewClick}
         onAddOrderClick={handleAddOrderClick}
         onReviewPendingClick={handleReveiwPendingClick}
         onManageSupplierClick={handelManageSupplierClick}
@@ -491,16 +549,71 @@ const PODashboard = () => {
             ) : (
               <table className="table table-bordered table-hover custom-table">
                 <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', color: 'black', zIndex: 1 }}>
-                  <tr>
-                    {columns.map((column, index) => (
-                      <th key={index} style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>
-                        {column.header}
-                      </th>
-                    ))}
-                  </tr>
+                <tr>
+    {columns.map((column, index) => (
+      <th key={index} style={{ padding: '12px 8px', backgroundColor: '#007bff', color: 'white' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>{column.header}</span>
+          
+          {/* Show selected filter value if it exists */}
+          {['status', 'ordered_by', 'order_date', 'material_name','material_code','po_no','dc_number'].includes(column.accessor) && filters[column.accessor] && (
+            <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              backgroundColor: '#f1f1f1',
+              color: '#333',
+              padding: '2px 6px', // Reduced padding
+              fontSize: '12px', // Smaller font size
+              borderRadius: '10px',
+              marginLeft: '8px',
+              height: '18px', // Limit height for compactness
+              lineHeight: '16px', // Adjust line height to make text align better
+              whiteSpace: 'nowrap', // Prevent wrapping
+            }}
+          >
+            {filters[column.accessor]}
+            <button
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#f44336',
+                cursor: 'pointer',
+                marginLeft: '4px', // Smaller margin
+                fontSize: '12px', // Reduce font size for the close icon
+              }}
+              onClick={() => handleFilterChange(column.accessor, '')} // Clear filter
+            >
+              x
+            </button>
+          </span>
+          
+          )}
+
+          {/* Filter Dropdown */}
+          {['status', 'ordered_by', 'order_date', 'material_name','material_code','po_no','dc_number'].includes(column.accessor) && (
+            <DropdownButton
+              id={`filter-${column.accessor}`}
+              title={<FaFilter style={{ cursor: 'pointer', color: '#fff' }} />}
+              variant="secondary"
+              size="sm"
+              onSelect={(value) => handleFilterChange(column.accessor, value)}
+            >
+              <Dropdown.Item eventKey="">All</Dropdown.Item>
+              {[...new Set(orders.map((order) => order[column.accessor]))].map((value) => (
+                <Dropdown.Item key={value} eventKey={value}>
+                  {value}
+                </Dropdown.Item>
+              ))}
+            </DropdownButton>
+          )}
+        </div>
+      </th>
+    ))}
+  </tr>
                 </thead>
                 <tbody>
-                  {orders.map((order, index) => (
+                  {filteredOrders.map((order, index) => (
                     <tr key={index}>
                       {columns.map((column, colIndex) => (
                         <td key={colIndex}>
