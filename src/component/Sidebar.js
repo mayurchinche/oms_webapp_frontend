@@ -44,18 +44,23 @@ const getMenuItems = (role) => {
         'Reversal Review Pending',
         'Review Pending',
         'Analysis',
+        'Manage Suppliers'
       ];
     case 'po_team':
       return [
+        'View Orders',
         'Raise PO',
         'Raise DC',
         'Mark Delivery',
+        'Reversal Review Pending',
+        'Review Pending',
         'Mark Reversal Delivery',
         'Manage Suppliers',
+        'Manage Materials'
       ];
     case 'employee':
     default:
-      return ['View Orders', 'Add Order'];
+      return ['View Orders', 'Add Order','Manage Materials'];
   }
 };
 

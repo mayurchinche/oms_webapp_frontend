@@ -12,6 +12,9 @@ import { FaFilter } from 'react-icons/fa';
 import { Dropdown, DropdownButton } from 'react-bootstrap'; // For dropdown menus
 import './NewManagerDahsboard.css';
 
+import ManageMaterialModal from './ManageMaterialModal'; // Import the ManageMaterialModal component
+import ManageSupplierModal from './ManageSupplierModal'; // Import the ManageSupplierModal component
+
 const EmployeeDashboard = () => {
   const { role, token, mobileNumber, userName } = useSelector((state) => state.auth);
   const [orders, setOrders] = useState([]);
@@ -27,6 +30,18 @@ const EmployeeDashboard = () => {
   const [orderType, setOrderType] = useState('forward orders');
   const [columns, setColumns] = useState([]); // State to manage columns
   const navigate = useNavigate();
+
+  const [isManageMaterialModalOpen, setIsManageMaterialModalOpen] = useState(false); // Manage Material Modal state
+  const openManageMaterialModal = () => {
+    console.log('Opening manage material modal');
+    setIsManageMaterialModalOpen(true);
+  };
+
+  const closeManageMaterialModal = () => {
+    console.log('Closing manage material modal');
+    setIsManageMaterialModalOpen(false);
+  };
+
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -47,6 +62,7 @@ const EmployeeDashboard = () => {
       ordered_by: '',
       order_date: '',
       material_name: '',
+      material_code:''
     });
   };
   
@@ -177,6 +193,7 @@ const EmployeeDashboard = () => {
         onViewOrdersClick={handleViewOrdersClick}
         onAddOrderClick={handleAddOrderClick}
         onReviewPendingClick={handleReversalOrderClick}
+        onManageMaterailClick={openManageMaterialModal}
         onLogout={logOut}
       />
 
@@ -203,7 +220,7 @@ const EmployeeDashboard = () => {
           <span>{column.header}</span>
           
           {/* Show selected filter value if it exists */}
-          {['status', 'ordered_by', 'order_date', 'material_name'].includes(column.accessor) && filters[column.accessor] && (
+          {['status', 'ordered_by', 'order_date', 'material_name','material_code'].includes(column.accessor) && filters[column.accessor] && (
             <span
             style={{
               display: 'inline-flex',
@@ -238,7 +255,7 @@ const EmployeeDashboard = () => {
           )}
 
           {/* Filter Dropdown */}
-          {['status', 'ordered_by', 'order_date', 'material_name'].includes(column.accessor) && (
+          {['status', 'ordered_by', 'order_date', 'material_name','material_code'].includes(column.accessor) && (
             <DropdownButton
               id={`filter-${column.accessor}`}
               title={<FaFilter style={{ cursor: 'pointer', color: '#fff' }} />}
@@ -287,6 +304,7 @@ const EmployeeDashboard = () => {
         </div>
 
         <AddOrderModal isModalOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} />
+        <ManageMaterialModal isModalOpen={isManageMaterialModalOpen} closeModal={closeManageMaterialModal} />
         {selectedOrder && (
           <RaiseReversalModal
             isModalOpen={isReversalModalOpen}

@@ -55,6 +55,7 @@ const ManagerDashboard = () => {
       ordered_by: '',
       order_date: '',
       material_name: '',
+      material_code: ''
     });
   };
   
@@ -69,6 +70,7 @@ const ManagerDashboard = () => {
   const forwardOrderColumns = [
     { header: 'Order Date', accessor: 'order_date' },
     { header: 'Material Name', accessor: 'material_name' },
+    { header: 'Material Code', accessor: 'material_code' },
     { header: 'Model', accessor: 'model' },
     { header: 'Customer Name', accessor: 'name_of_customer' },
     { header: 'Ordered By', accessor: 'ordered_by' },
@@ -80,6 +82,7 @@ const ManagerDashboard = () => {
   const reversalOrderColumns = [
     { header: 'Created At', accessor: 'created_at' },
     { header: 'Material Name', accessor: 'original_order_material_name' },
+    { header: 'Material Code', accessor: 'material_code' },
     { header: 'Supplier Name', accessor: 'origin_order_supplier_name' },
     { header: 'Description', accessor: 'description' },
     { header: 'original_order_quantity', accessor: 'original_order_quantity' },
@@ -331,6 +334,7 @@ const handelAnalysisClick = () =>{
     ))}
   </tr>
 </thead> */}
+
 <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', color: 'black', zIndex: 1 }}>
   <tr>
     {columns.map((column, index) => (
@@ -339,7 +343,7 @@ const handelAnalysisClick = () =>{
           <span>{column.header}</span>
           
           {/* Show selected filter value if it exists */}
-          {['status', 'ordered_by', 'order_date', 'material_name'].includes(column.accessor) && filters[column.accessor] && (
+          {['status', 'ordered_by', 'order_date', 'material_name','material_code'].includes(column.accessor) && filters[column.accessor] && (
             <span
             style={{
               display: 'inline-flex',
@@ -374,7 +378,7 @@ const handelAnalysisClick = () =>{
           )}
 
           {/* Filter Dropdown */}
-          {['status', 'ordered_by', 'order_date', 'material_name'].includes(column.accessor) && (
+          {['status', 'ordered_by', 'order_date', 'material_name','material_code'].includes(column.accessor) && (
             <DropdownButton
               id={`filter-${column.accessor}`}
               title={<FaFilter style={{ cursor: 'pointer', color: '#fff' }} />}
@@ -424,7 +428,7 @@ const handelAnalysisClick = () =>{
                     </tr>
                   ))}
                 </tbody> */}
-                <tbody>
+<tbody>
   {filteredOrders.map((order, index) => (
     <tr key={index}>
       {columns.map((column, colIndex) => (

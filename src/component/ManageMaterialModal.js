@@ -3,7 +3,6 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
-  Container,
   Typography,
   TextField,
   Button,
@@ -12,15 +11,46 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   CircularProgress,
   Backdrop,
-  useTheme,
-  useMediaQuery
+  Grid,
+  Paper
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import AddMaterialModal from './AddMaterialModal';
+
+const ManagingMaterialsStyles = {
+  container: {
+    maxHeight: '80vh',
+    overflowY: 'auto',
+    padding: '20px'
+  },
+  materialsGrid: {
+    maxHeight: '60vh',
+    overflowY: 'auto'
+  },
+  materialBox: {
+    border: '1px solid #D1D1D1',
+    borderRadius: '8px',
+    padding: '1rem',
+    backgroundColor: '#f9f9f9',
+  },
+  subtitle: {
+    fontWeight: 'bold',
+    marginBottom: '0.5rem'
+  },
+  moduleBox: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '0.5rem',
+    border: '1px solid #D1D1D1',
+    borderRadius: '8px',
+    backgroundColor: '#ffffff',
+    marginBottom: '0.5rem'
+  }
+};
 
 const ManageMaterialModal = ({ isModalOpen, closeModal }) => {
   const [materials, setMaterials] = useState([]);
@@ -37,8 +67,6 @@ const ManageMaterialModal = ({ isModalOpen, closeModal }) => {
 
   const { role, token } = useSelector((state) => state.auth);
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (isModalOpen) {
@@ -69,7 +97,7 @@ const ManageMaterialModal = ({ isModalOpen, closeModal }) => {
     }
   };
 
-  const fetchModules = async (materialName) => {
+ const fetchModules = async (materialName) => {
     setLoading(true);
     try {
       const response = await axios.get(`https://ordermanagementservice-backend.onrender.com/api/get/${materialName}`, {
@@ -209,7 +237,7 @@ const ManageMaterialModal = ({ isModalOpen, closeModal }) => {
       </Backdrop>
 
       {/* Main Modal Dialog for managing materials */}
-      <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="md">
+      <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="lg">
         <DialogTitle>
           Manage Materials
           <IconButton
@@ -224,160 +252,163 @@ const ManageMaterialModal = ({ isModalOpen, closeModal }) => {
         </DialogTitle>
         
         <DialogContent dividers>
-          <TextField
-            fullWidth
-            margin="normal"
-            variant="outlined"
-            label="Search Material"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2 }}
-            onClick={openAddMaterialModal}
-          >
-            Add Material
-          </Button>
-          
-          {error ? (
-            <Typography color="error" sx={{ mt: 2 }}>{error}</Typography>
-          ) : (
-            <Box sx={{ mt: 2 }}>
-              {filteredMaterials.map((material, index) => (
-                <Box key={index} sx={{ mb: 2, border: '1px solid #ccc', borderRadius: 1, p: 2 }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="h6">{material.material_name}</Typography>
-                    <Button
-                      variant="outlined"
-                      onClick={() => toggleExpandMaterial(material.material_name)}
-                    >
-                      {expandedMaterial === material.material_name ? '-' : '+'}
-                    </Button>
-                  </Box>
-                  {expandedMaterial === material.material_name && (
-                    <Box>
-                      <Typography variant="subtitle1" sx={{ mt: 2 }}>Available Modules</Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField
+                fullWidth
+                margin="normal"
+                variant="outlined"
+                label="Search Material"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                sx={{ mt: 2, bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}
+                onClick={openAddMaterialModal}
+              >
+                Add Material
+              </Button>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={8}>
+              {error ? (
+                <Typography color="error">{error}</Typography>
+              ) : (
+                <Grid container spacing={2} sx={{ ...ManagingMaterialsStyles.materialsGrid }}>
+                  {filteredMaterials.map((material, index) => (
+                    <Grid item xs={12} sm={6} md={4} key={index}>
+                      <Paper elevation={3}
+                      sx={ManagingMaterialsStyles.materialBox}>
+                      <Typography variant="h6" gutterBottom>{material.material_name}</Typography>
                       <Button
-                        variant="contained"
-                        color="secondary"
-                        sx={{ mt: 1 }}
-                        onClick={openAddModuleModal}
+                        variant="outlined"
+                        onClick={() => toggleExpandMaterial(material.material_name)}
+                        sx={{ mt: 1, mb: 1 }}
                       >
-                        Add Module
+                        {expandedMaterial === material.material_name ? 'Collapse' : 'Expand'}
                       </Button>
-                      <Box sx={{ mt: 2 }}>
-                        {modules.map((module, idx) => (
-                          <Box key={idx} display="flex" justifyContent="space-between" alignItems="center" sx={{ mt: 1, p: 1, border: '1px solid #e0e0e0', borderRadius: 1 }}>
-                                                        <Typography>{module.module_name}</Typography>
-                            <Box>
-                              <Button
-                                variant="outlined"
-                                color="primary"
-                                onClick={() => openUpdateModuleModal(module.module_name)}
-                              >
-                                Update
-                              </Button>
-                              <Button
-                                variant="outlined"
-                                color="error"
-                                sx={{ ml: 1 }}
-                                onClick={() => handleDeleteModule(material.material_name, module.module_name)}
-                              >
-                                Delete
-                              </Button>
-                            </Box>
-                          </Box>
-                        ))}
-                      </Box>
-                    </Box>
-                  )}
-                </Box>
-              ))}
-            </Box>
-          )}
-        </DialogContent>
+                      {expandedMaterial === material.material_name && (
+                        <Box mt={2}>
+                          <Typography variant="subtitle1" sx={ManagingMaterialsStyles.subtitle}>Modules</Typography>
+                          <Button
+                            variant="contained"
+                            color="secondary"
+                            sx={{ mt: 1, bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }}
+                            onClick={openAddModuleModal}
+                          >
+                            Add Module
+                          </Button>
+                          <Grid container spacing={1} mt={2}>
+                            {modules.map((module, idx) => (
+                              <Grid item xs={12} key={idx}>
+                                <Box sx={ManagingMaterialsStyles.moduleBox}>
+                                  <Typography>{module.module_name}</Typography>
+                                  {/* <Box>
+                                    <Button
+                                      variant="outlined"
+                                      color="primary"
+                                      onClick={() => openUpdateModuleModal(module.module_name)}
+                                      sx={{ mr: 1 }}
+                                    >
+                                      Update
+                                    </Button>
+                                    <Button
+                                      variant="outlined"
+                                      color="error"
+                                      onClick={() => handleDeleteModule(material.material_name, module.module_name)}
+                                    >
+                                      Delete
+                                    </Button>
+                                  </Box> */}
+                                </Box>
+                              </Grid>
+                            ))}
+                          </Grid>
+                        </Box>
+                      )}
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </Grid>
+        </Grid>
+      </DialogContent>
 
-        <DialogActions>
-          <Button onClick={closeModal} color="primary">
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <DialogActions>
+        <Button onClick={closeModal} color="primary" variant="outlined">
+          Close
+        </Button>
+      </DialogActions>
+    </Dialog>
 
-      {/* Add Material Modal */}
-      <AddMaterialModal 
-        isModalOpen={isAddMaterialModalOpen}
-        closeModal={closeAddMaterialModal}
-        refreshMaterials={fetchMaterials}
-      />
+    {/* Add Material Modal */}
+    <AddMaterialModal 
+      isModalOpen={isAddMaterialModalOpen}
+      closeModal={closeAddMaterialModal}
+      refreshMaterials={fetchMaterials}
+    />
 
-      {/* Update Module Modal */}
-      <Dialog open={isUpdateModalOpen} onClose={closeUpdateModuleModal} fullWidth maxWidth="sm">
-        <DialogTitle>Update Module</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Enter the new name for the module.
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="normal"
-            label="New Module Name"
-            fullWidth
-            variant="outlined"
-            value={newModuleName}
-            onChange={(e) => setNewModuleName(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeUpdateModuleModal} color="primary">
-            Cancel
-          </Button>
-          <Button 
-            onClick={() => handleUpdateModule(expandedMaterial, newModuleName)}
-            color="primary"
-            variant="contained"
-          >
-            Update
-          </Button>
-        </DialogActions>
-      </Dialog>
+    {/* Update Module Modal */}
+    <Dialog open={isUpdateModalOpen} onClose={closeUpdateModuleModal} fullWidth maxWidth="sm">
+      <DialogTitle>Update Module</DialogTitle>
+      <DialogContent>
+        <TextField
+          autoFocus
+          margin="normal"
+          label="New Module Name"
+          fullWidth
+          variant="outlined"
+          value={newModuleName}
+          onChange={(e) => setNewModuleName(e.target.value)}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={closeUpdateModuleModal} color="primary" variant="outlined">
+          Cancel
+        </Button>
+        <Button 
+          onClick={() => handleUpdateModule(expandedMaterial, newModuleName)}
+          color="primary"
+          variant="contained"
+        >
+          Update
+        </Button>
+      </DialogActions>
+    </Dialog>
 
-      {/* Add Module Modal */}
-      <Dialog open={isAddModuleModalOpen} onClose={closeAddModuleModal} fullWidth maxWidth="sm">
-        <DialogTitle>Add Module</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Enter the name for the new module.
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="normal"
-            label="Module Name"
-            fullWidth
-            variant="outlined"
-            value={newModuleName}
-            onChange={(e) => setNewModuleName(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeAddModuleModal} color="primary">
-            Cancel
-          </Button>
-          <Button 
-            onClick={() => handleAddModule(expandedMaterial, newModuleName)}
-            color="primary"
-            variant="contained" 
-          >
-            Add Module
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
-  );
+    {/* Add Module Modal */}
+    <Dialog open={isAddModuleModalOpen} onClose={closeAddModuleModal} fullWidth maxWidth="sm">
+      <DialogTitle>Add Module</DialogTitle>
+      <DialogContent>
+        <TextField
+          autoFocus
+          margin="normal"
+          label="Module Name"
+          fullWidth
+          variant="outlined"
+          value={newModuleName}
+          onChange={(e) => setNewModuleName(e.target.value)}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={closeAddModuleModal} color="primary" variant="outlined">
+          Cancel
+        </Button>
+        <Button 
+          onClick={() => handleAddModule(expandedMaterial, newModuleName)}
+          color="primary"
+          variant="contained" 
+        >
+          Add Module
+        </Button>
+      </DialogActions>
+    </Dialog>
+  </>
+);
 };
 
 export default ManageMaterialModal;
