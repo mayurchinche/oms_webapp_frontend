@@ -8,6 +8,9 @@ import ManagerDashboard from './component/ManagerDashboard';
 import PODashboard from './component/PODashboard';
 import ForgotPassword from './component/ForgotPassword';
 import Register from './component/Register';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
 
 import ProtectedRoute from './component/ProtectedRoute.js';
 import NewManagerDashboard from './component/NewManagerDahsboard';
