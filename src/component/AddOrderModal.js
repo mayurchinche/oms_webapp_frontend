@@ -18,7 +18,7 @@ import SuccessSnackbar from './SuccessSnackbar'; // Import the SuccessSnackbar c
 import './AddOrderModal.css'; // For custom styles
 
 const AddOrderModal = ({ isModalOpen, closeModal }) => {
-  const [customerName, setCustomerName] = useState('');
+const [customerName, setCustomerName] = useState('');
   const [materialName, setMaterialName] = useState('');
   const [materialCode, setMaterialCode] = useState('');
   const [model, setModel] = useState('');
@@ -90,7 +90,7 @@ const AddOrderModal = ({ isModalOpen, closeModal }) => {
     setErrorMessage('');
   };
 
-  const handleCustomerChange = (e) => {
+const handleCustomerChange = (e) => {
     const value = e.target.value;
     setCustomerName(value);
     setIsCustomerSelected(false);
@@ -132,13 +132,14 @@ const AddOrderModal = ({ isModalOpen, closeModal }) => {
   
   
 
-  const handleMaterialSelect = (material) => {
-    setMaterialName(material);
+  const handleMaterialSelect = (material_name,material_code) => {
+    setMaterialName(material_name);
+    setMaterialCode(material_code);
     setFilteredMaterials([]);
     setIsMaterialSelected(true);
     setLoadingModels(true);
-    console.log(`Fetching models for material: ${material}`);
-    axios.get(`https://ordermanagementservice-backend.onrender.com/api/get/${material}`, {
+    console.log(`Fetching models for material: ${material_name}`);
+    axios.get(`https://ordermanagementservice-backend.onrender.com/api/get/${material_name}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         role: role
@@ -289,7 +290,7 @@ const AddOrderModal = ({ isModalOpen, closeModal }) => {
     {filteredMaterials.map((material, index) => (
       <MenuItem
         key={index}
-        onClick={() => handleMaterialSelect(material.name)}
+        onClick={() => handleMaterialSelect(material.name,material.code)}
       >
         {material.code} - {material.name}
       </MenuItem>
