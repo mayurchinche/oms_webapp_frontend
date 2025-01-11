@@ -18,6 +18,7 @@ const AddMaterialModal = ({ isModalOpen, closeModal, refreshMaterials }) => {
 
   const { token, role } = useSelector((state) => state.auth);
 
+  
   // Handle Add Material button click
   const handleAddMaterial = () => {
     // Validation
