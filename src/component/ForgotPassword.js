@@ -3,6 +3,7 @@ import firebase from "../firebase.config";
 import axios from "axios";
 import { Box, Button, TextField, Typography, Card, CardContent, MenuItem, FormControl, InputLabel, Select, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { getAuth } from 'firebase/auth';
 
 const ForgotPassword = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -18,6 +19,7 @@ const ForgotPassword = () => {
   const [resetMessage, setResetMessage] = useState('');
   const recaptchRef = useRef(null);
   const navigate = useNavigate();
+  const auth = getAuth(); // Ensure this matches your Firebase initialization
 
   const handleSendOtp = () => {
     if (phoneNumber.length !== 10) {
@@ -26,6 +28,10 @@ const ForgotPassword = () => {
     }
     setOtpMessage('');
     const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+
+    if (recaptchRef.current) {
+      recaptchRef.current.innerHTML = '<div id="recaptcha-container"></div>';
+    }
 
     const verifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
       size: 'invisible',
@@ -36,10 +42,7 @@ const ForgotPassword = () => {
         console.log("reCAPTCHA expired.");
       }
     });
-
-    if (recaptchRef.current) {
-      recaptchRef.current.innerHTML = '<div id="recaptcha-container"></div>';
-    }
+    document.getElementById('recaptcha-container').style.display = 'none';
 
     firebase.auth().signInWithPhoneNumber(fullPhoneNumber, verifier)
       .then(confirmationResult => {
@@ -48,7 +51,6 @@ const ForgotPassword = () => {
         setOtpMessage('OTP sent successfully');
       }).catch(error => {
         console.log('Error sending OTP', error);
-        setOtpMessage('Error sending OTP, please try again.');
       });
   };
 
