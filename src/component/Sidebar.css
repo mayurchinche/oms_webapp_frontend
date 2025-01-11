@@ -144,7 +144,7 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
     z-index: 1000; /* Ensure visibility above content */
     transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transitions */
-    animation: toggle-button-pulse 1.5s infinite; /* Subtle pulsing animation */
+    /*animation: toggle-button-pulse 1.5s infinite; /* Subtle pulsing animation */
 }
 
 /* Hover Effect */

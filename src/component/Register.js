@@ -3,6 +3,9 @@ import firebase from "../firebase.config";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom"; // Import Link
 import './Register.css';
+import {
+  TextField, Button, Card, CardContent, Typography, MenuItem, Select, InputLabel, FormControl, Grid, Box
+} from '@mui/material';
 
 const Register = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -96,79 +99,124 @@ const Register = () => {
   };
 
   return (
-    <div className="register-container">
-      <div className="register-card">
-        <h1>Sign Up</h1>
-        <div ref={recaptchRef}></div>
-        {!isVerified ? (
-          <>
-            <select value={countryCode} onChange={e => setCountryCode(e.target.value)}>
-              <option value="+91">🇮🇳 +91</option>
-            </select>
-            <input
-              type="tel"
-              placeholder="Enter mobile number"
-              value={phoneNumber}
-              onChange={e => setPhoneNumber(e.target.value)}
-            />
-            <button onClick={handleSendOtp}>Send OTP</button>
-            {otpMessage && <p className="message">{otpMessage}</p>}
-            {/* Reference Text */}
-            <p className="reference-text">
-              Already registered? <Link to="/login">Click here to login</Link>
-            </p>
-            {otpSent && (
-              <>
-                <input
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#f5f5f5' }}>
+      <Card sx={{ width: 400, padding: 3 }}>
+        <CardContent>
+          <Typography variant="h4" component="h1" gutterBottom>
+            Sign Up
+          </Typography>
+          <div ref={recaptchRef}></div>
+          {!isVerified ? (
+            <>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Country Code</InputLabel>
+                <Select
+                  value={countryCode}
+                  onChange={e => setCountryCode(e.target.value)}
+                >
+                  <MenuItem value="+91">🇮🇳 +91</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                fullWidth
+                type="tel"
+                margin="normal"
+                label="Mobile Number"
+                variant="outlined"
+                value={phoneNumber}
+                onChange={e => setPhoneNumber(e.target.value)}
+              />
+              <Button fullWidth variant="contained" color="primary" onClick={handleSendOtp}>
+                Send OTP
+              </Button>
+              {otpSent && (
+                <TextField
+                  fullWidth
                   type="text"
-                  placeholder="Enter OTP"
+                  margin="normal"
+                  label="Enter OTP"
+                  variant="outlined"
                   value={verificationCode}
                   onChange={e => setVerificationCode(e.target.value)}
                 />
-                <button onClick={handleVerifyOtp}>Verify OTP</button>
-              </>
-            )}
-          </>
-        ) : (
-          <>
-            <p className="verified-text">OTP Verified</p>
-            <input
-              type="text"
-              placeholder="First Name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Last Name"
-              value={lastName}
-              onChange={e => setLastName(e.target.value)}
-            />
-            <select value={selectedRole} onChange={e => setSelectedRole(e.target.value)}>
-              <option value="employee">Employee</option>
-              <option value="manager">Manager</option>
-              <option value="po_team">PO Team</option>
-            </select>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-            />
-            {!isPasswordMatch && <p className="message">Passwords do not match!</p>}
-            <button onClick={handleSignUp}>Sign Up</button>
-            {registrationMessage && <p className="message">{registrationMessage}</p>}
-          </>
-        )}
-      </div>
-    </div>
+              )}
+              {otpSent && (
+                <Button fullWidth variant="contained" color="secondary" onClick={handleVerifyOtp}>
+                  Verify OTP
+                </Button>
+              )}
+              <Typography variant="body2" align="center" sx={{ mt: 2 }}>
+                Already registered?{' '}
+                <Link to="/login" underline="hover">
+                  Click here to login
+                </Link>
+              </Typography>
+            </>
+          ) : (
+            <>
+              <Typography variant="body1" color="success.main" sx={{ mb: 2 }}>
+                OTP Verified
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="First Name"
+                    variant="outlined"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Last Name"
+                    variant="outlined"
+                    value={lastName}
+                    onChange={e => setLastName(e.target.value)}
+                  />
+                </Grid>
+              </Grid>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Role</InputLabel>
+                <Select
+                  value={selectedRole}
+                  onChange={e => setSelectedRole(e.target.value)}
+                >
+                  <MenuItem value="employee">Employee</MenuItem>
+                  <MenuItem value="manager">Manager</MenuItem>
+                  <MenuItem value="po_team">PO Team</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                fullWidth
+                type="password"
+                margin="normal"
+                label="Password"
+                variant="outlined"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+              <TextField
+                fullWidth
+                type="password"
+                margin="normal"
+                label="Confirm Password"
+                variant="outlined"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                error={!isPasswordMatch}
+                helperText={!isPasswordMatch ? 'Passwords do not match!' : ''}
+              />
+              <Button fullWidth variant="contained" color="primary" sx={{ mt: 2 }} onClick={handleSignUp}>
+                Sign Up
+              </Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </Box>
   );
-};
+}
 
 export default Register;

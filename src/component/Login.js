@@ -3,28 +3,29 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setAuth } from '../redux/Actions/authActions';
 import {
+  Box,
   Container,
   Typography,
   TextField,
   Button,
-  Link,
+  CircularProgress,
+  Alert,
   Paper,
-  Box,
+  Link,
   useTheme,
   useMediaQuery,
-  CircularProgress, // Import CircularProgress
-  Alert, // Import Alert for showing error message
+  Snackbar,
 } from '@mui/material';
-import './Login.css';
+import './Login.css'; // Include custom CSS for background and styles
 
 const Login = () => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
-  const [countryCode] = useState('91'); // Set the country code to '91' (India) by default
-  const [loading, setLoading] = useState(false); // State to track the loading state
-  const [errorMessage, setErrorMessage] = useState(''); // State to hold error message
-  const [mobileNumberError, setMobileNumberError] = useState(''); // State for mobile validation error
-  const [passwordError, setPasswordError] = useState(''); // State for password validation error
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [mobileNumberError, setMobileNumberError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -33,35 +34,23 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Reset error messages before making the request
     setMobileNumberError('');
     setPasswordError('');
     setErrorMessage('');
 
-    let valid = true;
+    let isValid = true;
 
-    // Validate the mobile number
     if (!/^\d{10}$/.test(mobileNumber)) {
-      setMobileNumberError('Please enter a valid 10-digit mobile number.');
-      valid = false;
+      setMobileNumberError('Enter a valid 10-digit mobile number.');
+      isValid = false;
     }
-
-    // Validate password (ensure it's not empty)
     if (!password) {
       setPasswordError('Password is required.');
-      valid = false;
+      isValid = false;
     }
+    if (!isValid) return;
 
-    if (!valid) {
-      return; // If validation fails, prevent the form submission
-    }
-
-    // Combine the country code with the mobile number
-    const fullMobileNumber = `+${countryCode}${mobileNumber}`;
-
-    // Set loading to true to show the loader
     setLoading(true);
-
     try {
       const response = await fetch('https://ordermanagementservice-backend.onrender.com/auth/login', {
         method: 'POST',
@@ -69,140 +58,264 @@ const Login = () => {
           'Content-Type': 'application/json',
           accept: 'application/json',
         },
-        body: JSON.stringify({ contact_number: fullMobileNumber, password }),
+        body: JSON.stringify({ contact_number: `+91${mobileNumber}`, password }),
       });
 
-      const responseData = await response.json();
+      const data = await response.json();
 
-      // Check for error in response
-      if (responseData[0] && responseData[0].error) {
-        setErrorMessage(responseData[0].error); // Set error message from API response
-        setLoading(false); // Set loading to false
+      if (data[0]?.error) {
+        setErrorMessage(data[0].error);
+        setLoading(false);
         return;
       }
 
-      const data = responseData[0];
+      if (data[0]?.token) {
+        const userData = data[0];
+        sessionStorage.setItem('token', userData.token);
+        sessionStorage.setItem('role', userData.role);
+        sessionStorage.setItem('mobileNumber', `+91${mobileNumber}`);
+        sessionStorage.setItem('user_name', userData.user_name);
+        dispatch(setAuth(userData.role, userData.token, `+91${mobileNumber}`, userData.user_name));
 
-      setLoading(false); // Set loading to false after receiving the response
+        // Show success message
+        setSnackbarOpen(true);
 
-      if (data && data.token) {
-        sessionStorage.setItem('token', data.token);
-        sessionStorage.setItem('role', data.role);
-        sessionStorage.setItem('mobileNumber', fullMobileNumber);
-        sessionStorage.setItem('user_name', data.user_name);
-        dispatch(setAuth(data.role, data.token, fullMobileNumber, data.user_name));
         navigate(
-          data.role === 'employee'
+          userData.role === 'employee'
             ? '/employee-dashboard'
-            : data.role === 'manager'
+            : userData.role === 'manager'
             ? '/manager-dashboard'
             : '/po-dashboard'
         );
       } else {
-        alert(data.message);
+        setErrorMessage(data[0]?.message || 'Unexpected error occurred.');
       }
+      setLoading(false);
     } catch (error) {
-      setLoading(false); // Set loading to false in case of error
-      console.error('Error logging in:', error);
-      alert('An error occurred. Please try again.');
+      setLoading(false);
+      setErrorMessage('An error occurred. Please try again.');
     }
   };
 
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
   return (
-    <Container component="main" maxWidth="xs">
-      <Paper elevation={isSmallScreen ? 0 : 3} sx={{ p: 4, mt: 8, borderRadius: 2, position: 'relative' }}>
-        <Typography component="h1" variant="h5" align="center">
-          Login to your account
-        </Typography>
-
-        {/* Show error message if it exists */}
-        {errorMessage && (
-          <Box sx={{ mb: 2 }}>
-            <Alert severity="error">{errorMessage}</Alert>
-          </Box>
-        )}
-
-        {/* Show validation errors */}
-        {mobileNumberError && (
-          <Box sx={{ mb: 2 }}>
-            <Alert severity="error">{mobileNumberError}</Alert>
-          </Box>
-        )}
-        {passwordError && (
-          <Box sx={{ mb: 2 }}>
-            <Alert severity="error">{passwordError}</Alert>
-          </Box>
-        )}
-
-        <Box component="form" onSubmit={handleLogin} sx={{ mt: 1 }}>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="mobileNumber"
-            label="Mobile Number"
-            name="mobileNumber"
-            autoComplete="tel"
-            autoFocus
-            value={mobileNumber}
-            onChange={(e) => setMobileNumber(e.target.value)}
-            placeholder="Enter your 10-digit mobile number"
-            inputProps={{ maxLength: 10 }}
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            sx={{ mt: 3, mb: 2 }}
-            disabled={loading} // Disable the button while loading
-          >
-            Login
-          </Button>
-          <Box display="flex" justifyContent="space-between">
-            <Link href="/forgot-password" variant="body2">
-              Forgot password?
-            </Link>
-            <Link href="/Register" variant="body2">
-              Don't have an account? Register here
-            </Link>
-          </Box>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#ffffff',
+      }}
+    >
+      <Container
+        maxWidth="lg"
+        sx={{
+          display: 'flex',
+          flexDirection: isSmallScreen ? 'column' : 'row',
+          height: '100%',
+        }}
+      >
+        {/* Left Side: Carousel */}
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
+          {/* Your carousel code remains unchanged */}
+          <div id="carouselExample" className="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+            <div className="carousel-inner">
+              <div className="carousel-item active">
+                <img
+                  src="./images/losma_spa_logo.jpeg"
+                  className="d-block w-100"
+                  alt="Image 1"
+                  style={{ objectFit: 'contain', height: '300px' }}
+                />
+              </div>
+              <div className="carousel-item">
+                <img
+                  src="./images/losma_portfolio.jpg"
+                  className="d-block w-100"
+                  alt="Image 2"
+                  style={{ objectFit: 'contain', height: '300px' }}
+                />
+              </div>
+              <div className="carousel-item">
+                <img
+                  src="./images/losma.jpg"
+                  className="d-block w-100"
+                  alt="Image 3"
+                  style={{ objectFit: 'contain', height: '300px' }}
+                />
+              </div>
+            </div>
+            <button
+              className="carousel-control-prev"
+              type="button"
+              data-bs-target="#carouselExample"
+              data-bs-slide="prev"
+            >
+              <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span className="visually-hidden">Previous</span>
+            </button>
+            <button
+              className="carousel-control-next"
+              type="button"
+              data-bs-target="#carouselExample"
+              data-bs-slide="next"
+            >
+              <span className="carousel-control-next-icon" aria-hidden="true"></span>
+              <span className="visually-hidden">Next</span>
+            </button>
+          </div>
         </Box>
 
-        {/* Show loader when loading state is true */}
-        {loading && (
-          <Box
+        {/* Right Side: Login Form */}
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            mt: isSmallScreen ? 3 : 0,
+          }}
+        >
+          <Paper
+            elevation={6}
             sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              zIndex: 1,
+              borderRadius: 4,
+              padding: 4,
+              textAlign: 'center',
+              background: theme.palette.background.paper,
+              color: theme.palette.text.primary,
+              width: '100%',
+              maxWidth: '400px',
+              position: 'relative', // Added for overlay positioning
             }}
           >
-            <CircularProgress size={50} />
-          </Box>
-        )}
-      </Paper>
-    </Container>
+            {loading && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderRadius: 4,
+                  zIndex: 10,
+                }}
+              >
+                <CircularProgress />
+                <Typography sx={{ ml: 2 }} variant="h6">
+                  Logging in...
+                </Typography>
+              </Box>
+            )}
+            <Typography variant="h4" sx={{ fontWeight: 600, mb: 2 }}>
+              Welcome Back!
+            </Typography>
+            <Typography variant="body1" sx={{ color: 'text.secondary', mb: 3 }}>
+              Log in to continue
+            </Typography>
+
+            {errorMessage && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {errorMessage}
+              </Alert>
+            )}
+
+            <Box component="form" onSubmit={handleLogin}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                margin="normal"
+                label="Mobile Number"
+                value={mobileNumber}
+                onChange={(e) => setMobileNumber(e.target.value)}
+                error={Boolean(mobileNumberError)}
+                helperText={mobileNumberError}
+                inputProps={{ maxLength: 10 }}
+              />
+
+              <TextField
+                fullWidth
+                variant="outlined"
+                margin="normal"
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                error={Boolean(passwordError)}
+                helperText={passwordError}
+              />
+
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                type="submit"
+                disabled={loading}
+                sx={{
+                  mt: 2,
+                  mb: 1,
+                  py: 1.5,
+                  fontWeight: 'bold',
+                  fontSize: '16px',
+                }}
+              >
+                Log In
+              </Button>
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  mt: 2,
+                  fontSize: '14px',
+                }}
+              >
+                <Link
+                  href="/forgot-password"
+                  underline="hover"
+                  sx={{ color: theme.palette.primary.main }}
+                >
+                  Forgot Password?
+                </Link>
+                <Link
+                  href="/register"
+                  underline="hover"
+                  sx={{ color: theme.palette.primary.main }}
+                >
+                  Register Here
+                </Link>
+              </Box>
+            </Box>
+          </Paper>
+        </Box>
+      </Container>
+
+      {/* Snackbar for success message */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        message="Login successful!"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
+    </Box>
   );
 };
 
