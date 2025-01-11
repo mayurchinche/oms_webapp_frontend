@@ -1,149 +1,207 @@
-import React, { useState } from 'react';
-import { auth } from '../firebase';
-import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
-import './ForgotPassword.css';
+import React, { useState, useRef } from "react";
+import firebase from "../firebase.config";
+import axios from "axios";
+import { Box, Button, TextField, Typography, Card, CardContent, MenuItem, FormControl, InputLabel, Select, Alert } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const ForgotPassword = () => {
-  const [step, setStep] = useState(1);
-  const [mobileNumber, setMobileNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [countryCode, setCountryCode] = useState('+91');
-  const [otp, setOtp] = useState('');
+  const [verificationId, setVerificationId] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isVerified, setIsVerified] = useState(false);
   const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [otpSent, setOtpSent] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false);
-  const [otpTimer, setOtpTimer] = useState(60);
+  const [otpMessage, setOtpMessage] = useState('');
+  const [isPasswordMatch, setIsPasswordMatch] = useState(true);
+  const [resetMessage, setResetMessage] = useState('');
+  const recaptchRef = useRef(null);
   const navigate = useNavigate();
 
   const handleSendOtp = () => {
-    
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
-        'size': 'invisible',
-        'callback': (response) => {
-          console.log('reCAPTCHA solved:', response);
-        }
-      }, auth);
+    if (phoneNumber.length !== 10) {
+      setOtpMessage('Enter a valid 10-digit number');
+      return;
     }
-    const appVerifier = window.recaptchaVerifier;
-    signInWithPhoneNumber(auth, `${countryCode}${mobileNumber}`, appVerifier)
-      .then((confirmationResult) => {
-        window.confirmationResult = confirmationResult;
+    setOtpMessage('');
+    const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+
+    const verifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      size: 'invisible',
+      callback: (response) => {
+        console.log("reCAPTCHA verified:", response);
+      },
+      'expired-callback': () => {
+        console.log("reCAPTCHA expired.");
+      }
+    });
+
+    if (recaptchRef.current) {
+      recaptchRef.current.innerHTML = '<div id="recaptcha-container"></div>';
+    }
+
+    firebase.auth().signInWithPhoneNumber(fullPhoneNumber, verifier)
+      .then(confirmationResult => {
+        setVerificationId(confirmationResult.verificationId);
         setOtpSent(true);
-        setStep(2);
-        startOtpTimer();
-        console.log('OTP sent successfully');
-      })
-      .catch((error) => {
-        console.error('Error sending OTP:', error);
+        setOtpMessage('OTP sent successfully');
+      }).catch(error => {
+        console.log('Error sending OTP', error);
+        setOtpMessage('Error sending OTP, please try again.');
       });
   };
 
   const handleVerifyOtp = () => {
-    console.log('Verifying OTP:', otp);
-    window.confirmationResult.confirm(otp)
-      .then((result) => {
-        setOtpVerified(true);
-        setStep(3);
-        console.log('OTP verified successfully');
-      })
-      .catch((error) => {
-        console.error('Error verifying OTP:', error);
+    const credentials = firebase.auth.PhoneAuthProvider.credential(verificationId, verificationCode);
+    firebase.auth().signInWithCredential(credentials)
+      .then(userCredential => {
+        setIsVerified(true);
+      }).catch(error => {
+        console.error('Error in verifying OTP', error);
+        setOtpMessage('Invalid OTP, please try again.');
       });
   };
 
-  const startOtpTimer = () => {
-    let timer = 60;
-    setOtpTimer(timer);
-    const interval = setInterval(() => {
-      timer -= 1;
-      setOtpTimer(timer);
-      if (timer <= 0) {
-        clearInterval(interval);
-      }
-    }, 1000);
-  };
-
-  const handleResetPassword = () => {
-    if (newPassword !== confirmPassword) {
-      console.error('Passwords do not match');
+  const handleResetPassword = async () => {
+    if (newPassword !== confirmNewPassword) {
+      setIsPasswordMatch(false);
       return;
     }
+    setIsPasswordMatch(true);
 
-    const user = auth.currentUser;
-    user.updatePassword(newPassword)
-      .then(() => {
-        console.log('Password reset successful');
-        navigate('/login');
-      })
-      .catch((error) => {
-        console.error('Error resetting password:', error);
-      });
+    try {
+      const idToken = await firebase.auth().currentUser.getIdToken();
+      const userDetails = {
+        contact_number: `${countryCode}${phoneNumber}`,
+        new_password: newPassword,
+        id_token: idToken,
+      };
+
+      const response = await axios.post('https://ordermanagementservice-backend.onrender.com/auth/reset-password', userDetails);
+      if (response.status === 200) {
+        setResetMessage('Password reset successfully');
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+      } else {
+        setResetMessage('Failed to reset password, please try again.');
+      }
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      setResetMessage('Failed to reset password, please try again.');
+    }
   };
 
   return (
-    <div className="forgot-password-container">
-      <h2>Forgot Password</h2>
-      {step === 1 && (
-        <div>
-          <label>Country Code:</label>
-          <select value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
-            <option value="+91">India (+91)</option>
-            {/* Add more country codes as needed */}
-          </select>
-          <label>Mobile Number:</label>
-          <input
-            type="text"
-            value={mobileNumber}
-            onChange={(e) => setMobileNumber(e.target.value)}
-            placeholder="Enter mobile number"
-            required
-          />
-          <button onClick={handleSendOtp}>Send OTP</button>
-          <div id="recaptcha-container"></div>
-        </div>
-      )}
-      {step === 2 && (
-        <div>
-          <label>OTP:</label>
-          <input
-            type="text"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            placeholder="Enter OTP"
-            required
-          />
-          <p>OTP expires in {otpTimer} seconds</p>
-          <button onClick={handleVerifyOtp}>Verify OTP</button>
-          <button onClick={handleSendOtp}>Send Again</button>
-        </div>
-      )}
-      {step === 3 && (
-        <div>
-          <label>New Password:</label>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="Enter new password"
-            required
-          />
-          <label>Confirm Password:</label>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm new password"
-            required
-          />
-          {newPassword && confirmPassword && (
-            <p>{newPassword === confirmPassword ? 'Passwords match' : 'Passwords do not match'}</p>
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#f5f5f5' }}>
+      <Card sx={{ width: 400, padding: 3 }}>
+        <CardContent>
+          <Typography variant="h4" component="h1" gutterBottom>
+            Forgot Password
+          </Typography>
+          <div ref={recaptchRef}></div>
+          {!isVerified ? (
+            <>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Country Code</InputLabel>
+                <Select
+                  value={countryCode}
+                  onChange={e => setCountryCode(e.target.value)}
+                >
+                  <MenuItem value="+91">�������� +91</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                fullWidth
+                type="tel"
+                margin="normal"
+                label="Mobile Number"
+                variant="outlined"
+                value={phoneNumber}
+                onChange={e => setPhoneNumber(e.target.value)}
+              />
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                onClick={handleSendOtp}
+                sx={{ mt: 2 }}
+              >
+                Send OTP
+              </Button>
+              {otpMessage && (
+                <Alert severity="info" sx={{ mt: 2 }}>
+                  {otpMessage}
+                </Alert>
+              )}
+              {otpSent && (
+                <>
+                  <TextField
+                    fullWidth
+                    type="text"
+                    margin="normal"
+                    label="Enter OTP"
+                    variant="outlined"
+                    value={verificationCode}
+                    onChange={e => setVerificationCode(e.target.value)}
+                  />
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleVerifyOtp}
+                    sx={{ mt: 2 }}
+                  >
+                    Verify OTP
+                  </Button>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <Typography variant="body1" color="success.main" sx={{ mb: 2 }}>
+                OTP Verified
+              </Typography>
+              <TextField
+                fullWidth
+                type="password"
+                margin="normal"
+                label="New Password"
+                variant="outlined"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+              />
+              <TextField
+                fullWidth
+                type="password"
+                margin="normal"
+                label="Confirm New Password"
+                variant="outlined"
+                value={confirmNewPassword}
+                onChange={e => setConfirmNewPassword(e.target.value)}
+                error={!isPasswordMatch}
+                helperText={!isPasswordMatch ? "Passwords do not match!" : ""}
+              />
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                onClick={handleResetPassword}
+                sx={{ mt: 2 }}
+              >
+                Reset Password
+              </Button>
+              {resetMessage && (
+                <Alert severity="info" sx={{ mt: 2 }}>
+                  {resetMessage}
+                </Alert>
+              )}
+            </>
           )}
-          <button onClick={handleResetPassword}>Reset Password</button>
-        </div>
-      )}
-    </div>
+        </CardContent>
+      </Card>
+    </Box>
   );
 };
 
