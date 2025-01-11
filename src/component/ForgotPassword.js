@@ -76,11 +76,10 @@ const ForgotPassword = () => {
       const idToken = await firebase.auth().currentUser.getIdToken();
       const userDetails = {
         contact_number: `${countryCode}${phoneNumber}`,
-        new_password: newPassword,
-        id_token: idToken,
+        new_password: newPassword
       };
 
-      const response = await axios.post('https://ordermanagementservice-backend.onrender.com/auth/reset-password', userDetails);
+      const response = await axios.put('https://ordermanagementservice-backend.onrender.com/auth/set_new_password', userDetails);
       if (response.status === 200) {
         setResetMessage('Password reset successfully');
         setTimeout(() => {
