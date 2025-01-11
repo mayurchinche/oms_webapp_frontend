@@ -21,6 +21,7 @@ const ForgotPassword = () => {
   const navigate = useNavigate();
   const auth = getAuth(); // Ensure this matches your Firebase initialization
 
+  
   const handleSendOtp = () => {
     if (phoneNumber.length !== 10) {
       setOtpMessage('Enter a valid 10-digit number');
