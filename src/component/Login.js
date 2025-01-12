@@ -1,23 +1,12 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { Box, Container, Typography, TextField, Button, CircularProgress, Alert, Paper, Link, useTheme, useMediaQuery, Snackbar } from '@mui/material';
+import Carousel from './Carousel';
+import ThreeBackground from './ThreeBackground';
 import { setAuth } from '../redux/Actions/authActions';
-import {
-  Box,
-  Container,
-  Typography,
-  TextField,
-  Button,
-  CircularProgress,
-  Alert,
-  Paper,
-  Link,
-  useTheme,
-  useMediaQuery,
-  Snackbar,
-} from '@mui/material';
-import './Login.css'; // Include custom CSS for background and styles
-
+import './Login.css';
+import BackgroundImage from '../BackgroundImage';
 const Login = () => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
@@ -84,226 +73,181 @@ const Login = () => {
           userData.role === 'employee'
             ? '/employee-dashboard'
             : userData.role === 'manager'
-            ? '/manager-dashboard'
-            : '/po-dashboard'
-        );
-      } else {
-        setErrorMessage(data[0]?.message || 'Unexpected error occurred.');
-      }
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      setErrorMessage('An error occurred. Please try again.');
-    }
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-  };
-
-  return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#ffffff',
-      }}
-    >
-      <Container
-        maxWidth="lg"
-        sx={{
-          display: 'flex',
-          flexDirection: isSmallScreen ? 'column' : 'row',
-          height: '100%',
-        }}
-      >
-        {/* Left Side: Carousel */}
+            ? '/manager-dashboard'            : '/po-dashboard'
+            );
+          } else {
+            setErrorMessage(data[0]?.message || 'Unexpected error occurred.');
+          }
+          setLoading(false);
+        } catch (error) {
+          setLoading(false);
+          setErrorMessage('An error occurred. Please try again.');
+        }
+      };
+    
+      const handleSnackbarClose = () => {
+        setSnackbarOpen(false);
+      };
+    
+      return (
         <Box
           sx={{
-            flex: 1,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100%',
+            minHeight: '100vh',
+            position: 'relative',
+            overflow: 'hidden', // Ensure background doesn't overflow
           }}
         >
-          {/* Your carousel code remains unchanged */}
-          <div id="carouselExample" className="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
-            <div className="carousel-inner">
-              <div className="carousel-item active">
-                <img
-                  src="./images/losma_spa_logo.jpeg"
-                  className="d-block w-100"
-                  alt="Image 1"
-                  style={{ objectFit: 'contain', height: '300px' }}
-                />
-              </div>
-              <div className="carousel-item">
-                <img
-                  src="./images/losma_portfolio.jpg"
-                  className="d-block w-100"
-                  alt="Image 2"
-                  style={{ objectFit: 'contain', height: '300px' }}
-                />
-              </div>
-              <div className="carousel-item">
-                <img
-                  src="./images/losma.jpg"
-                  className="d-block w-100"
-                  alt="Image 3"
-                  style={{ objectFit: 'contain', height: '300px' }}
-                />
-              </div>
-            </div>
-            <button
-              className="carousel-control-prev"
-              type="button"
-              data-bs-target="#carouselExample"
-              data-bs-slide="prev"
-            >
-              <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-              <span className="visually-hidden">Previous</span>
-            </button>
-            <button
-              className="carousel-control-next"
-              type="button"
-              data-bs-target="#carouselExample"
-              data-bs-slide="next"
-            >
-              <span className="carousel-control-next-icon" aria-hidden="true"></span>
-              <span className="visually-hidden">Next</span>
-            </button>
-          </div>
-        </Box>
-
-        {/* Right Side: Login Form */}
-        <Box
-          sx={{
-            flex: 1,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100%',
-            mt: isSmallScreen ? 3 : 0,
-          }}
-        >
-          <Paper
-            elevation={6}
+          <BackgroundImage />
+          <Container
+            maxWidth="lg"
             sx={{
-              borderRadius: 4,
-              padding: 4,
-              textAlign: 'center',
-              background: theme.palette.background.paper,
-              color: theme.palette.text.primary,
-              width: '100%',
-              maxWidth: '400px',
-              position: 'relative', // Added for overlay positioning
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100vh',
+              position: 'relative',  // So that the form stays on top of the background
+              zIndex: 1,
             }}
           >
-            {loading && (
-              <Box
+            {/* Left Side: Carousel */}
+            {/* <Box
+              sx={{
+                flex: 1,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+              }}
+            > */}
+              {/* <Carousel /> */}
+            {/* </Box> */}
+    
+            {/* Right Side: Login Form */}
+            <Box
+              sx={{
+                flex: 1,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                mt: isSmallScreen ? 3 : 0,
+              }}
+            >
+              <Paper
+                elevation={6}
                 sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
                   borderRadius: 4,
-                  zIndex: 10,
+                  padding: 4,
+                  textAlign: 'center',
+                  background: theme.palette.background.paper,
+                  color: theme.palette.text.primary,
+                  width: '100%',
+                  maxWidth: '400px',
+                  position: 'relative', // Added for overlay positioning
                 }}
               >
-                <CircularProgress />
-                <Typography sx={{ ml: 2 }} variant="h6">
-                  Logging in...
+                {loading && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      borderRadius: 4,
+                      zIndex: 10,
+                    }}
+                  >
+                    <CircularProgress />
+                    <Typography sx={{ ml: 2 }} variant="h6">
+                      Logging in...
+                    </Typography>
+                  </Box>
+                )}
+                <Typography variant="h4" sx={{ fontWeight: 600, mb: 2 }}>
+                  Welcome Back!
                 </Typography>
-              </Box>
-            )}
-            <Typography variant="h4" sx={{ fontWeight: 600, mb: 2 }}>
-              Welcome Back!
-            </Typography>
-            <Typography variant="body1" sx={{ color: 'text.secondary', mb: 3 }}>
-              Log in to continue
-            </Typography>
-
-            {errorMessage && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {errorMessage}
-              </Alert>
-            )}
-
-            <Box component="form" onSubmit={handleLogin}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                margin="normal"
-                label="Mobile Number"
-                value={mobileNumber}
-                onChange={(e) => setMobileNumber(e.target.value)}
-                error={Boolean(mobileNumberError)}
-                helperText={mobileNumberError}
-                inputProps={{ maxLength: 10 }}
-              />
-
-              <TextField
-                fullWidth
-                variant="outlined"
-                margin="normal"
-                label="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                error={Boolean(passwordError)}
-                helperText={passwordError}
-              />
-
-              <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                type="submit"
-                disabled={loading}
-                sx={{
-                  mt: 2,
-                  mb: 1,
-                  py: 1.5,
-                  fontWeight: 'bold',
-                  fontSize: '16px',
-                }}
-              >
-                Log In
-              </Button>
-
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  mt: 2,
-                  fontSize: '14px',
-                }}
-              >
-                <Link
-                  href="/forgot-password"
-                  underline="hover"
-                  sx={{ color: theme.palette.primary.main }}
-                >
-                  Forgot Password?
-                </Link>
-                <Link
-                  href="/register"
-                  underline="hover"
-                  sx={{ color: theme.palette.primary.main }}
-                >
-                  Register Here
-                </Link>
-              </Box>
-            </Box>
-          </Paper>
+                <Typography variant="body1" sx={{ color: 'text.secondary', mb: 3 }}>
+                  Log in to continue
+                </Typography>
+    
+                {errorMessage && (
+                  <Alert severity="error" sx={{ mb: 2 }}>
+                    {errorMessage}
+                  </Alert>
+                )}
+    
+                <Box component="form" onSubmit={handleLogin}>
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    margin="normal"
+                    label="Mobile Number"
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    error={Boolean(mobileNumberError)}
+                    helperText={mobileNumberError}
+                    inputProps={{ maxLength: 10 }}
+                  />
+    
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    margin="normal"
+                    label="Password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    error={Boolean(passwordError)}
+                    helperText={passwordError}
+                  />
+    
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    disabled={loading}
+                    sx={{
+                      mt: 2,
+                      mb: 1,
+                      py: 1.5,
+                      fontWeight: 'bold',
+                      fontSize: '16px',
+                    }}
+                  >
+                    Log In
+                  </Button>
+    
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      mt: 2,
+                      fontSize: '14px',
+                    }}
+                  >
+                    <Link
+                      href="/forgot-password"
+                      underline="hover"
+                      sx={{ color: theme.palette.primary.main }}
+                    >
+                      Forgot Password?
+                    </Link>
+                    <Link
+                      href="/register"
+                      underline="hover"
+                      sx={{ color: theme.palette.primary.main }}
+                    >
+                      Register Here
+                    </Link>
+                  </Box>
+                </Box>
+                </Paper>
         </Box>
       </Container>
 
@@ -319,4 +263,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Login;    

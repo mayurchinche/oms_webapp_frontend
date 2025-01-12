@@ -2,9 +2,9 @@ import React, { useState, useRef } from "react";
 import firebase from "../firebase.config";
 import axios from "axios";
 import { Box, Button, TextField, Typography, Card, CardContent, MenuItem, FormControl, InputLabel, Select, Alert } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate ,Link} from "react-router-dom";
 import { getAuth } from 'firebase/auth';
-
+import BackgroundImage from '../BackgroundImage';
 const ForgotPassword = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [countryCode, setCountryCode] = useState('+91');
@@ -20,6 +20,7 @@ const ForgotPassword = () => {
   const recaptchRef = useRef(null);
   const navigate = useNavigate();
   const auth = getAuth(); // Ensure this matches your Firebase initialization
+  
 
   const handleSendOtp = () => {
     if (phoneNumber.length !== 10) {
@@ -95,8 +96,13 @@ const ForgotPassword = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#f5f5f5' }}>
-      <Card sx={{ width: 400, padding: 3 }}>
+    
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', position: 'relative' }}>
+      {/* BackgroundImage component is used here */}
+      <BackgroundImage />
+      
+      {/* Content Box with the form */}
+      <Card sx={{ width: 400, padding: 3, position: 'absolute', zIndex: 1 }}>
         <CardContent>
           <Typography variant="h4" component="h1" gutterBottom>
             Forgot Password
@@ -110,7 +116,7 @@ const ForgotPassword = () => {
                   value={countryCode}
                   onChange={e => setCountryCode(e.target.value)}
                 >
-                  <MenuItem value="+91">�������� +91</MenuItem>
+                  <MenuItem value="+91">+91</MenuItem>
                 </Select>
               </FormControl>
               <TextField
@@ -131,6 +137,12 @@ const ForgotPassword = () => {
               >
                 Send OTP
               </Button>
+              <Typography variant="body2" align="center" sx={{ mt: 2 }}>
+                Already registered?{' '}
+                <Link to="/login" underline="hover">
+                  Click here to login
+                </Link>
+              </Typography>
               {otpMessage && (
                 <Alert severity="info" sx={{ mt: 2 }}>
                   {otpMessage}
@@ -199,6 +211,7 @@ const ForgotPassword = () => {
                 </Alert>
               )}
             </>
+            
           )}
         </CardContent>
       </Card>

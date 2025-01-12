@@ -3,6 +3,8 @@ import firebase from "../firebase.config";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom"; // Import Link
 import './Register.css';
+import BackgroundImage from '../BackgroundImage'; // Add this import at the top
+
 import {
   TextField, Button, Card, CardContent, Typography, MenuItem, Select, InputLabel, FormControl, Grid, Box
 } from '@mui/material';
@@ -99,8 +101,9 @@ const Register = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#f5f5f5' }}>
-      <Card sx={{ width: 400, padding: 3 }}>
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', position: 'relative' }}>
+<BackgroundImage />
+      <Card sx={{ width: 400, padding: 3, position: 'absolute', zIndex: 1 }}>
         <CardContent>
           <Typography variant="h4" component="h1" gutterBottom>
             Sign Up
