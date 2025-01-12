@@ -3,7 +3,6 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Box, Container, Typography, TextField, Button, CircularProgress, Alert, Paper, Link, useTheme, useMediaQuery, Snackbar } from '@mui/material';
 import Carousel from './Carousel';
-import ThreeBackground from './ThreeBackground';
 import { setAuth } from '../redux/Actions/authActions';
 import './Login.css';
 import BackgroundImage from '../BackgroundImage';
