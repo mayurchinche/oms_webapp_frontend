@@ -298,7 +298,7 @@ const ManageMaterialModal = ({ isModalOpen, closeModal }) => {
             
                   <Grid item xs={12} sm={6} md={4} key={index}>
                     <Paper elevation={3} sx={ManagingMaterialsStyles.materialBox} ref={(el) => materialRefs.current[material.material_code+"-"+material.material_name] = el}>
-                      <Typography sx={ManagingMaterialsStyles.subtitle}>{material.material_code+"-"+material.material_name }</Typography>
+                      <Typography sx={ManagingMaterialsStyles.subtitle}>{material.material_code+":"+material.material_name }</Typography>
                       <Button
                         variant="outlined"
                         color="primary"
