@@ -62,7 +62,8 @@ const EmployeeDashboard = () => {
       ordered_by: '',
       order_date: '',
       material_name: '',
-      material_code:''
+      material_code:'',
+      created_at:''
     });
   };
   
@@ -75,6 +76,7 @@ const EmployeeDashboard = () => {
   const forwardOrderColumns = [
     { header: 'Order Date', accessor: 'order_date' },
     { header: 'Material Name', accessor: 'material_name' },
+    {header:'Material Code',accessor:'material_code'},
     { header: 'Model', accessor: 'model' },
     { header: 'Customer Name', accessor: 'name_of_customer' },
     { header: 'Status', accessor: 'status' },
@@ -84,6 +86,7 @@ const EmployeeDashboard = () => {
   const reversalOrderColumns = [
     { header: 'Created At', accessor: 'created_at' },
     { header: 'Material Name', accessor: 'original_order_material_name' },
+    {header :'Material Code',accessor:'material_code'},
     { header: 'Supplier Name', accessor: 'origin_order_supplier_name' },
     { header: 'Description', accessor: 'description' },
     { header: 'original_order_quantity', accessor: 'original_order_quantity' },
@@ -91,7 +94,7 @@ const EmployeeDashboard = () => {
     { header: 'Status', accessor: 'status' },
     { header: 'DC Number', accessor: 'dc_number' }
   ];
-  
+  console.log(forwardOrderColumns)
   const fetchOrders = useCallback((url, columnsConfig) => {
     setLoading(true);
     setError(null);
@@ -220,7 +223,7 @@ const EmployeeDashboard = () => {
           <span>{column.header}</span>
           
           {/* Show selected filter value if it exists */}
-          {['status', 'ordered_by', 'order_date', 'material_name','material_code'].includes(column.accessor) && filters[column.accessor] && (
+          {['status', 'ordered_by', 'order_date', 'material_name','material_code','created_at'].includes(column.accessor) && filters[column.accessor] && (
             <span
             style={{
               display: 'inline-flex',
@@ -255,22 +258,37 @@ const EmployeeDashboard = () => {
           )}
 
           {/* Filter Dropdown */}
-          {['status', 'ordered_by', 'order_date', 'material_name','material_code'].includes(column.accessor) && (
-            <DropdownButton
-              id={`filter-${column.accessor}`}
-              title={<FaFilter style={{ cursor: 'pointer', color: '#fff' }} />}
-              variant="secondary"
-              size="sm"
-              onSelect={(value) => handleFilterChange(column.accessor, value)}
-            >
-              <Dropdown.Item eventKey="">All</Dropdown.Item>
-              {[...new Set(orders.map((order) => order[column.accessor]))].map((value) => (
-                <Dropdown.Item key={value} eventKey={value}>
-                  {value}
-                </Dropdown.Item>
-              ))}
-            </DropdownButton>
-          )}
+          {['status', 'ordered_by', 'order_date', 'material_name', 'material_code','created_at'].includes(column.accessor) && (
+  <DropdownButton
+    id={`filter-${column.accessor}`}
+    title={<FaFilter style={{ cursor: 'pointer', color: '#fff' }} />}
+    variant="secondary"
+    size="sm"
+    onSelect={(value) => handleFilterChange(column.accessor, value)} // Set filter value
+  >
+    <Dropdown
+      style={{
+        maxHeight: '200px', // Set the height of the dropdown
+        overflowY: 'auto',  // Enable vertical scrolling
+      }}
+    >
+      {/* Replace the following array with actual unique values from the orders */}
+      {[
+       ...new Set(
+        orders.map((order) =>
+          column.accessor === 'created_at'
+            ? order[column.accessor]?.split('T')[0] // Extract only the date part
+            : order[column.accessor]
+        )),
+      ].map((value, index) => (
+        <Dropdown.Item key={index} eventKey={value}>
+          {value || 'N/A'}
+        </Dropdown.Item>
+      ))}
+    </Dropdown>
+  </DropdownButton>
+)}
+
         </div>
       </th>
     ))}
@@ -280,15 +298,27 @@ const EmployeeDashboard = () => {
   {filteredOrders.map((order, index) => (
     <tr key={index}>
       {columns.map((column, colIndex) => (
-        <td key={colIndex}>
+        <td key={colIndex} style={{ textAlign: 'center', verticalAlign: 'middle' }}>
           {column.isButton ? (
-           <button
-           style={{ backgroundColor: '#085fbc' }}
-           onClick={() => openReversalModal(order)}
-         >
-           {column.buttonText}
-         </button>
-          )  : column.accessor === 'created_at' ? (
+            <button
+              style={{
+                backgroundColor: '#085fbc',
+                color: '#fff',
+                padding: '5px 10px',
+                fontSize: '14px',
+                borderRadius: '16px',
+                border: 'none',
+                cursor: 'pointer',
+                maxWidth: '120px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+              onClick={() => openReversalModal(order)}
+            >
+              {column.buttonText}
+            </button>
+          ) : column.accessor === 'created_at' ? (
             formatDate(order[column.accessor]) // Format the date here
           ) : (
             order[column.accessor]
@@ -298,6 +328,7 @@ const EmployeeDashboard = () => {
     </tr>
   ))}
 </tbody>
+
               </table>
             )}
           </div>
