@@ -251,15 +251,6 @@ const ManageMaterialModal = ({ isModalOpen, closeModal }) => {
     <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="lg" >
       <DialogTitle>
         Manage Materials
-        <IconButton
-          edge="end"
-          color="inherit"
-          onClick={closeModal}
-          aria-label="close"
-          sx={{ position: 'absolute', right: 8, top: 8 }}
-        >
-          <CloseIcon />
-        </IconButton>
       </DialogTitle>
 
       <DialogContent dividers sx={{ height: '70vh', overflowY: 'auto', backgroundColor: '#f9f9f9' }} >
