@@ -5,19 +5,18 @@ import {
   Typography,
   Button,
   Box,
+  IconButton,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   CircularProgress,
   Grid,
-  Paper,
-  TextField
+  Paper,TextField
 } from '@mui/material';
 
 import AddMaterialModal from './AddMaterialModal';
 import AddModuleModal from './AddModuleModal';
-
 const ManagingMaterialsStyles = {
   container: {
     maxHeight: '80vh',
@@ -90,7 +89,6 @@ const ManageMaterialModal = ({ isModalOpen, closeModal }) => {
   
   // Create a ref to store the material cards for scrolling
   const materialRefs = useRef({});
-
   const openAddMaterialModal = () => {
     setIsAddMaterialModalOpen(true);
   };
@@ -98,6 +96,7 @@ const ManageMaterialModal = ({ isModalOpen, closeModal }) => {
   const closeAddMaterialModal = () => {
     setIsAddMaterialModalOpen(false);
   };
+
 
   const handleAddModule = async (materialName, newModuleName) => {
     setLoading(true);
@@ -122,13 +121,12 @@ const ManageMaterialModal = ({ isModalOpen, closeModal }) => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     if (isModalOpen) {
-      setSearchTerm('');
-      setExpandedMaterial(null);
-      setModules({});
-      setError(null);
+       setSearchTerm('');
+    setExpandedMaterial(null);
+    setModules({});
+    setError(null);
       fetchMaterials();
     }
   }, [isModalOpen]);
@@ -147,7 +145,7 @@ const ManageMaterialModal = ({ isModalOpen, closeModal }) => {
         }
       );
       if (response.data && response.data[0] && response.data[0].length > 0) {
-        console.log("response.data[0]", response.data[0])
+        console.log("response.data[0]",response.data[0])
         setMaterials(response.data[0]);
       } else {
         setMaterials([]);
@@ -241,7 +239,6 @@ const ManageMaterialModal = ({ isModalOpen, closeModal }) => {
   const filteredMaterials = materials.filter((material) =>
     material.material_name && (material.material_name.toLowerCase().includes(searchTerm.toLowerCase()) || material.material_code.toLowerCase().includes(searchTerm.toLowerCase()))
   );
-
   const openAddModuleModal = () => {
     setIsAddModuleModalOpen(true);
   };
@@ -253,9 +250,11 @@ const ManageMaterialModal = ({ isModalOpen, closeModal }) => {
   return (
     <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="lg">
       <DialogTitle>
+      
         Manage Materials
+       
       </DialogTitle>
-
+  
       <DialogContent dividers sx={{ height: '70vh', overflowY: 'auto', backgroundColor: '#f9f9f9' }}>
         <Grid container spacing={2} sx={{ height: '100%' }}>
           <Grid item xs={12} sm={6} md={4}>
@@ -272,86 +271,136 @@ const ManageMaterialModal = ({ isModalOpen, closeModal }) => {
               variant="contained"
               color="primary"
               sx={{ mt: 2, bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}
-              onClick={openAddMaterialModal}
+              onClick={() => setIsAddMaterialModalOpen(true)}
             >
               Add Material
             </Button>
           </Grid>
-
-          <Grid item xs={12} sm={6} md={8}>
-            <Box sx={ManagingMaterialsStyles.container}>
-              <Grid container spacing={2}>
-                {filteredMaterials.length > 0 ? (
-                  filteredMaterials.map((material) => (
-                    <Grid item xs={12} sm={6} md={4} key={material.material_code}>
-                      <Paper
-                        sx={ManagingMaterialsStyles.materialBox}
-                        ref={(el) => (materialRefs.current[material.material_name] = el)}
-                      >
-                        <Typography variant="h6">{material.material_name}</Typography>
-                        <Typography variant="body2" color="textSecondary">
+  
+          <Grid item xs={12} sm={6} md={8} sx={{ overflowY: 'auto', maxHeight: 'calc(100% - 20px)' }}>
+            {loading ? (
+              <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <CircularProgress />
+                <Typography sx={{ mt: 2 }}>Loading materials, please wait...</Typography>
+              </Box>
+            ) : error ? (
+              <Typography color="error">{error}</Typography>
+            ) : (
+              <Grid container spacing={2} sx={ManagingMaterialsStyles.materialsGrid}>
+                {filteredMaterials.map((material, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Paper elevation={3} sx={ManagingMaterialsStyles.materialBox} ref={(el) => materialRefs.current[material.material_code+"-"+material.material_name] = el}>
+                      <Typography sx={ManagingMaterialsStyles.subtitle}>{material.material_code+"-"+material.material_name }</Typography>
+                      <Typography variant="body2" color="textSecondary">
                           Material Code: {material.material_code}
                         </Typography>
-                        <Button
-                          onClick={() => toggleExpandMaterial(material.material_name)}
-                          variant="outlined"
-                          sx={{ mt: 2 }}
-                        >
-                          {expandedMaterial === material.material_name ? 'Collapse' : 'Expand'}
-                        </Button>
-
-                        {expandedMaterial === material.material_name && (
-                          <Box sx={ManagingMaterialsStyles.moduleBox}>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => toggleExpandMaterial(material.material_name)}
+                      >
+                        {expandedMaterial === material.material_name ? 'Collapse' : 'Expand'}
+                      </Button>
+                      {expandedMaterial === material.material_name && (
+                        <Box sx={{ border: '1px solid #ddd', padding: '1rem', marginTop: '1rem' }}>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            sx={{
+                              marginBottom: '1rem',
+                              backgroundColor: 'primary.main',
+                              '&:hover': { backgroundColor: 'primary.dark' },
+                            }}
+                            onClick={openAddModuleModal}
+                          >
+                            Add Module
+                          </Button>
+  
+                          <Typography variant="h8" sx={{ marginBottom: '1rem' }}>
+                            Available Modules List
+                          </Typography>
+  
+                          <Box
+                            sx={{
+                              maxHeight: '200px', // Adjust the height as needed
+                              overflowY: 'auto',
+                              border: '1px solid #ccc',
+                              borderRadius: '8px',
+                              padding: '1rem',
+                              backgroundColor: '#f9f9f9',
+                            }}
+                          >
                             {loadingMaterial === material.material_name ? (
-                              <Box sx={ManagingMaterialsStyles.loaderOverlay}>
+                              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
                                 <CircularProgress />
+                                <Typography sx={{ marginTop: '0.5rem' }}>Loading modules...</Typography>
                               </Box>
-                            ) : modules[material.material_name] && modules[material.material_name].length > 0 ? (
-                              modules[material.material_name].map((module) => (
-                                <Box key={module.module_name} sx={ManagingMaterialsStyles.moduleItem}>
-                                  <Typography>{module.module_name}</Typography>
-                                  <Button
-                                    variant="contained"
-                                    color="error"
-                                    onClick={() => handleDeleteModule(material.material_name, module.module_name)}
-                                  >
-                                    Delete
-                                  </Button>
+                            ) : modules[material.material_name]?.length > 0 ? (
+                              modules[material.material_name].map((module, moduleIndex) => (
+                                <Box
+                                  key={moduleIndex}
+                                  sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '0.5rem',
+                                    border: '1px solid #ddd',
+                                    borderRadius: '4px',
+                                    backgroundColor: '#fff',
+                                    marginBottom: '0.5rem',
+                                  }}
+                                >
+                                  <Typography variant="body1">{module.module_name}</Typography>
                                 </Box>
                               ))
                             ) : (
-                              <Typography>No modules found</Typography>
+                              <Typography color="textSecondary">No modules available for this material.</Typography>
                             )}
                           </Box>
-                        )}
-                      </Paper>
-                    </Grid>
-                  ))
-                ) : (
-                  <Typography>No materials found</Typography>
-                )}
+                        </Box>
+                      )}
+                    </Paper>
+                  </Grid>
+                ))}
               </Grid>
-            </Box>
+            )}
           </Grid>
         </Grid>
       </DialogContent>
-
-      <DialogActions>
-        <Button onClick={closeModal} color="primary">Cancel</Button>
+  
+      <DialogActions
+        sx={{
+          position: 'absolute',  // Position the footer absolutely
+          bottom: 0,             // Align it to the bottom
+          right: 0,              // Align it to the right
+          padding: '16px',       // Add spacing around the button
+          width: '100%',         // Ensure it spans the modal width (if needed)
+          boxSizing: 'border-box', // Prevent content overflow due to padding
+          backgroundColor: '#fff', // Optional: Give it a background if needed
+        }}
+      >
+        <Button onClick={closeModal} color="primary" variant="contained">
+          Close
+        </Button>
       </DialogActions>
-
-      <AddMaterialModal
+  
+      <AddMaterialModal 
         isModalOpen={isAddMaterialModalOpen}
         closeModal={closeAddMaterialModal}
-        fetchMaterials={fetchMaterials}
+        refreshMaterials={fetchMaterials}
       />
-      <AddModuleModal
-        isModalOpen={isAddModuleModalOpen}
-        closeModal={closeAddModuleModal}
-        handleAddModule={handleAddModule}
+      <AddModuleModal 
+        isAddModuleModalOpen={isAddModuleModalOpen} 
+        closeAddModuleModal={closeAddModuleModal}
+        handleAddModule={handleAddModule} 
+        expandedMaterial={expandedMaterial}
+        token={token}
+        role={role}
+        fetchModules={fetchModules}
       />
     </Dialog>
   );
+  
 };
 
 export default ManageMaterialModal;
