@@ -1,23 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { Typography, TextField, Button, Box, IconButton, Dialog, DialogActions, DialogContent, DialogTitle, CircularProgress, Grid, Paper } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import {
+  Typography,
+  TextField,
+  Button,
+  Box,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  CircularProgress,
+  Grid,
+  Paper,
+} from '@mui/material';
 import SuccessSnackbar from './SuccessSnackbar';
 import AddSupplierModal from './AddSupplierModal';
 
 const styles = {
   container: {
-    display: 'flex',
     padding: '20px',
   },
   leftColumn: {
-    width: '25%',
-    paddingRight: '20px', // Add some spacing between left and right content
-  },
-  rightColumn: {
-    width: '75%',
-    overflowY: 'auto',
+    paddingRight: '20px',
   },
   searchContainer: {
     marginBottom: '20px',
@@ -44,11 +49,6 @@ const styles = {
     fontWeight: 'bold',
     marginBottom: '0.5rem',
   },
-  buttonContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    marginTop: '1rem',
-  },
 };
 
 const ManageSupplierModal = ({ isModalOpen, closeModal }) => {
@@ -66,7 +66,6 @@ const ManageSupplierModal = ({ isModalOpen, closeModal }) => {
   useEffect(() => {
     if (isModalOpen) {
       setSearchTerm('');
-    
       setError(null);
       fetchSuppliers();
     }
@@ -123,38 +122,42 @@ const ManageSupplierModal = ({ isModalOpen, closeModal }) => {
 
   return (
     <>
-      <Dialog
-        open={isModalOpen}
-        onClose={closeModal}
-        fullWidth
-        maxWidth="lg"
-        sx={{
-          '& .MuiDialog-paper': {
-            maxHeight: '500px',
-            minHeight: '500px',
-           
-        
-            minWidth: '1000px',
-            maxWidth: '1000px'
-          },
-        }}
-      >
-        <DialogTitle>
-          Manage Suppliers
-          <IconButton
-            edge="end"
-            color="inherit"
-            onClick={closeModal}
-            aria-label="close"
-            sx={{ position: 'absolute', right: 16, top: 16 }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers sx={{ height: '70vh', overflowY: 'auto', backgroundColor: '#f9f9f9' }}>
-          <Box sx={styles.container}>
+    <Dialog
+  open={isModalOpen}
+  onClose={closeModal}
+  fullWidth
+  maxWidth="lg"
+  // sx={{
+  //   '& .MuiDialog-paper': {
+  //     maxHeight: '500px',
+  //     minHeight: '500px',
+     
+  
+  //     minWidth: '1000px',
+  //     maxWidth: '1000px'
+  //   },
+
+  // }}
+  sx={{
+    '& .MuiDialog-paper': {
+      maxHeight: '550px',
+      minHeight: '550px',
+      minWidth: '1000px',
+      maxWidth: '1000px',
+      // Responsive styles for mobile devices
+      '@media (max-width: 550px)': {
+        maxWidth: '90%', // Adjust width for mobile
+        minWidth: '90%', // Adjust width for mobile
+        margin: '0 auto', // Center the dialog
+      },
+    },
+  }}
+>
+        <DialogTitle>Manage Suppliers</DialogTitle>
+        <DialogContent dividers sx={{ height: '100%', backgroundColor: '#f9f9f9' }}>
+          <Grid container spacing={2} sx={styles.container}>
             {/* Left Column: Search and Add Supplier */}
-            <Box sx={styles.leftColumn}>
+            <Grid item xs={12} sm={4}>
               <Box sx={styles.searchContainer}>
                 <TextField
                   fullWidth
@@ -174,11 +177,10 @@ const ManageSupplierModal = ({ isModalOpen, closeModal }) => {
                   Add Supplier
                 </Button>
               </Box>
-            </Box>
+            </Grid>
 
             {/* Right Column: Supplier List and Loader */}
-            <Box sx={styles.rightColumn}>
-              {/* List of Suppliers (Scrollable) */}
+            <Grid item xs={12} sm={8}>
               {loading ? (
                 <Box sx={styles.loaderContainer}>
                   <CircularProgress />
@@ -193,7 +195,7 @@ const ManageSupplierModal = ({ isModalOpen, closeModal }) => {
                   {filteredSuppliers.map((supplier) => (
                     <Paper key={supplier.supplier_name} sx={styles.supplierBox}>
                       <Typography sx={styles.subtitle}>Name: {supplier.supplier_name}</Typography>
-                      <Typography >Contact No: {supplier.contact_number}</Typography>
+                      <Typography>Contact No: {supplier.contact_number}</Typography>
                       <Button
                         variant="outlined"
                         color="primary"
@@ -206,12 +208,12 @@ const ManageSupplierModal = ({ isModalOpen, closeModal }) => {
                   ))}
                 </Box>
               )}
-            </Box>
-          </Box>
+            </Grid>
+          </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeModal} color="primary" variant="outlined">
-            Cancel
+          <Button onClick={closeModal} color="primary" variant="contained">
+            Close
           </Button>
         </DialogActions>
       </Dialog>

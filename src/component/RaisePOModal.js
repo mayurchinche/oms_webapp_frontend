@@ -114,15 +114,7 @@ const RaisePOModal = ({ isModalOpen, closeModal, order, fetchOrders, pendingPOCo
       <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="sm">
         <DialogTitle>
           Raise PO
-          <IconButton
-            edge="end"
-            color="inherit"
-            onClick={closeModal}
-            aria-label="close"
-            sx={{ position: 'absolute', right: 16, top: 16 }}
-          >
-            <CloseIcon />
-          </IconButton>
+         
         </DialogTitle>
 
         <DialogContent>

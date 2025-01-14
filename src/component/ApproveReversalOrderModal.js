@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import SuccessSnackbar from './SuccessSnackbar';
 import {
   TextField,
   Button,
@@ -80,6 +81,11 @@ const ApproveReversalOrderModal = ({ isModalOpen, closeModal, order, orderType }
 
   return (
     <>
+    <SuccessSnackbar
+        open={!!successMessage}
+        message={successMessage}
+        onClose={() => setSuccessMessage('')}
+      />
       {/* Loader - Backdrop with CircularProgress */}
       <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
         <CircularProgress color="inherit" />
@@ -98,11 +104,6 @@ const ApproveReversalOrderModal = ({ isModalOpen, closeModal, order, orderType }
             </Box>
           )}
 
-          {successMessage && (
-            <Box mt={2}>
-              <Typography color="success.main">{successMessage}</Typography>
-            </Box>
-          )}
         </DialogContent>
 
         <DialogActions>
@@ -114,6 +115,7 @@ const ApproveReversalOrderModal = ({ isModalOpen, closeModal, order, orderType }
           </Button>
         </DialogActions>
       </Dialog>
+      
     </>
   );
 };

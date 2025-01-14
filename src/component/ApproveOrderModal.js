@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import SuccessSnackbar from './SuccessSnackbar';
 import {
   TextField,
   Dialog,
@@ -14,6 +15,7 @@ import {
   Typography,
   Box,
   Button as MuiButton,
+  Button,
   styled,
 } from '@mui/material';
 import { Add, Remove } from '@mui/icons-material';
@@ -25,9 +27,7 @@ const StyledButton = styled(MuiButton)(({ theme }) => ({
   borderRadius: '8px',
   fontSize: '14px',
   '&:hover': {
-    // backgroundColor: '#388e3c', // Darker green on hover
     backgroundColor: '#0056b3', // Darker Blue on hover
-
   },
 }));
 
@@ -38,8 +38,7 @@ const SecondaryButton = styled(MuiButton)(({ theme }) => ({
   borderRadius: '8px',
   fontSize: '14px',
   '&:hover': {
-    // backgroundColor: '#d32f2f', // Darker red on hover
-    backgroundColor: '#0056b3', // Darker red on hover
+    backgroundColor: '#0056b3', // Darker blue on hover
   },
 }));
 
@@ -55,57 +54,66 @@ const CustomIconButton = styled(IconButton)(({ theme }) => ({
 }));
 
 const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
-  const [expectedPrice, setExpectedPrice] = useState('');
-  const [orderQuantity, setOrderQuantity] = useState(order.order_quantity || 0);
+  const [expectedPrice, setExpectedPrice] = useState(0); // Default value set to 0
+  const [orderQuantity, setOrderQuantity] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-
+ const [successMessage, setSuccessMessage] = useState('');
   const { role, token, userName } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
+  // Reset modal state when opening
   useEffect(() => {
-    if (order && order.order_quantity) {
-      setOrderQuantity(order.order_quantity);
+    if (isModalOpen && order) {
+      setOrderQuantity(order.order_quantity || 0);
+      setExpectedPrice(0);
     }
-  }, [order]);
+  }, [isModalOpen, order]);
 
-  const handleApproveOrder = () => {
+  const handleApproveOrder = async () => {
+    setLoading(true);  // Start loader
     const approvalData = {
       approved_by: userName,
       expected_price: expectedPrice,
       order_quantity: orderQuantity,
     };
-    setLoading(true);
-
-    // Determine the appropriate URL based on the order type
-    const url = orderType === 'reversal'
-      ? `https://ordermanagementservice-backend.onrender.com/api/core/orders/reverse/${order.order_id}`
-      : `https://ordermanagementservice-backend.onrender.com/api/core/orders/approve/${order.order_id}`;
-
-    axios
-      .put(url, approvalData, {
+  
+    const url =
+      orderType === 'reversal'
+        ? `https://ordermanagementservice-backend.onrender.com/api/core/orders/reverse/${order.order_id}`
+        : `https://ordermanagementservice-backend.onrender.com/api/core/orders/approve/${order.order_id}`;
+  
+    try {
+      const response = await axios.put(url, approvalData, {
         headers: {
           Authorization: `Bearer ${token}`,
           role: role,
           'Content-Type': 'application/json',
         },
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          setLoading(false);
-          setSuccessMessage('Order successfully approved');
-          setTimeout(() => {
-            setSuccessMessage('');
-            closeModal();
-            navigate('/manager-dashboard'); // Redirect to the pending requests page
-          }, 2000);
-        }
-      })
-      .catch((error) => {
-        setLoading(false);
-        alert('Failed to approve order');
       });
+  
+      console.log('Response:', response); // Log response to check status code
+      if (response.status === 200) {
+        setLoading(false);
+        setSuccessMessage('Request Approved Successfully');
+        setTimeout(() => {
+          setSuccessMessage('');
+          closeModal();
+          navigate('/manager-dashboard');
+        }, 3000);
+      } else {
+        // Handle non-200 status code
+        setLoading(false);
+        alert('Failed to approve order. Please try again.');
+      }
+    }    catch (error) {
+      // Catch any network errors or errors from the API call
+      setLoading(false);
+      console.error('Error approving order:', error);
+      alert('Failed to approve order. Please try again.');
+    }
   };
+  
+  
 
   const increaseQuantity = () => {
     setOrderQuantity(orderQuantity + 1);
@@ -117,16 +125,14 @@ const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
 
   return (
     <>
-      {/* Loader - Backdrop with CircularProgress */}
+      {/* Loader */}
       <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
         <CircularProgress color="inherit" />
       </Backdrop>
 
-      {/* Main Modal Dialog for approving orders */}
+      {/* Modal */}
       <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="sm">
-        <DialogTitle>
-          Approve Order
-        </DialogTitle>
+        <DialogTitle>Approve Order</DialogTitle>
 
         <DialogContent>
           {order && (
@@ -136,7 +142,7 @@ const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
                 label="Expected Price"
                 type="number"
                 value={expectedPrice}
-                onChange={(e) => setExpectedPrice(e.target.value)}
+                onChange={(e) => setExpectedPrice(Number(e.target.value))}
                 variant="outlined"
                 fullWidth
               />
@@ -146,25 +152,17 @@ const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
                   <Remove />
                 </CustomIconButton>
                 <TextField
-                  type="text"
+                  type="number"
                   value={orderQuantity}
                   onChange={(e) => setOrderQuantity(Number(e.target.value))}
-                  // variant="outlined"
-                  size="large"
+                  variant="outlined"
+                  size="small"
                   sx={{ width: '100px', textAlign: 'center' }}
                 />
-
                 <CustomIconButton onClick={increaseQuantity}>
                   <Add />
                 </CustomIconButton>
-
               </Box>
-            </Box>
-          )}
-
-          {successMessage && (
-            <Box mt={2}>
-              <Typography color="success.main">{successMessage}</Typography>
             </Box>
           )}
         </DialogContent>
@@ -173,9 +171,32 @@ const ApproveOrderModal = ({ isModalOpen, closeModal, order, orderType }) => {
           <SecondaryButton onClick={closeModal} color="secondary" variant="contained">
             Close
           </SecondaryButton>
-          <StyledButton onClick={handleApproveOrder} color="primary" variant="contained">
+          {/* <StyledButton onClick={handleApproveOrder} color="primary" variant="contained">
             Approve
-          </StyledButton>
+          </StyledButton> */}
+           <Box position="relative">
+      <Button
+        onClick={handleApproveOrder}
+        color="primary"
+        variant="contained"
+        disabled={loading}
+        sx={{ position: 'relative', paddingRight: '2rem' }} // Adjust padding for loader space
+      >
+        Approve
+        {loading && (
+          <CircularProgress
+            size={24}
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-20%, -50%)', // Center the loader inside the button
+              color: '#fff',
+            }}
+          />
+        )}
+      </Button>
+    </Box>
         </DialogActions>
       </Dialog>
     </>

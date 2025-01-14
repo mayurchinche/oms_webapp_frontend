@@ -55,7 +55,12 @@ const ManagerDashboard = () => {
       ordered_by: '',
       order_date: '',
       material_name: '',
-      material_code: ''
+      material_code: '',
+      created_at:'',
+      dc_number:'',
+      original_order_material_name:''
+      
+
     });
   };
   
@@ -81,7 +86,7 @@ const ManagerDashboard = () => {
 
   const reversalOrderColumns = [
     { header: 'Created At', accessor: 'created_at' },
-    { header: 'Material Name', accessor: 'original_order_material_name' },
+    { header: 'Material name', accessor: 'original_order_material_name' },
     { header: 'Material Code', accessor: 'material_code' },
     { header: 'Supplier Name', accessor: 'origin_order_supplier_name' },
     { header: 'Description', accessor: 'description' },
@@ -94,6 +99,7 @@ const ManagerDashboard = () => {
   const reviewPendingColumns = [
     { header: 'Order Date', accessor: 'order_date' },
     { header: 'Material Name', accessor: 'material_name' },
+    { header: 'Material Code', accessor: 'material_code' },
     { header: 'Model', accessor: 'model' },
     { header: 'Customer Name', accessor: 'name_of_customer' },
     { header: 'Ordered By', accessor: 'ordered_by' },
@@ -108,13 +114,14 @@ const ManagerDashboard = () => {
     { header: 'Created At', accessor: 'created_at' },
     { header: 'Supplier Name', accessor: 'origin_order_supplier_name' },
     { header: 'Material Name', accessor: 'original_order_material_name' },
+    { header: 'Material Code', accessor: 'material_code' },
     { header: 'Customer Name', accessor: 'name_of_customer' },
     { header: 'Ordered By', accessor: 'user_contact_number' },
     { header: 'Quantity', accessor: 'original_order_quantity' },
     { header: 'Reversal Quantity', accessor: 'reversal_quantity' },
     { header: 'Action', accessor: 'Approve Reversal', isButton: true, buttonText: 'Approve Reversal' }
   ]
-
+  
   const fetchOrders = useCallback((url, columnsConfig) => {
     setLoading(true);
     setError(null);
@@ -276,7 +283,7 @@ const handelAnalysisClick = () =>{
         onViewOrdersClick={handleViewOrdersClick}
         onAddOrderClick={handleAddOrderClick}
         onManageMaterailClick={openManageMaterialModal}
-        onManageSupplierClick={handelManageSupplierClick}
+        onManageSupplierClick={openManageSupplierModal}
         onReviewPendingClick={handleReveiwPendingClick}
         onAnalysisClick={handelAnalysisClick}
         onReversalReviewPendingClick={handleReversalReveiwPendingClick}
@@ -343,7 +350,7 @@ const handelAnalysisClick = () =>{
           <span>{column.header}</span>
           
           {/* Show selected filter value if it exists */}
-          {['status', 'ordered_by', 'order_date', 'material_name','material_code'].includes(column.accessor) && filters[column.accessor] && (
+          {['status', 'ordered_by', 'order_date', 'material_name','material_code','created_at','dc_number','original_order_material_name'].includes(column.accessor) && filters[column.accessor] && (
             <span
             style={{
               display: 'inline-flex',
@@ -378,20 +385,34 @@ const handelAnalysisClick = () =>{
           )}
 
           {/* Filter Dropdown */}
-          {['status', 'ordered_by', 'order_date', 'material_name','material_code'].includes(column.accessor) && (
-            <DropdownButton
+          {['status', 'ordered_by', 'order_date', 'material_name','material_code','created_at','dc_number','original_order_material_name'].includes(column.accessor) && (
+           <DropdownButton
               id={`filter-${column.accessor}`}
               title={<FaFilter style={{ cursor: 'pointer', color: '#fff' }} />}
               variant="secondary"
               size="sm"
-              onSelect={(value) => handleFilterChange(column.accessor, value)}
+              onSelect={(value) => handleFilterChange(column.accessor, value)} // Set filter value
             >
-              <Dropdown.Item eventKey="">All</Dropdown.Item>
-              {[...new Set(orders.map((order) => order[column.accessor]))].map((value) => (
-                <Dropdown.Item key={value} eventKey={value}>
-                  {value}
-                </Dropdown.Item>
-              ))}
+              <Dropdown
+                style={{
+                  maxHeight: '200px', // Set the height of the dropdown
+                  overflowY: 'auto',  // Enable vertical scrolling
+                }}
+              >
+                {/* Replace the following array with actual unique values from the orders */}
+                {[
+                 ...new Set(
+                  orders.map((order) =>
+                    column.accessor === 'created_at'
+                      ? order[column.accessor]?.split('T')[0] // Extract only the date part
+                      : order[column.accessor]
+                  )),
+                ].map((value, index) => (
+                  <Dropdown.Item key={index} eventKey={value}>
+                    {value || 'N/A'}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown>
             </DropdownButton>
           )}
         </div>
@@ -435,7 +456,19 @@ const handelAnalysisClick = () =>{
         <td key={colIndex}>
           {column.isButton ? (
             <button
-              style={{ backgroundColor: '#085fbc' }}
+            style={{
+              backgroundColor: '#085fbc',
+              color: '#fff',
+              padding: '5px 10px',
+              fontSize: '12px',
+              borderRadius: '16px',
+              border: 'none',
+              cursor: 'pointer',
+              maxWidth: '120px',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
               onClick={() => {
                 if (column.accessor === 'Review & Approve') {
                   openApproveModal(order);
@@ -466,7 +499,7 @@ const handelAnalysisClick = () =>{
         
 
         <ManageMaterialModal isModalOpen={isManageMaterialModalOpen} closeModal={closeManageMaterialModal} />
-        <ManageSupplierModal  isModalOpen={isManageSupplierModalOpen} closeModal ={openManageSupplierModal} />
+        <ManageSupplierModal  isModalOpen={isManageSupplierModalOpen} closeModal ={closeManageSupplierModal} />
 
         {selectedOrder && <ApproveOrderModal isModalOpen={isApproveModalOpen} closeModal={closeApproveModal} order={selectedOrder} />}
         {selectedOrder && <ApproveReversalOrderModal isModalOpen={isApproveReversalOrderModal} closeModal={closeApproveReversalModal} order={selectedOrder} />}

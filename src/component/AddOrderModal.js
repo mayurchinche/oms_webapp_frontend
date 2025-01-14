@@ -42,6 +42,52 @@ const AddOrderModal = ({ isModalOpen, closeModal }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Restore modal state
+    const savedState = localStorage.getItem('modalState');
+    if (savedState) {
+      const { 
+        isModalOpen, 
+        customerName, 
+        materialName, 
+        materialCode, 
+        model, 
+        quantity, 
+        orderDate 
+      } = JSON.parse(savedState);
+  
+      if (isModalOpen) {
+        setCustomerName(customerName);
+        setMaterialName(materialName);
+        setMaterialCode(materialCode);
+        setModel(model);
+        setQuantity(quantity);
+        setOrderDate(orderDate);
+      }
+    }
+  }, []);
+  
+  useEffect(() => {
+    // Persist modal state
+    if (isModalOpen) {
+      const stateToPersist = {
+        isModalOpen,
+        customerName,
+        materialName,
+        materialCode,
+        model,
+        quantity,
+        orderDate,
+      };
+      localStorage.setItem('modalState', JSON.stringify(stateToPersist));
+    }
+  }, [isModalOpen, customerName, materialName, materialCode, model, quantity, orderDate]);
+  
+  const handleCloseModal = () => {
+    closeModal();
+    localStorage.removeItem('modalState');
+  };
+  
+  useEffect(() => {
     if (isModalOpen) {
       resetModalState();
 
