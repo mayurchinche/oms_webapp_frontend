@@ -247,6 +247,7 @@ const ManageMaterialModal = ({ isModalOpen, closeModal }) => {
     setIsAddModuleModalOpen(false);
   };
 
+  
   return (
     <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="lg">
       <DialogTitle>
