@@ -59,6 +59,7 @@ const PODashboard = () => {
   const reviewPendingColumns = [
     { header: 'Order Date', accessor: 'order_date' },
     { header: 'Material Name', accessor: 'material_name' },
+    { header: 'Material Code', accessor: 'material_code' },
     { header: 'Model', accessor: 'model' },
     { header: 'Customer Name', accessor: 'name_of_customer' },
     { header: 'Ordered By', accessor: 'ordered_by' },
@@ -163,7 +164,8 @@ const PODashboard = () => {
   const reversalOrderColumns = [
     { header: 'Created At', accessor: 'created_at' },
     { header: 'Material Name', accessor: 'original_order_material_name' },
-    { header: 'Supplier Name', accessor: 'origin_order_supplier_name' },
+    { header: 'Material Code', accessor: 'material_code' },
+    { header: 'Supplier name', accessor: 'origin_order_supplier_name' },
     { header: 'Description', accessor: 'description' },
     { header: 'original_order_quantity', accessor: 'original_order_quantity' },
     { header: 'Reversal Quantity', accessor: 'reversal_quantity' },
@@ -174,6 +176,7 @@ const PODashboard = () => {
     { header: 'Order Date', accessor: 'order_date' },
     { header: 'Name of Customer', accessor: 'name_of_customer' },
     { header: 'Material Name', accessor: 'material_name' },
+    { header: 'Material Code', accessor: 'material_code' },
     { header: 'Model', accessor: 'model' },
     { header: 'Order Quantity', accessor: 'order_quantity' },
     { header: 'Ordered By', accessor: 'ordered_by' },
@@ -185,11 +188,12 @@ const PODashboard = () => {
 
   const dcPendingColumns = [
 
-    { header: 'User Contact Number', accessor: 'user_contact_number' },
+   
     { header: 'Created At', accessor: 'created_at' },
     { header: 'Description', accessor: 'description' },
-    { header: 'Original Order ID', accessor: 'original_order_id' },
+   
     { header: 'Original Order Material Name', accessor: 'original_order_material_name' },
+    { header: 'Material Code', accessor: 'material_code' },
     { header: 'Original Order Quantity', accessor: 'original_order_quantity' },
     { header: 'Reversal Quantity', accessor: 'reversal_quantity' },
     { header: 'Status', accessor: 'status' },
@@ -197,16 +201,17 @@ const PODashboard = () => {
   ];
 
   const deliveryPendingColumns = [
-    { header: 'Order ID', accessor: 'order_id' },
-    { header: 'User Contact Number', accessor: 'user_contact_number' },
+   
+   
     { header: 'Order Date', accessor: 'order_date' },
     { header: 'Name of Customer', accessor: 'name_of_customer' },
     { header: 'PO No', accessor: 'po_no' },
-    { header: 'Whatsapp Date', accessor: 'whatsapp_date' },
+  
     { header: 'Material Name', accessor: 'material_name' },
+    { header: 'Material Code', accessor: 'material_code' },
     { header: 'Model', accessor: 'model' },
     { header: 'Order Quantity', accessor: 'order_quantity' },
-    { header: 'Order To', accessor: 'order_to' },
+   
     { header: 'Received Date', accessor: 'received_date' },
     { header: 'Pending Quantity', accessor: 'pending_quantity' },
     { header: 'Ordered By', accessor: 'ordered_by' },
@@ -221,13 +226,15 @@ const PODashboard = () => {
   ];
 
   const reversalDeliveryPendingColumns = [
-    { header: 'Reversal Order ID', accessor: 'id' },
+   
     { header: 'DC Number', accessor: 'dc_number' },
-    { header: 'User Contact Number', accessor: 'user_contact_number' },
+    { header: 'Name of Customer', accessor: 'name_of_customer' },
     { header: 'Created At', accessor: 'created_at' },
     { header: 'Description', accessor: 'description' },
-    { header: 'Original Order ID', accessor: 'original_order_id' },
+   
     { header: 'Original Order Material Name', accessor: 'original_order_material_name' },
+    { header: 'Material Code', accessor: 'material_code' },
+
     { header: 'Original Order Quantity', accessor: 'original_order_quantity' },
     { header: 'Reversal Quantity', accessor: 'reversal_quantity' },
     { header: 'Status', accessor: 'status' },
@@ -248,7 +255,9 @@ const PODashboard = () => {
       material_name: '',
       material_code: '',
       po_no:'',
-      dc_number:''
+      dc_number:'',
+      origin_order_supplier_name:'',
+      created_at:''
     });
   };
     
@@ -556,7 +565,7 @@ const handleReversalOrderViewClick = () => {
           <span>{column.header}</span>
           
           {/* Show selected filter value if it exists */}
-          {['status', 'ordered_by', 'order_date', 'material_name','material_code','po_no','dc_number'].includes(column.accessor) && filters[column.accessor] && (
+          {['status', 'ordered_by', 'order_date', 'material_name','material_code','po_no','dc_number','origin_order_supplier_name','created_at'].includes(column.accessor) && filters[column.accessor] && (
             <span
             style={{
               display: 'inline-flex',
@@ -591,21 +600,49 @@ const handleReversalOrderViewClick = () => {
           )}
 
           {/* Filter Dropdown */}
-          {['status', 'ordered_by', 'order_date', 'material_name','material_code','po_no','dc_number'].includes(column.accessor) && (
-            <DropdownButton
-              id={`filter-${column.accessor}`}
-              title={<FaFilter style={{ cursor: 'pointer', color: '#fff' }} />}
-              variant="secondary"
-              size="sm"
-              onSelect={(value) => handleFilterChange(column.accessor, value)}
-            >
-              <Dropdown.Item eventKey="">All</Dropdown.Item>
-              {[...new Set(orders.map((order) => order[column.accessor]))].map((value) => (
-                <Dropdown.Item key={value} eventKey={value}>
-                  {value}
-                </Dropdown.Item>
-              ))}
-            </DropdownButton>
+          {['status', 'ordered_by', 'order_date', 'material_name','material_code','po_no','dc_number','origin_order_supplier_name','created_at'].includes(column.accessor) && (
+            // <DropdownButton
+            //   id={`filter-${column.accessor}`}
+            //   title={<FaFilter style={{ cursor: 'pointer', color: '#fff' }} />}
+            //   variant="secondary"
+            //   size="sm"
+            //   onSelect={(value) => handleFilterChange(column.accessor, value)}
+            // >
+            //   <Dropdown.Item eventKey="">All</Dropdown.Item>
+            //   {[...new Set(orders.map((order) => order[column.accessor]))].map((value) => (
+            //     <Dropdown.Item key={value} eventKey={value}>
+            //       {value}
+            //     </Dropdown.Item>
+            //   ))}
+            // </DropdownButton>
+             <DropdownButton
+                id={`filter-${column.accessor}`}
+                title={<FaFilter style={{ cursor: 'pointer', color: '#fff' }} />}
+                variant="secondary"
+                size="sm"
+                onSelect={(value) => handleFilterChange(column.accessor, value)} // Set filter value
+              >
+                <Dropdown
+                  style={{
+                    maxHeight: '200px', // Set the height of the dropdown
+                    overflowY: 'auto',  // Enable vertical scrolling
+                  }}
+                >
+                  {/* Replace the following array with actual unique values from the orders */}
+                  {[
+                   ...new Set(
+                    orders.map((order) =>
+                      column.accessor === 'created_at'
+                        ? order[column.accessor]?.split('T')[0] // Extract only the date part
+                        : order[column.accessor]
+                    )),
+                  ].map((value, index) => (
+                    <Dropdown.Item key={index} eventKey={value}>
+                      {value || 'N/A'}
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown>
+              </DropdownButton>
           )}
         </div>
       </th>
@@ -618,7 +655,21 @@ const handleReversalOrderViewClick = () => {
                       {columns.map((column, colIndex) => (
                         <td key={colIndex}>
                         {column.isButton ? (
-                          <button onClick={() => {
+                          <button
+                          style={{
+                            backgroundColor: '#085fbc',
+                            color: '#fff',
+                            padding: '5px 10px',
+                            fontSize: '14px',
+                            borderRadius: '16px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            maxWidth: '120px',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                           onClick={() => {
                             if (column.accessor === 'Raise DC') {
                               handelRaiseDCButtonClick(order)
                               // raiseDC(order.id);

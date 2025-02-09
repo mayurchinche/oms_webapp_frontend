@@ -5,15 +5,18 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import AddOrderModal from './AddOrderModal';
+import SuccessSnackbar from './SuccessSnackbar'; 
 import RaiseReversalModal from './RaiseReversalModal';
 import LoadingDialog from './LoadingDialog';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaFilter } from 'react-icons/fa';
 import { Dropdown, DropdownButton } from 'react-bootstrap'; // For dropdown menus
+import FailSnackbar from './FailSnackbar';
 import './NewManagerDahsboard.css';
 
 import ManageMaterialModal from './ManageMaterialModal'; // Import the ManageMaterialModal component
 import ManageSupplierModal from './ManageSupplierModal'; // Import the ManageSupplierModal component
+import { styled } from '@mui/material';
 
 const EmployeeDashboard = () => {
   const { role, token, mobileNumber, userName } = useSelector((state) => state.auth);
@@ -29,7 +32,11 @@ const EmployeeDashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [orderType, setOrderType] = useState('forward orders');
   const [columns, setColumns] = useState([]); // State to manage columns
-  const navigate = useNavigate();
+    const [successMessage, setSuccessMessage] = useState('');
+    const [failMessage, setFailMessage] = useState('');
+    const [reversalStatus, setReversalStatus] = useState({});
+  
+    const navigate = useNavigate();
 
   const [isManageMaterialModalOpen, setIsManageMaterialModalOpen] = useState(false); // Manage Material Modal state
   const openManageMaterialModal = () => {
@@ -110,6 +117,11 @@ const EmployeeDashboard = () => {
         if (data.length > 0) {
           setOrders(data);
           setColumns(columnsConfig); // Set the columns configuration
+          const status = data.reduce((acc, order) => {
+            acc[order.id] = order.reversal_raised || false; // Assuming `reversal_raised` is a field from the API
+            return acc;
+          }, {});
+          setReversalStatus(status);
         } else {
           setError('No records found');
         }
@@ -150,15 +162,46 @@ const EmployeeDashboard = () => {
     fetchOrders(`https://ordermanagementservice-backend.onrender.com/api/core/orders/reversal/get_reversal_orders/${mobileNumber}`, reversalOrderColumns);
   };
 
-  const openReversalModal = (order) => {
+  const openReversalModal = async (order) => {
+    console.log('openReversalModal called for order:', order.order_id);
+    
     if (order.status === 'Order_Delivered') {
-      setSelectedOrder(order);
-      setIsReversalModalOpen(true);
+      console.log('Order status is "Order_Delivered". Fetching reversal orders...');
+  
+      try {
+        // Fetch the reversal orders list
+        const response = await axios.get('https://ordermanagementservice-backend.onrender.com/api/reversal_orders');
+        console.log("response",response.data[0].data)
+        console.log('Reversal orders fetched:', response);
+  
+        if (response.data && Array.isArray(response.data[0].data)) {
+          // Check if the current order ID exists in the reversal orders list
+          const isReversalAlreadyRaised = response.data[0].data.some(reversalOrder => reversalOrder.original_order_id === order.order_id);
+          
+          console.log('Is reversal already raised:', isReversalAlreadyRaised);
+        
+          if (isReversalAlreadyRaised) {
+            setFailMessage('Reversal has already been raised for this order.');
+          } else {
+            setSelectedOrder(order);
+            setIsReversalModalOpen(true);
+          }
+        } else {
+          // Handle the case when the API response is invalid or does not return a list of orders
+          setFailMessage('Unable to retrieve reversal orders.');
+        }
+        
+      } catch (error) {
+        console.error("Error fetching reversal orders:", error);
+        setFailMessage('Failed to check reversal orders. Please try again later.');
+      }
     } else {
-      setReversalMessage('Order has not been delivered yet.');
+      setFailMessage('Order has not been delivered yet.');
       setTimeout(() => setReversalMessage(''), 3000);
     }
   };
+  
+  
 
   const closeReversalModal = () => {
     setIsReversalModalOpen(false);
@@ -341,6 +384,8 @@ const EmployeeDashboard = () => {
             isModalOpen={isReversalModalOpen}
             closeModal={closeReversalModal}
             order={selectedOrder}
+            forwardOrderColumns={forwardOrderColumns}
+            fetchOrders={fetchOrders}
           />
         )}
         {reversalMessage && (
@@ -354,7 +399,18 @@ const EmployeeDashboard = () => {
             </div>
           </div>
         )}
+        <FailSnackbar   open={!!failMessage}
+        message={failMessage}
+        onClose={() => setFailMessage('')}/>
+
+        
+         <SuccessSnackbar
+        open={!!successMessage}
+        message={successMessage}
+        onClose={() => setSuccessMessage('')}
+      />
       </div>
+     
     </div>
   );
 };
